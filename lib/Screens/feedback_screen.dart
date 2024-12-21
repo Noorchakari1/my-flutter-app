@@ -53,7 +53,10 @@ class FeedbackScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(pageTitle),
+        title: Text(
+          pageTitle,
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.blue.shade400,
         centerTitle: true,
       ),
