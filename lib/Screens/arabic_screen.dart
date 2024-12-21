@@ -11,7 +11,7 @@ class ArabicScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'مرحباً',
+          'مرحباً kdfjskdfjskdj',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xff42A5F5),
