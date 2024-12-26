@@ -4,6 +4,14 @@
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 <uses-permission android:name="android.permission.CAMERA"/>
 <uses-permission android:name="android.permission.INTERNET" />
+<!-- دسترسی به موقعیت جغرافیایی -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<!-- دسترسی به دوربین -->
+<uses-permission android:name="android.permission.CAMERA" />
+<!-- دسترسی به دانلود فایل  -->
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 
 
@@ -11,6 +19,11 @@
 
 
     <application
+
+        android:usesCleartextTraffic="true"
+        android:hardwareAccelerated="true"
+
+
         android:label="د چارو اداري لوی ریاست"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">

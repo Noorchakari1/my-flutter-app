@@ -23,6 +23,8 @@ class FeedbackScreen extends StatelessWidget {
   });
 
   // Function to launch WhatsApp
+  //the error when clic on whatsapp is that couldn't look up phone number 0792436800 because its either missing a valid country code or has thew wrong value
+
   Future<void> _launchWhatsApp(String number) async {
     final uri = Uri.parse("https://wa.me/$number");
     if (await canLaunchUrl(uri)) {
@@ -55,7 +57,7 @@ class FeedbackScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           pageTitle,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.blue.shade400,
         centerTitle: true,
@@ -100,7 +102,7 @@ class FeedbackScreen extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     try {
-                      await _launchWhatsApp('0792436800');
+                      await _launchWhatsApp('+93792436800');
                     } catch (e) {
                       // ignore: use_build_context_synchronously
                       ScaffoldMessenger.of(context).showSnackBar(

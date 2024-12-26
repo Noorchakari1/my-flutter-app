@@ -16,6 +16,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',
+        appBarTheme: const AppBarTheme(
+          titleTextStyle: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
+          backgroundColor: Color(0xff1B047C),
+        ),
       ),
       home: const HomePage(),
     );
@@ -27,17 +32,28 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xff1B047C),
-        title: const Text(
-          'د چارو اداري لوی ریاست',
-          style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
-        ),
-        centerTitle: true,
-      ),
-      body: const AopApp(),
+    return const Scaffold(
+      // appBar: AppBar(
+      //   actions: [
+      //     IconButton(
+      //         onPressed: () {
+      //           Navigator.of(context).push(MaterialPageRoute(
+      //               builder: (context) => const WebviewScreen(
+      //                     url:
+      //                         "https://qiblafinder.withgoogle.com/intl/fa/onboarding/position",
+      //                   )));
+      //         },
+      //         icon: const Icon(Icons.location_on, color: Colors.white)),
+      //   ],
+      //   backgroundColor: const Color(0xff1B047C),
+      //   title: const Text(
+      //     'د چارو اداري لوی ریاست',
+      //     style: TextStyle(
+      //         fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
+      //   ),
+      //   centerTitle: true,
+      // ),
+      body: AopApp(),
     );
   }
 }
