@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,7 +13,6 @@ class WebviewScreen extends StatefulWidget {
   const WebviewScreen({Key? key, required this.url}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _WebviewScreenState createState() => _WebviewScreenState();
 }
 
@@ -19,6 +20,7 @@ class _WebviewScreenState extends State<WebviewScreen> {
   late InAppWebViewController webViewController;
   double downloadProgress = 0.0;
   bool isOffline = false;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -28,16 +30,22 @@ class _WebviewScreenState extends State<WebviewScreen> {
 
   Future<void> _initialize() async {
     await _requestPermissions();
-    await _checkConnectivity();
+    _checkConnectivity();
   }
 
   Future<void> _requestPermissions() async {
-    if (await Permission.storage.isDenied) {
-      await Permission.storage.request();
+    final status = await Permission.storage.request();
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("مجوز دسترسی به حافظه مورد نیاز است."),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 
-  Future<void> _checkConnectivity() async {
+  void _checkConnectivity() async {
     try {
       final result = await InternetAddress.lookup('example.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
@@ -45,12 +53,11 @@ class _WebviewScreenState extends State<WebviewScreen> {
           isOffline = false;
         });
       }
-    } on SocketException catch (_) {
+    } on SocketException {
       setState(() {
         isOffline = true;
       });
-      if (context.mounted) {
-        // ignore: use_build_context_synchronously
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("اینترنت شما قطع است. لطفاً شبکه را بررسی کنید."),
@@ -59,6 +66,78 @@ class _WebviewScreenState extends State<WebviewScreen> {
         );
       }
     }
+  }
+
+  Future<bool> _onWillPop() async {
+    if (await webViewController.canGoBack()) {
+      webViewController.goBack();
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: SafeArea(
+          child: Stack(
+            children: [
+              if (!isOffline)
+                InAppWebView(
+                  initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+                  onWebViewCreated: (controller) {
+                    webViewController = controller;
+                  },
+                  onLoadStart: (controller, url) {
+                    setState(() {
+                      isLoading = true;
+                    });
+                  },
+                  onLoadStop: (controller, url) {
+                    setState(() {
+                      isLoading = false;
+                    });
+                  },
+                  androidOnPermissionRequest:
+                      (controller, origin, resources) async {
+                    return PermissionRequestResponse(
+                      resources: resources,
+                      action: PermissionRequestResponseAction.GRANT,
+                    );
+                  },
+                  onDownloadStartRequest: (controller, request) async {
+                    await _handleDownload(request.url.toString());
+                  },
+                )
+              else
+                const Center(
+                  child: Text(
+                    "اینترنت شما قطع است. لطفاً شبکه را بررسی کنید.",
+                    style: TextStyle(fontSize: 18, color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              if (isLoading && !isOffline)
+                const Center(child: CircularProgressIndicator()),
+              if (downloadProgress > 0.0 && downloadProgress < 1.0)
+                Positioned(
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                  child: LinearProgressIndicator(
+                    value: downloadProgress,
+                    backgroundColor: Colors.grey,
+                    color: Colors.blue,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _handleDownload(String url) async {
@@ -77,22 +156,19 @@ class _WebviewScreenState extends State<WebviewScreen> {
         },
       );
 
-      if (context.mounted) {
-        // ignore: use_build_context_synchronously
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Center(child: Text("فایل دانلود شد: ${url.split('/').last}")),
+            content: Text("فایل با موفقیت دانلود شد: ${url.split('/').last}"),
             duration: const Duration(seconds: 3),
           ),
         );
       }
     } catch (e) {
-      if (context.mounted) {
-        // ignore: use_build_context_synchronously
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Center(child: Text("خطا در دانلود فایل")),
+            content: Text("خطا در دانلود فایل"),
             duration: Duration(seconds: 3),
           ),
         );
@@ -102,59 +178,5 @@ class _WebviewScreenState extends State<WebviewScreen> {
         downloadProgress = 0.0;
       });
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          if (!isOffline)
-            InAppWebView(
-              initialUrlRequest: URLRequest(url: WebUri(widget.url)),
-              onWebViewCreated: (controller) {
-                webViewController = controller;
-                webViewController.setSettings(
-                  settings: InAppWebViewSettings(
-                    cacheEnabled: true, // فعال کردن قابلیت کش
-                  ),
-                );
-              },
-              // ignore: deprecated_member_use
-              androidOnPermissionRequest:
-                  (controller, origin, resources) async {
-                // ignore: deprecated_member_use
-                return PermissionRequestResponse(
-                  resources: resources,
-                  // ignore: deprecated_member_use
-                  action: PermissionRequestResponseAction.GRANT,
-                );
-              },
-              onDownloadStartRequest: (controller, request) async {
-                await _handleDownload(request.url.toString());
-              },
-            )
-          else
-            const Center(
-              child: Text(
-                "اینترنت شما قطع است. لطفاً شبکه را بررسی کنید.",
-                style: TextStyle(fontSize: 18, color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          if (downloadProgress > 0.0 && downloadProgress < 1.0)
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: LinearProgressIndicator(
-                value: downloadProgress,
-                backgroundColor: Colors.grey,
-                color: Colors.blue,
-              ),
-            ),
-        ],
-      ),
-    );
   }
 }

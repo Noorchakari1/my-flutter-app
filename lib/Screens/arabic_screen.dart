@@ -44,12 +44,12 @@ class ArabicScreen extends StatelessWidget {
                   // Add navigation or functionality here
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const FeedbackScreen(
-                            pageTitle: 'اتصل بنا.',
-                            text:
+                            appbarTitle: 'اتصل بنا.',
+                            guidedText:
                                 'يرجى النقر على أحد الخيارات أدناه ومشاركة أفكارك واقتراحاتك معنا.',
                             whatsAppTitle: 'واتسپ',
                             emailTitle: 'ایمیل',
-                            txtdir: TextDirection.rtl,
+                            txtDir: TextDirection.rtl,
                             formTitle: 'نموذج الاتصال',
                             url: 'https://aop.gov.af/dr/forms',
                           )));

@@ -64,12 +64,12 @@ class PersianScreen extends StatelessWidget {
                   // Add navigation or functionality here
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const FeedbackScreen(
-                            pageTitle: 'ارتباط با ما',
-                            text:
+                            appbarTitle: 'ارتباط با ما',
+                            guidedText:
                                 'لطفا روی یکی از گزینه های پایین کلیک نموده، نظریات و پیشنهادات را با ما شریک سازید',
                             whatsAppTitle: 'واتسپ',
                             emailTitle: 'ایمیل',
-                            txtdir: TextDirection.rtl,
+                            txtDir: TextDirection.rtl,
                             formTitle: 'فورم تماس',
                             url: 'https://aop.gov.af/dr/forms',
                           )));

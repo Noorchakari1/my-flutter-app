@@ -3,28 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FeedbackScreen extends StatelessWidget {
-  final String pageTitle;
-  final String text;
+  final String appbarTitle;
+  final String guidedText;
   final String whatsAppTitle;
   final String emailTitle;
-  final TextDirection txtdir;
+  final TextDirection txtDir;
   final String formTitle;
   final String url;
 
   const FeedbackScreen({
     super.key,
-    required this.text,
+    required this.guidedText,
     required this.whatsAppTitle,
     required this.emailTitle,
-    required this.txtdir,
-    required this.pageTitle,
+    required this.txtDir,
+    required this.appbarTitle,
     required this.formTitle,
     required this.url,
   });
-
-  // Function to launch WhatsApp
-  //the error when clic on whatsapp is that couldn't look up phone number 0792436800 because its either missing a valid country code or has thew wrong value
-
+  // Function to launch Whatsapp
   Future<void> _launchWhatsApp(String number) async {
     final uri = Uri.parse("https://wa.me/$number");
     if (await canLaunchUrl(uri)) {
@@ -56,7 +53,7 @@ class FeedbackScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          pageTitle,
+          appbarTitle,
           style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.blue.shade400,
@@ -71,7 +68,7 @@ class FeedbackScreen extends StatelessWidget {
           ),
         ),
         child: Directionality(
-          textDirection: txtdir,
+          textDirection: txtDir,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -86,7 +83,7 @@ class FeedbackScreen extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      text,
+                      guidedText,
                       style: TextStyle(
                         fontSize: 18.0,
                         fontWeight: FontWeight.bold,

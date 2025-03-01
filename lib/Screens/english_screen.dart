@@ -64,12 +64,12 @@ class EnglishScreen extends StatelessWidget {
                   // Add navigation or functionality here
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const FeedbackScreen(
-                            pageTitle: 'Contact us',
-                            text:
+                            appbarTitle: 'Contact us',
+                            guidedText:
                                 'Please click on one of the options below and share your feedback and suggestions with us',
                             whatsAppTitle: 'WhatsApp',
                             emailTitle: "email",
-                            txtdir: TextDirection.ltr,
+                            txtDir: TextDirection.ltr,
                             formTitle: 'Contact form',
                             url: 'https://aop.gov.af/en/forms',
                           )));

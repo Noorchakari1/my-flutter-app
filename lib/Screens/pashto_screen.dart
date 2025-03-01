@@ -63,12 +63,12 @@ class PashtoScreen extends StatelessWidget {
                   // Add navigation or functionality here
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const FeedbackScreen(
-                            pageTitle: 'موږ سره اړیکه ونیسئ',
-                            text:
+                            appbarTitle: 'موږ سره اړیکه ونیسئ',
+                            guidedText:
                                 'مهرباني وکړئ لاندې یو انتخاب باندې کلیک وکړئ او خپل نظرونه او وړاندیزونه موږ سره شریک کړئ.',
                             whatsAppTitle: "واتسپ",
                             emailTitle: "ایمیل",
-                            txtdir: TextDirection.rtl,
+                            txtDir: TextDirection.rtl,
                             formTitle: 'د اړیکو فورمه',
                             url: 'https://aop.gov.af/pa/forms',
                           )));
