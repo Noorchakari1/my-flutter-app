@@ -1,0 +1,109 @@
+import 'package:flutter/material.dart';
+
+import '../../features/language/presentation/screens/english_screen.dart';
+import '../../features/language/presentation/screens/feedback_screen.dart';
+import '../../features/language/presentation/screens/language_screen.dart';
+import '../../features/language/presentation/screens/pashto_screen.dart';
+import '../../features/language/presentation/screens/persian_screen.dart';
+import '../../features/language/presentation/screens/service_button_screen.dart';
+import '../../features/language/presentation/screens/web_view_screen.dart';
+import '../../shared/constants/app_constants.dart';
+
+/// Application routes configuration
+class Routes {
+  const Routes._();
+
+  // Route names
+  static const String home = '/';
+  static const String language = '/language';
+  static const String english = '/english';
+  static const String persian = '/persian';
+  static const String pashto = '/pashto';
+  static const String feedback = '/feedback';
+  static const String webView = '/web-view';
+  static const String service = '/service';
+
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case AppConstants.homeRoute:
+      case AppConstants.languageRoute:
+        return MaterialPageRoute(
+          builder: (_) => const LanguageScreen(),
+        );
+      case AppConstants.pashtoRoute:
+        return MaterialPageRoute(
+          builder: (_) => const PashtoScreen(),
+        );
+      case AppConstants.persianRoute:
+        return MaterialPageRoute(
+          builder: (_) => const PersianScreen(),
+        );
+      case AppConstants.englishRoute:
+        return MaterialPageRoute(
+          builder: (_) => const EnglishScreen(),
+        );
+      case AppConstants.webViewRoute:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => WebViewScreen(
+            url: args['url'] as String,
+            language: args['language'] as String,
+            showBottomNav: args['showBottomNav'] as bool? ?? true,
+          ),
+        );
+      case AppConstants.serviceRoute:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => ServiceButtonScreen(
+            language: args['language'] as String,
+            passportTitle: args['passportTitle'] as String,
+            passportURL: args['passportURL'] as String,
+          ),
+        );
+      case AppConstants.feedbackRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final language = args?['language'] as String? ?? 'persian';
+        final languageText = language == 'persian'
+            ? AppConstants.persianText
+            : language == 'pashto'
+                ? AppConstants.pashtoText
+                : AppConstants.englishText;
+        return MaterialPageRoute(
+          builder: (_) => FeedbackScreen(
+            appbarTitle: languageText['contactUs']!,
+            guidedText: languageText['feedbackGuide']!,
+            whatsAppTitle: languageText['whatsapp']!,
+            emailTitle: languageText['email']!,
+            txtDir: language == 'english' ? TextDirection.ltr : TextDirection.rtl,
+            formTitle: languageText['contactForm']!,
+            url: AppConstants.aopFormUrls[language]!,
+            language: language,
+          ),
+        );
+      default:
+        return MaterialPageRoute(
+          builder: (_) => const NotFoundPage(),
+        );
+    }
+  }
+}
+
+/// 404 Page for undefined routes
+class NotFoundPage extends StatelessWidget {
+  const NotFoundPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Page Not Found'),
+      ),
+      body: const Center(
+        child: Text(
+          '404 - Page Not Found',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+    );
+  }
+} 

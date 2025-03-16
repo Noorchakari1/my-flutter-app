@@ -1,59 +1,57 @@
-import 'package:aop_sites/Screens/language_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'core/config/routes.dart';
+import 'core/providers/theme_provider.dart';
+import 'core/services/language_service.dart';
+import 'core/services/theme_service.dart';
+import 'features/splash/presentation/screens/splash_screen.dart';
+import 'shared/constants/app_constants.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LanguageService.init();
+  await ThemeService.init();
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeState = ref.watch(themeNotifierProvider);
+    final isRTL = themeState.currentLanguage == 'persian' || 
+                  themeState.currentLanguage == 'pashto';
+    
     return MaterialApp(
+      title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
-      title: 'AOP',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'Roboto',
-        appBarTheme: const AppBarTheme(
-          titleTextStyle: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
-          backgroundColor: Color(0xff1B047C),
-        ),
-      ),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      // appBar: AppBar(
-      //   actions: [
-      //     IconButton(
-      //         onPressed: () {
-      //           Navigator.of(context).push(MaterialPageRoute(
-      //               builder: (context) => const WebviewScreen(
-      //                     url:
-      //                         "https://qiblafinder.withgoogle.com/intl/fa/onboarding/position",
-      //                   )));
-      //         },
-      //         icon: const Icon(Icons.location_on, color: Colors.white)),
-      //   ],
-      //   backgroundColor: const Color(0xff1B047C),
-      //   title: const Text(
-      //     'د چارو اداري لوی ریاست',
-      //     style: TextStyle(
-      //         fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
-      //   ),
-      //   centerTitle: true,
-      // ),
-      body: AopApp(),
+      theme: ref.read(themeNotifierProvider.notifier).theme,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('fa'),
+        Locale('ps'),
+      ],
+      locale: isRTL ? const Locale('fa') : const Locale('en'),
+      home: const SplashScreen(),
+      onGenerateRoute: Routes.generateRoute,
+      builder: (context, child) {
+        return Directionality(
+          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+          child: child!,
+        );
+      },
     );
   }
 }

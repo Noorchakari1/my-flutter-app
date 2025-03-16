@@ -1,0 +1,130 @@
+import 'package:aop_sites/features/language/presentation/screens/service_button_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/widgets/custom_app_bar.dart';
+import '../widgets/custom_bottom_nav_bar.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/app_header.dart';
+import 'web_view_screen.dart';
+
+class FeedbackScreen extends StatefulWidget {
+  final String appbarTitle;
+  final String guidedText;
+  final String whatsAppTitle;
+  final String emailTitle;
+  final TextDirection txtDir;
+  final String formTitle;
+  final String url;
+  final String language;
+  final bool showBottomNav;
+
+  const FeedbackScreen({
+    super.key,
+    required this.appbarTitle,
+    required this.guidedText,
+    required this.whatsAppTitle,
+    required this.emailTitle,
+    required this.txtDir,
+    required this.formTitle,
+    required this.url,
+    required this.language,
+    this.showBottomNav = true,
+  });
+
+  @override
+  State<FeedbackScreen> createState() => _FeedbackScreenState();
+}
+
+class _FeedbackScreenState extends State<FeedbackScreen> {
+  final int _page = 2; // Set to 2 since this is the feedback page
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final languageText = widget.language == 'persian'
+        ? AppConstants.persianText
+        : widget.language == 'pashto'
+            ? AppConstants.pashtoText
+            : AppConstants.englishText;
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: CustomAppBar(title: widget.appbarTitle, showBackButton: false),
+      bottomNavigationBar: widget.showBottomNav
+          ? CustomBottomNavBar(
+              currentIndex: _page,
+              onTap: (index) {
+                if (index != 2) {
+                  Navigator.pop(context);
+                }
+              },
+              webUrl: AppConstants.aopUrls[widget.language]!,
+              textDirection: widget.txtDir,
+              feedbackTitle: widget.appbarTitle,
+              feedbackText: widget.guidedText,
+            )
+          : null,
+      body: Column(
+        children: [
+          AppHeader(
+            title: widget.guidedText,
+            logoPath: AppConstants.logoPath,
+            logoHeight: AppConstants.headerImageHeight,
+            logoColor: Colors.white,
+          ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.defaultPadding,
+                vertical: AppConstants.defaultPadding * 2,
+              ),
+              child: GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: AppConstants.defaultPadding * 1.5,
+                crossAxisSpacing: AppConstants.defaultPadding * 1.5,
+                childAspectRatio: 1,
+                children: [
+                  CustomButton(
+                    title: widget.whatsAppTitle,
+                    iconData: Icons.chat,
+                    onPressed: () async {
+                      final Uri whatsappUrl =
+                          Uri.parse("whatsapp://send?phone=+93744724357");
+                      if (await canLaunchUrl(whatsappUrl)) {
+                        await launchUrl(whatsappUrl);
+                      }
+                    },
+                  ),
+                  CustomButton(
+                    title: widget.emailTitle,
+                    iconData: Icons.email,
+                    onPressed: () async {
+                      final Uri emailUrl = Uri.parse("mailto:info@aop.gov.af");
+                      if (await canLaunchUrl(emailUrl)) {
+                        await launchUrl(emailUrl);
+                      }
+                    },
+                  ),
+                  CustomButton(
+                    title: widget.formTitle,
+                    iconData: Icons.forum,
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => WebViewScreen(
+                          url: widget.url,
+                          language: widget.language,
+                          showBottomNav: false,
+                        ),
+                      ));
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
