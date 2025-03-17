@@ -1,13 +1,15 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import '../../../../shared/constants/app_constants.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
+import '../widgets/download_dialog.dart';
 import '../widgets/download_progress_indicator.dart';
 import '../widgets/page_loading_indicator.dart';
-import '../widgets/download_dialog.dart';
 
 class WebViewScreen extends StatefulWidget {
   final String url;

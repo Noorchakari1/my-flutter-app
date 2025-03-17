@@ -106,13 +106,11 @@ class _CustomWebViewState extends ConsumerState<CustomWebView> with SingleTicker
           });
       ''');
 
-      if (response != null) {
-        setState(() {
-          _isDownloading = false;
-          _showDownloadCompleteDialog();
-        });
-      }
-    } catch (e) {
+      setState(() {
+        _isDownloading = false;
+        _showDownloadCompleteDialog();
+      });
+        } catch (e) {
       debugPrint('Download error: $e');
       setState(() => _isDownloading = false);
     }

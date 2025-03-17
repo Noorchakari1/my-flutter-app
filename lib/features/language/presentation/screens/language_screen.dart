@@ -70,7 +70,7 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
     
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'د چارو اداری لوی ریاست',
         showBackButton: false,
       ),

@@ -21,7 +21,7 @@ class PageLoadingIndicator extends StatelessWidget {
           LinearProgressIndicator(
             value: progress,
             backgroundColor: Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(
+            valueColor: const AlwaysStoppedAnimation<Color>(
               AppConstants.primaryColor,
             ),
           ),

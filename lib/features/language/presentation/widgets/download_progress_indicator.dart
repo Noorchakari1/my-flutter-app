@@ -34,7 +34,7 @@ class DownloadProgressIndicator extends StatelessWidget {
                 const SizedBox(height: 16),
                 CircularProgressIndicator(
                   value: downloadProgress,
-                  valueColor: AlwaysStoppedAnimation<Color>(
+                  valueColor: const AlwaysStoppedAnimation<Color>(
                     AppConstants.primaryColor,
                   ),
                 ),

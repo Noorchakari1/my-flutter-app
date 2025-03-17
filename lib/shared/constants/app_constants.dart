@@ -148,7 +148,7 @@ class AppConstants {
   static const Map<String, String> englishText = {
     'videos': 'Videos',
     'welcome': 'Welcome',
-    'headerTitle': 'General Directorate of Administration.',
+    'headerTitle': 'General Directorate of Administration',
     'aopWebsite': 'Office of the Prime Minister',
     'agencyList': 'Ministry List',
     'publicServices': 'Public Services',
