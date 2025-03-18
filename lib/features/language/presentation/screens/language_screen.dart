@@ -70,8 +70,8 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
     
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const CustomAppBar(
-        title: 'د چارو اداری لوی ریاست',
+      appBar:  CustomAppBar(
+        title: AppConstants.pashtoText['headerTitle']!,
         showBackButton: false,
       ),
       body: SafeArea(
@@ -79,7 +79,8 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(AppConstants.headerPadding),
+              // padding: const EdgeInsets.all(AppConstants.headerPadding),
+                    padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
               decoration: BoxDecoration(
                 color: AppConstants.primaryColor,
                 borderRadius: const BorderRadius.only(
@@ -109,10 +110,10 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
                     ),
                   ),
                   const SizedBox(height: AppConstants.defaultPadding * 1.5),
-                  const Text(
-                    'مهرباني وکړئ د لاندې لیست څخه خپله ژبه غوره کړئ.',
+                   Text(
+                    AppConstants.pashtoText['langGuide']!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -120,10 +121,10 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
                     ),
                   ),
                   const SizedBox(height: AppConstants.defaultPadding),
-                  const Text(
-                    'لطفا زبان مورد نظر خود را از لیست زیر انتخاب کنید.',
+                   Text(
+                    AppConstants.persianText['langGuide']!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -131,10 +132,10 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
                     ),
                   ),
                   const SizedBox(height: AppConstants.defaultPadding),
-                  const Text(
-                    'Please select your preferred language',
+                   Text(
+                    AppConstants.englishText['langGuide']!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,

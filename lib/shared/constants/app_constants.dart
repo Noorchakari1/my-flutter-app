@@ -108,13 +108,14 @@ class AppConstants {
     'whatsapp': 'واتساپ',
     'email': 'ایمیل',
     'contactForm': 'فورم تماس',
+    'langGuide': 'لطفاً زبان خود را انتخاب نمایید'
   };
 
   // Pashto Text
   static const Map<String, String> pashtoText = {
     'videos': 'ویډیوګانې',
     'welcome': 'ښه راغلاست',
-    'headerTitle': 'د چارو ادارې  لوی ریاست',
+    'headerTitle': 'د چارو ادارې لوی ریاست',
     'aopWebsite': 'د چارو ادارې ویب پاڼه',
     'agencyList': 'د وزارتونو لیست',
     'publicServices': 'عامه خدمتونه',
@@ -126,6 +127,7 @@ class AppConstants {
     'whatsapp': 'واټساپ',
     'email': 'بریښنالیک',
     'contactForm': 'د اړیکې فورم',
+    'langGuide': 'مهرباني وکړئ خپله ژبه غوره کړئ'
   };
 
   // English Screen Text
@@ -160,5 +162,6 @@ class AppConstants {
     'whatsapp': 'WhatsApp',
     'email': 'Email',
     'contactForm': 'Contact Form',
+    'langGuide': 'Please select your language'
   };
 }

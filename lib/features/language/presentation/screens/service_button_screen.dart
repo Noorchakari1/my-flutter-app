@@ -101,22 +101,6 @@ class _ServiceButtonScreenState extends ConsumerState<ServiceButtonScreen> {
                         }
                       },
                     ),
-                    // می‌توانید دکمه‌های بیشتری اضافه کنید
-                    CustomButton(
-                      title: languageText['information'] ?? 'Information Access',
-                      iconData: Icons.info_outline,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => WebViewScreen(
-                              url: 'https://passport.moi.gov.af/da/',
-                              language: widget.language,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
                   ],
                 ),
               ),

@@ -115,8 +115,8 @@ class _EnglishScreenState extends State<EnglishScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _page == 0
-          ? const CustomAppBar(
-              title: 'Office of the Prime Minister',
+          ?  CustomAppBar(
+              title: AppConstants.englishText['welcome']!,
             )
           : null,
       bottomNavigationBar: CustomBottomNavBar(
