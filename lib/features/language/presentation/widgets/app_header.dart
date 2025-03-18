@@ -23,7 +23,8 @@ class AppHeader extends StatelessWidget {
     
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppConstants.headerPadding),
+      // padding: const EdgeInsets.all(AppConstants.headerPadding),
+            padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
       decoration: BoxDecoration(
         color: AppConstants.primaryColor,
         borderRadius: const BorderRadius.only(

@@ -18,7 +18,7 @@ class ThemeService {
   }
 
   static ThemeData getTheme(bool isDarkMode, String language) {
-    final isRTL = language == 'persian' || language == 'pashto';
+    // final isRTL = language == 'persian' || language == 'pashto';
     
     return ThemeData(
       brightness: isDarkMode ? Brightness.dark : Brightness.light,
