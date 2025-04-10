@@ -61,6 +61,30 @@ class NewsNotifier extends StateNotifier<AsyncValue<List<NewsItem>>> {
       state = AsyncError(e, st);
     }
   }
+  
+  // Search functionality - will try API search first, fallback to local search
+  Future<void> searchNews(String query) async {
+    if (query.isEmpty) {
+      return refresh();
+    }
+    
+    state = const AsyncLoading();
+    
+    try {
+      // Try API search first
+      final response = await _newsService.searchNews(query);
+      state = AsyncData(response.items);
+    } catch (e) {
+      // If API search fails, try local search
+      try {
+        final currentState = await _newsService.getNews();
+        final searchResults = await _newsService.searchNewsLocally(query, currentState.items);
+        state = AsyncData(searchResults);
+      } catch (e, st) {
+        state = AsyncError(e, st);
+      }
+    }
+  }
 }
 
 final newsNotifierProvider = StateNotifierProvider<NewsNotifier, AsyncValue<List<NewsItem>>>((ref) {
@@ -72,6 +96,31 @@ final newsNotifierProvider = StateNotifierProvider<NewsNotifier, AsyncValue<List
 final newsDataProvider = FutureProvider.family<NewsResponse, int>((ref, page) {
   final newsService = ref.read(newsServiceProvider);
   return newsService.getNews(page: page);
+});
+
+// Provider for searching news
+final newsSearchProvider = StateProvider<String>((ref) => '');
+
+// Provider for the search results
+final searchResultsProvider = FutureProvider<List<NewsItem>>((ref) {
+  final searchQuery = ref.watch(newsSearchProvider);
+  
+  if (searchQuery.isEmpty) {
+    // Return empty list if no search query
+    return Future.value([]);
+  }
+  
+  final newsService = ref.read(newsServiceProvider);
+  
+  // Try API search first, then fall back to local if needed
+  return newsService.searchNews(searchQuery).then(
+    (response) => response.items,
+    onError: (error) async {
+      // Fall back to local search
+      final allNews = await newsService.getNews();
+      return newsService.searchNewsLocally(searchQuery, allNews.items);
+    }
+  );
 });
 
 // Provider for fetching a specific news detail

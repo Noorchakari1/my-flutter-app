@@ -159,7 +159,7 @@ class NewsDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'این خبر در دسته ${newsDetail.type ?? 'عمومی'} منتشر شده و تاکنون ${newsDetail.views ?? 0} بار مشاهده شده است.',
+                      'این خبر تاکنون ${newsDetail.views ?? 0} بار مشاهده شده است.',
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.6,
@@ -265,35 +265,6 @@ class NewsDetailScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            // Bottom text overlay
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        newsDetail.type ?? 'عمومی',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -386,27 +357,6 @@ class NewsDetailScreen extends ConsumerWidget {
                 ),
               ),
             ],
-          ),
-        ),
-        const Spacer(),
-        // Category pill
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).primaryColor.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: Text(
-            newsDetail.type ?? 'عمومی',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
           ),
         ),
       ],

@@ -20,6 +20,32 @@ class NewsService {
       throw Exception('Failed to load news: $e');
     }
   }
+  
+  // New method for searching news
+  Future<NewsResponse> searchNews(String query, {int page = 1}) async {
+    try {
+      final encodedQuery = Uri.encodeComponent(query);
+      final response = await http.get(Uri.parse('$baseUrl/news?search=$encodedQuery&page=$page'));
+      
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return NewsResponse.fromJson(data);
+      } else {
+        throw Exception('Failed to search news: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to search news: $e');
+    }
+  }
+  
+  // If API doesn't support search, here's a local search implementation
+  Future<List<NewsItem>> searchNewsLocally(String query, List<NewsItem> newsItems) async {
+    final lowercaseQuery = query.toLowerCase();
+    return newsItems.where((news) => 
+      (news.title != null && news.title!.toLowerCase().contains(lowercaseQuery)) ||
+      (news.type != null && news.type!.toLowerCase().contains(lowercaseQuery))
+    ).toList();
+  }
 
   Future<NewsDetail> getNewsDetail(int id) async {
     try {

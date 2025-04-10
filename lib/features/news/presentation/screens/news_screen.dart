@@ -7,6 +7,7 @@ import '../../data/providers/news_provider.dart';
 import '../../data/services/news_service.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'news_detail_screen.dart';
+import 'news_search_screen.dart';
 
 class NewsScreen extends ConsumerStatefulWidget {
   const NewsScreen({Key? key}) : super(key: key);
@@ -19,9 +20,17 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   late TabController _tabController;
-  final List<String> _categories = ['همه', 'سیاسی', 'اقتصادی', 'اجتماعی', 'فرهنگی'];
+  final List<String> _categories = ['فرهنگی', 'اجتماعی', 'اقتصادی', 'سیاسی', 'آخرین اخبار', 'همه'];
   int _currentPage = 1;
   bool _hasMoreData = true;
+  
+  // Search related variables
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearchVisible = false;
+  String _searchQuery = '';
+  
+  // Scroll to top button visibility
+  bool _showScrollToTop = false;
   
   @override
   void initState() {
@@ -39,6 +48,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
   
@@ -47,6 +57,11 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
+    
+    // Show scroll to top button when user has scrolled down enough
+    setState(() {
+      _showScrollToTop = currentScroll > 300; // Show button after scrolling 300px
+    });
     
     // Load more when we reach 70% of the list
     if (maxScroll - currentScroll <= maxScroll * 0.3 && !_isLoadingMore && _hasMoreData) {
@@ -123,23 +138,119 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     return Future.value();
   }
 
+  // Toggle search visibility
+  void _toggleSearch() {
+    setState(() {
+      _isSearchVisible = !_isSearchVisible;
+      if (!_isSearchVisible) {
+        _searchController.clear();
+        _searchQuery = '';
+      }
+    });
+  }
+  
+  // Perform search
+  void _performSearch(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+  
+  // Clear search
+  void _clearSearch() {
+    setState(() {
+      _searchController.clear();
+      _searchQuery = '';
+    });
+  }
+  
+  // Filter news based on search query
+  List<NewsItem> _filterNews(List<NewsItem> news, String query) {
+    if (query.isEmpty) return news;
+    
+    final lowercaseQuery = query.toLowerCase();
+    return news.where((item) => 
+      (item.title != null && item.title!.toLowerCase().contains(lowercaseQuery))
+    ).toList();
+  }
+  
+  // Sort news by date (newest first)
+  List<NewsItem> _sortNewsByDate(List<NewsItem> news) {
+    // Make a copy to avoid modifying the original list
+    final sortedNews = List<NewsItem>.from(news);
+    
+    // Sort the news by date, putting newest first
+    sortedNews.sort((a, b) {
+      if (a.date == null) return 1; // null dates go to the end
+      if (b.date == null) return -1; // null dates go to the end
+      
+      // Compare dates (assuming format is sortable, typically ISO format)
+      // Reverse comparison to get descending order (newest first)
+      return b.date!.compareTo(a.date!);
+    });
+    
+    return sortedNews;
+  }
+
+  // Scroll to the top of the list
+  void _scrollToTop() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final newsState = ref.watch(newsNotifierProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
+      // Add floating action button for scroll to top
+      floatingActionButton: _showScrollToTop 
+          ? FloatingActionButton(
+              onPressed: _scrollToTop,
+              mini: true,
+              backgroundColor: Theme.of(context).primaryColor,
+              child: const Icon(
+                Icons.arrow_upward,
+                color: Colors.white,
+              ),
+            )
+          : null,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              title: const Text(
-                'اخبار', 
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                ),
-              ),
+              title: _isSearchVisible 
+                ? TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'جستجو در اخبار...',
+                      border: InputBorder.none,
+                      hintStyle: TextStyle(
+                        color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                      ),
+                    ),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    onChanged: _performSearch,
+                    autofocus: true,
+                  )
+                : const Text(
+                    'اخبار', 
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
               centerTitle: true,
               floating: true,
               pinned: true,
@@ -148,9 +259,16 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                   ? Theme.of(context).appBarTheme.backgroundColor 
                   : Colors.white,
               shadowColor: Colors.transparent,
+              leading: _isSearchVisible
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: _toggleSearch,
+                  )
+                : null,
               bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(48),
+                preferredSize: const Size.fromHeight(50),
                 child: Container(
+                  height: 50,
                   decoration: BoxDecoration(
                     color: isDarkMode 
                         ? Theme.of(context).appBarTheme.backgroundColor 
@@ -164,30 +282,38 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       ),
                     ),
                   ),
-                  child: TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    labelColor: Theme.of(context).primaryColor,
-                    unselectedLabelColor: isDarkMode 
-                        ? Colors.grey.shade400 
-                        : Colors.grey.shade600,
-                    indicatorColor: Theme.of(context).primaryColor,
-                    indicatorWeight: 3,
-                    indicatorSize: TabBarIndicatorSize.label,
-                    tabs: _categories.map((category) => Tab(
-                      text: category,
-                    )).toList(),
+                  child: Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      padding: EdgeInsets.zero,
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      labelColor: Theme.of(context).primaryColor,
+                      unselectedLabelColor: isDarkMode 
+                          ? Colors.grey.shade400 
+                          : Colors.grey.shade600,
+                      indicatorColor: Theme.of(context).primaryColor,
+                      indicatorWeight: 3,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      tabs: _categories.map((category) => Tab(
+                        text: category,
+                        height: 46,
+                      )).toList(),
+                      tabAlignment: TabAlignment.start,
+                    ),
                   ),
                 ),
               ),
               actions: [
+                if (_isSearchVisible && _searchController.text.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: _clearSearch,
+                  ),
                 IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('قابلیت جستجو به زودی اضافه خواهد شد')),
-                    );
-                  },
+                  icon: Icon(_isSearchVisible ? Icons.search : Icons.search),
+                  onPressed: _toggleSearch,
                 ),
               ],
             ),
@@ -201,38 +327,139 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                   ? Theme.of(context).scaffoldBackgroundColor 
                   : Colors.grey.shade100,
             ),
-            child: TabBarView(
-              controller: _tabController,
-              children: List.generate(_categories.length, (tabIndex) {
-                return newsState.when(
-                  data: (news) {
-                    if (news.isEmpty) {
-                      return _buildEmptyState();
-                    }
-                    
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(12),
-                      controller: _scrollController,
-                      itemCount: news.length + (_hasMoreData ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        // Show loading indicator at the end
-                        if (index == news.length) {
-                          return _buildLoadingMoreIndicator();
-                        }
-                        
-                        final newsItem = news[index];
-                        // Display featured news (first item) differently
-                        if (index == 0 && tabIndex == 0) {
-                          return _buildFeaturedNewsCard(newsItem);
-                        }
-                        return _buildNewsCard(newsItem, index);
-                      },
-                    );
-                  },
-                  loading: () => _buildLoadingShimmer(),
-                  error: (error, stackTrace) => _buildErrorState(error),
-                );
-              }),
+            child: Column(
+              children: [
+                // Prominent search button (only visible when search is not active)
+                if (!_isSearchVisible)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: InkWell(
+                      onTap: _toggleSearch,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.search,
+                              color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'جستجو در اخبار...',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                // Search results indicator
+                if (_isSearchVisible && _searchQuery.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                    child: Row(
+                      children: [
+                        Text(
+                          'جستجو برای: "$_searchQuery"',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: isDarkMode ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: _clearSearch,
+                          child: const Text('پاک کردن'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Theme.of(context).primaryColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // News TabBarView
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: List.generate(_categories.length, (tabIndex) {
+                      return newsState.when(
+                        data: (news) {
+                          // Apply search filter if search query exists
+                          final displayedNews = _searchQuery.isNotEmpty 
+                              ? _filterNews(news, _searchQuery)
+                              : news;
+                              
+                          if (displayedNews.isEmpty) {
+                            return _searchQuery.isNotEmpty
+                                ? _buildEmptySearchResults()
+                                : _buildEmptyState();
+                          }
+                          
+                          // Sort all news by date (newest first)
+                          final sortedNews = _sortNewsByDate(displayedNews);
+                          
+                          // For "آخرین اخبار" tab, show only latest 10 news (unless searching)
+                          if (tabIndex == 4 && _searchQuery.isEmpty) {
+                            final latestNews = sortedNews.take(10).toList();
+                            
+                            return ListView.builder(
+                              padding: const EdgeInsets.all(12),
+                              itemCount: latestNews.length,
+                              itemBuilder: (context, index) {
+                                final newsItem = latestNews[index];
+                                return _buildNewsCard(newsItem, index);
+                              },
+                            );
+                          }
+                          
+                          return ListView.builder(
+                            padding: const EdgeInsets.all(12),
+                            controller: _scrollController,
+                            itemCount: sortedNews.length + (_hasMoreData && _searchQuery.isEmpty ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              // Show loading indicator at the end (only when not searching)
+                              if (index == sortedNews.length && _searchQuery.isEmpty) {
+                                return _buildLoadingMoreIndicator();
+                              }
+                              
+                              final newsItem = sortedNews[index];
+                              return _buildNewsCard(newsItem, index);
+                            },
+                          );
+                        },
+                        loading: () => _buildLoadingShimmer(),
+                        error: (error, stackTrace) => _buildErrorState(error),
+                      );
+                    }),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -325,21 +552,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
-        // Featured news shimmer
-        Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
-          child: Container(
-            height: 200,
-            margin: const EdgeInsets.only(bottom: 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-        ),
+        // Regular news item shimmers
         ...List.generate(
-          3,
+          5,
           (index) => Shimmer.fromColors(
             baseColor: Colors.grey.shade300,
             highlightColor: Colors.grey.shade100,
@@ -354,192 +569,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           ),
         ),
       ],
-    );
-  }
-
-  // Featured news card with larger image and prominent placement
-  Widget _buildFeaturedNewsCard(NewsItem newsItem) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => NewsDetailScreen(newsId: newsItem.id),
-          ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark 
-              ? Colors.grey.shade900 
-              : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              child: Stack(
-                children: [
-                  if (newsItem.image != null && newsItem.image!.isNotEmpty)
-                    CachedNetworkImage(
-                      imageUrl: newsItem.image!,
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Shimmer.fromColors(
-                        baseColor: Colors.grey.shade300,
-                        highlightColor: Colors.grey.shade100,
-                        child: Container(
-                          height: 200,
-                          width: double.infinity,
-                          color: Colors.white,
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        height: 200,
-                        width: double.infinity,
-                        color: Colors.grey.shade200,
-                        child: const Icon(
-                          Icons.error_outline,
-                          size: 32,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    )
-                  else
-                    Container(
-                      height: 200,
-                      width: double.infinity,
-                      color: Colors.grey.shade200,
-                      child: const Icon(
-                        Icons.image_not_supported_outlined,
-                        size: 48,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  // Gradient overlay for better text readability
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 80,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Featured badge
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.star,
-                            color: Colors.white,
-                            size: 12,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'خبر ویژه',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    newsItem.title ?? 'بدون عنوان',
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      height: 1.4,
-                    ),
-                    textDirection: TextDirection.rtl,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          newsItem.type ?? 'عمومی',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Icon(
-                        Icons.calendar_today,
-                        size: 14,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        newsItem.date != null ? _formatDate(newsItem.date!) : 'تاریخ نامشخص',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -627,35 +656,12 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          newsItem.date != null ? _formatDate(newsItem.date!) : 'تاریخ نامشخص',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            newsItem.type ?? 'عمومی',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Theme.of(context).primaryColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      newsItem.date ?? 'تاریخ نامشخص',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                 ),
@@ -670,5 +676,47 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   String _formatDate(String date) {
     // Format date string if needed
     return date;
+  }
+
+  // New method for empty search results
+  Widget _buildEmptySearchResults() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_off,
+            size: 64,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'نتیجه‌ای برای "$_searchQuery" یافت نشد',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'لطفا با کلمات کلیدی دیگری جستجو کنید',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _clearSearch,
+            child: const Text('پاک کردن جستجو'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 } 
