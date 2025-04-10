@@ -7,7 +7,7 @@ import '../../data/providers/news_provider.dart';
 import '../../data/services/news_service.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'news_detail_screen.dart';
-import 'news_search_screen.dart';
+import '../../../../core/providers/theme_provider.dart';
 
 class NewsScreen extends ConsumerStatefulWidget {
   const NewsScreen({Key? key}) : super(key: key);
@@ -20,7 +20,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   late TabController _tabController;
-  final List<String> _categories = ['فرهنگی', 'اجتماعی', 'اقتصادی', 'سیاسی', 'آخرین اخبار', 'همه'];
+  final List<String> _categories = ['همه', 'آخرین اخبار', 'اجتماعی', 'اقتصادی', 'سیاسی','فرهنگی' ];
   int _currentPage = 1;
   bool _hasMoreData = true;
   
@@ -77,7 +77,14 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     });
     
     try {
-      final response = await ref.read(newsServiceProvider).getNews(page: _currentPage);
+      // Get current language from theme provider
+      final themeState = ref.read(themeNotifierProvider);
+      final currentLanguage = themeState.currentLanguage;
+      
+      final response = await ref.read(newsServiceProvider).getNews(
+        page: _currentPage,
+        currentLanguage: currentLanguage,
+      );
       
       if (mounted) {
         setState(() {
@@ -108,7 +115,15 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     
     try {
       _currentPage++;
-      final response = await ref.read(newsServiceProvider).getNews(page: _currentPage);
+      // Get current language from theme provider
+      final themeState = ref.read(themeNotifierProvider);
+      final currentLanguage = themeState.currentLanguage;
+      
+      final response = await ref.read(newsServiceProvider).getNews(
+        page: _currentPage,
+        currentLanguage: currentLanguage,
+      );
+      
       final currentNews = ref.read(newsNotifierProvider).value ?? [];
       
       if (mounted) {

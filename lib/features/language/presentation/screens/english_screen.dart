@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/config/routes.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
 import '../widgets/app_header.dart';
@@ -77,6 +78,13 @@ class _EnglishScreenState extends State<EnglishScreen> {
                         language: 'english',
                       ),
                     ));
+                  },
+                ),
+                CustomButton(
+                  title: 'News',
+                  iconData: Icons.newspaper,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.news);
                   },
                 ),
               ],

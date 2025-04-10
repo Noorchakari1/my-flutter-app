@@ -6,9 +6,32 @@ import '../models/news_model.dart';
 class NewsService {
   static const String baseUrl = 'https://aop.gov.af/api/v1';
 
-  Future<NewsResponse> getNews({int page = 1}) async {
+  // Map app language to API language code
+  String getLanguageHeader(String appLanguage) {
+    switch (appLanguage.toLowerCase()) {
+      case 'english':
+        return 'en';
+      case 'persian':
+        return 'dr';
+      case 'uzbek':
+        return 'uz';
+      case 'pashto':
+      default:
+        return 'pa'; // Default to Pashto
+    }
+  }
+
+  Future<NewsResponse> getNews({int page = 1, String? currentLanguage}) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/news?page=$page'));
+      // Create headers with Accept-Language based on current app language
+      final headers = {
+        'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
+      };
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/news?page=$page'),
+        headers: headers,
+      );
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
@@ -22,10 +45,18 @@ class NewsService {
   }
   
   // New method for searching news
-  Future<NewsResponse> searchNews(String query, {int page = 1}) async {
+  Future<NewsResponse> searchNews(String query, {int page = 1, String? currentLanguage}) async {
     try {
       final encodedQuery = Uri.encodeComponent(query);
-      final response = await http.get(Uri.parse('$baseUrl/news?search=$encodedQuery&page=$page'));
+      // Create headers with Accept-Language based on current app language
+      final headers = {
+        'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
+      };
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/news?search=$encodedQuery&page=$page'),
+        headers: headers,
+      );
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
@@ -47,9 +78,17 @@ class NewsService {
     ).toList();
   }
 
-  Future<NewsDetail> getNewsDetail(int id) async {
+  Future<NewsDetail> getNewsDetail(int id, {String? currentLanguage}) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/news/$id'));
+      // Create headers with Accept-Language based on current app language
+      final headers = {
+        'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
+      };
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/news/$id'),
+        headers: headers,
+      );
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
