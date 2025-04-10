@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../data/models/news_model.dart';
 import '../../data/providers/news_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../core/providers/theme_provider.dart';
 
 class NewsDetailScreen extends ConsumerWidget {
   final int newsId;
@@ -90,31 +91,33 @@ class NewsDetailScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                child: Html(
-                  data: newsDetail.description ?? '',
-                  style: {
-                    "body": Style(
-                      fontSize: FontSize(16),
-                      lineHeight: LineHeight(1.8),
-                      direction: TextDirection.rtl,
-                      textAlign: TextAlign.justify,
-                      color: isDarkMode ? Colors.grey.shade300 : Colors.black87,
-                    ),
-                    "p": Style(
-                      margin: Margins.only(bottom: 20),
-                    ),
-                    "h1, h2, h3, h4, h5, h6": Style(
-                      color: isDarkMode ? Colors.white : Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    "a": Style(
-                      color: Theme.of(context).primaryColor,
-                      textDecoration: TextDecoration.none,
-                    ),
-                    "img": Style(
-                      margin: Margins.all(8),
-                    ),
-                  },
+                child: SelectionArea(
+                  child: Html(
+                    data: newsDetail.description ?? '',
+                    style: {
+                      "body": Style(
+                        fontSize: FontSize(16),
+                        lineHeight: LineHeight(1.8),
+                        direction: TextDirection.rtl,
+                        textAlign: TextAlign.justify,
+                        color: isDarkMode ? Colors.grey.shade300 : Colors.black87,
+                      ),
+                      "p": Style(
+                        margin: Margins.only(bottom: 20),
+                      ),
+                      "h1, h2, h3, h4, h5, h6": Style(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      "a": Style(
+                        color: Theme.of(context).primaryColor,
+                        textDecoration: TextDecoration.none,
+                      ),
+                      "img": Style(
+                        margin: Margins.all(8),
+                      ),
+                    },
+                  ),
                 ),
               ),
               
