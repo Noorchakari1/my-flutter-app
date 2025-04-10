@@ -8,6 +8,7 @@ import '../../data/services/news_service.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'news_detail_screen.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../shared/constants/app_constants.dart'; // Import AppConstants
 
 class NewsScreen extends ConsumerStatefulWidget {
   const NewsScreen({Key? key}) : super(key: key);
@@ -20,7 +21,15 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   late TabController _tabController;
-  final List<String> _categories = ['همه', 'آخرین اخبار', 'اجتماعی', 'اقتصادی', 'سیاسی','فرهنگی' ];
+  // Remove the static list and define keys for localization
+  final List<String> _categoryKeys = [
+    'newsTabsAll',
+    'newsTabsLatest',
+    'newsTabsSocial',
+    'newsTabsEconomic',
+    'newsTabsPolitical',
+    'newsTabsCultural'
+  ];
   int _currentPage = 1;
   bool _hasMoreData = true;
   
@@ -35,7 +44,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _categories.length, vsync: this);
+    // Initialize TabController with the number of category keys
+    _tabController = TabController(length: _categoryKeys.length, vsync: this);
     _scrollController.addListener(_scrollListener);
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,6 +60,23 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+  
+  // Helper function to get localized text
+  String _getText(BuildContext context, String key) {
+    final language = ref.watch(themeNotifierProvider).currentLanguage;
+    Map<String, String> textMap;
+    switch (language) {
+      case 'pashto':
+        textMap = AppConstants.pashtoText;
+        break;
+      case 'persian':
+        textMap = AppConstants.persianText;
+        break;
+      default:
+        textMap = AppConstants.englishText;
+    }
+    return textMap[key] ?? key; // Return key if translation not found
   }
   
   void _scrollListener() {
@@ -201,7 +228,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       
       // Compare dates (assuming format is sortable, typically ISO format)
       // Reverse comparison to get descending order (newest first)
-      return b.date!.compareTo(a.date!);
+      return b.date!.compareTo(a.date!); // Handle potential null dates
     });
     
     return sortedNews;
@@ -244,7 +271,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                 ? TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'جستجو در اخبار...',
+                      hintText: _getText(context, 'searchNewsHint'), // Localized hint
                       border: InputBorder.none,
                       hintStyle: TextStyle(
                         color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -259,8 +286,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                     onChanged: _performSearch,
                     autofocus: true,
                   )
-                : const Text(
-                    'اخبار', 
+                : Text(
+                    _getText(context, 'newsTitle'), // Localized title
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
@@ -311,8 +338,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       indicatorColor: Theme.of(context).primaryColor,
                       indicatorWeight: 3,
                       indicatorSize: TabBarIndicatorSize.label,
-                      tabs: _categories.map((category) => Tab(
-                        text: category,
+                      // Generate tabs using localized keys
+                      tabs: _categoryKeys.map((key) => Tab(
+                        text: _getText(context, key),
                         height: 46,
                       )).toList(),
                       tabAlignment: TabAlignment.start,
@@ -324,10 +352,12 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                 if (_isSearchVisible && _searchController.text.isNotEmpty)
                   IconButton(
                     icon: const Icon(Icons.clear),
+                    tooltip: _getText(context, 'clearSearch'), // Localized tooltip
                     onPressed: _clearSearch,
                   ),
                 IconButton(
-                  icon: Icon(_isSearchVisible ? Icons.search : Icons.search),
+                  icon: Icon(_isSearchVisible ? Icons.search_off : Icons.search),
+                  tooltip: _getText(context, 'searchNewsHint'), // Localized tooltip
                   onPressed: _toggleSearch,
                 ),
               ],
@@ -379,7 +409,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'جستجو در اخبار...',
+                              _getText(context, 'searchNewsHint'), // Localized hint
                               style: TextStyle(
                                 fontSize: 14,
                                 color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -398,7 +428,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                     child: Row(
                       children: [
                         Text(
-                          'جستجو برای: "$_searchQuery"',
+                          '${_getText(context, 'searchLabel')} "$_searchQuery"', // Localized label
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -408,7 +438,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                         const Spacer(),
                         TextButton(
                           onPressed: _clearSearch,
-                          child: const Text('پاک کردن'),
+                          child: Text(_getText(context, 'clearSearchButton')), // Localized button text
                           style: TextButton.styleFrom(
                             foregroundColor: Theme.of(context).primaryColor,
                             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -422,7 +452,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
-                    children: List.generate(_categories.length, (tabIndex) {
+                    children: List.generate(_categoryKeys.length, (tabIndex) {
                       return newsState.when(
                         data: (news) {
                           // Apply search filter if search query exists
@@ -439,8 +469,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                           // Sort all news by date (newest first)
                           final sortedNews = _sortNewsByDate(displayedNews);
                           
-                          // For "آخرین اخبار" tab, show only latest 10 news (unless searching)
-                          if (tabIndex == 4 && _searchQuery.isEmpty) {
+                          // For "Latest News" tab, show only latest 10 news (unless searching)
+                          // Use the key for comparison
+                          if (_categoryKeys[tabIndex] == 'newsTabsLatest' && _searchQuery.isEmpty) {
                             final latestNews = sortedNews.take(10).toList();
                             
                             return ListView.builder(
@@ -450,7 +481,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                                 final newsItem = latestNews[index];
                                 return _buildNewsCard(newsItem, index);
                               },
-                            );
+                            ); 
                           }
                           
                           return ListView.builder(
@@ -693,7 +724,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     return date;
   }
 
-  // New method for empty search results
+  // New method for empty search results with localized text
   Widget _buildEmptySearchResults() {
     return Center(
       child: Column(
@@ -706,7 +737,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           ),
           const SizedBox(height: 16),
           Text(
-            'نتیجه‌ای برای "$_searchQuery" یافت نشد',
+            _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery), // Localized text with query
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -714,8 +745,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'لطفا با کلمات کلیدی دیگری جستجو کنید',
+          Text(
+            _getText(context, 'emptySearchSuggestion'), // Localized suggestion
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
@@ -725,7 +756,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _clearSearch,
-            child: const Text('پاک کردن جستجو'),
+            child: Text(_getText(context, 'clearSearchButton')), // Localized button text
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
