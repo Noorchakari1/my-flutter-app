@@ -395,22 +395,24 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
               // Prominent search button (only visible when search is not active)
               if (!_isSearchVisible)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.grey.shade800 : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                      width: 1,
-                    ),
+                    color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: InkWell(
                     onTap: _toggleSearch,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.grey.shade800 : Colors.white,
-                        borderRadius: BorderRadius.circular(10),
+                        color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
                           width: 1,
@@ -421,13 +423,13 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                           Icon(
                             Icons.search,
                             color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
-                            size: 20,
+                            size: 18,
                           ),
                           const SizedBox(width: 12),
                           Text(
                             _getText(context, 'searchNewsHint'), // Localized hint
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 14,
                               color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                             ),
                           ),
