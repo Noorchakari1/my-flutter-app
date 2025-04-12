@@ -131,9 +131,13 @@ class _PersianScreenState extends State<PersianScreen> {
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _page,
         onTap: (index) {
-          setState(() {
-            _page = index;
-          });
+          if (index == 1) {
+            Navigator.of(context).pushNamed(Routes.news);
+          } else {
+            setState(() {
+              _page = index;
+            });
+          }
         },
         webUrl: AppConstants.aopUrls['persian']!,
         textDirection: TextDirection.rtl,
