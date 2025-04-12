@@ -364,129 +364,134 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
             ),
           ];
         },
-        body: RefreshIndicator(
-          onRefresh: _refreshData,
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDarkMode 
-                  ? Theme.of(context).scaffoldBackgroundColor 
-                  : Colors.grey.shade100,
-            ),
-            child: Column(
-              children: [
-                // Prominent search button (only visible when search is not active)
-                if (!_isSearchVisible)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
+        body: Container(
+          decoration: BoxDecoration(
+            color: isDarkMode 
+                ? Theme.of(context).scaffoldBackgroundColor 
+                : Colors.grey.shade100,
+          ),
+          child: Column(
+            children: [
+              // Prominent search button (only visible when search is not active)
+              if (!_isSearchVisible)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: InkWell(
+                    onTap: _toggleSearch,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                          width: 1,
                         ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: _toggleSearch,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                            width: 1,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.search,
+                            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                            size: 18,
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.search,
+                          const SizedBox(width: 12),
+                          Text(
+                            _getText(context, 'searchNewsHint'), // Localized hint
+                            style: TextStyle(
+                              fontSize: 14,
                               color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
-                              size: 18,
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              _getText(context, 'searchNewsHint'), // Localized hint
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                // Search results indicator
-                if (_isSearchVisible && _searchQuery.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-                    child: Row(
-                      children: [
-                        Text(
-                          '${_getText(context, 'searchLabel')} "$_searchQuery"', // Localized label
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkMode ? Colors.white : Colors.black87,
-                          ),
+                ),
+              // Search results indicator
+              if (_isSearchVisible && _searchQuery.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                  child: Row(
+                    children: [
+                      Text(
+                        '${_getText(context, 'searchLabel')} "$_searchQuery"', // Localized label
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkMode ? Colors.white : Colors.black87,
                         ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: _clearSearch,
-                          child: Text(_getText(context, 'clearSearchButton')), // Localized button text
-                          style: TextButton.styleFrom(
-                            foregroundColor: Theme.of(context).primaryColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            visualDensity: VisualDensity.compact,
-                          ),
+                      ),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: _clearSearch,
+                        child: Text(_getText(context, 'clearSearchButton')), // Localized button text
+                        style: TextButton.styleFrom(
+                          foregroundColor: Theme.of(context).primaryColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          visualDensity: VisualDensity.compact,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                // News TabBarView
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: List.generate(_categoryKeys.length, (tabIndex) {
-                      return newsState.when(
-                        data: (news) {
-                          // Apply search filter if search query exists
-                          final displayedNews = _searchQuery.isNotEmpty 
-                              ? _filterNews(news, _searchQuery)
-                              : news;
-                              
-                          if (displayedNews.isEmpty) {
-                            return _searchQuery.isNotEmpty
-                                ? _buildEmptySearchResults()
-                                : _buildEmptyState();
-                          }
-                          
-                          // Sort all news by date (newest first)
-                          final sortedNews = _sortNewsByDate(displayedNews);
-                          
-                          // For "Latest News" tab, show only latest 10 news (unless searching)
-                          // Use the key for comparison
-                          if (_categoryKeys[tabIndex] == 'newsTabsLatest' && _searchQuery.isEmpty) {
-                            final latestNews = sortedNews.take(10).toList();
+                ),
+              // News TabBarView
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: List.generate(_categoryKeys.length, (tabIndex) {
+                    return newsState.when(
+                      data: (news) {
+                        // Apply search filter if search query exists
+                        final displayedNews = _searchQuery.isNotEmpty 
+                            ? _filterNews(news, _searchQuery)
+                            : news;
                             
-                            return ListView.builder(
+                        if (displayedNews.isEmpty) {
+                          return _searchQuery.isNotEmpty
+                              ? _buildEmptySearchResults()
+                              : _buildEmptyState();
+                        }
+                        
+                        // Sort all news by date (newest first)
+                        final sortedNews = _sortNewsByDate(displayedNews);
+                        
+                        // For "Latest News" tab, show only latest 10 news (unless searching)
+                        // Use the key for comparison
+                        if (_categoryKeys[tabIndex] == 'newsTabsLatest' && _searchQuery.isEmpty) {
+                          final latestNews = sortedNews.take(10).toList();
+                          
+                          return RefreshIndicator(
+                            onRefresh: _refreshData,
+                            child: ListView.builder(
                               padding: const EdgeInsets.all(12),
                               itemCount: latestNews.length,
+                              physics: const AlwaysScrollableScrollPhysics(),
                               itemBuilder: (context, index) {
                                 final newsItem = latestNews[index];
                                 return _buildNewsCard(newsItem, index);
                               },
-                            ); 
-                          }
-                          
-                          return ListView.builder(
+                            ),
+                          ); 
+                        }
+                        
+                        return RefreshIndicator(
+                          onRefresh: _refreshData,
+                          child: ListView.builder(
                             padding: const EdgeInsets.all(12),
                             controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
                             itemCount: sortedNews.length + (_hasMoreData && _searchQuery.isEmpty ? 1 : 0),
                             itemBuilder: (context, index) {
                               // Show loading indicator at the end (only when not searching)
@@ -497,16 +502,16 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                               final newsItem = sortedNews[index];
                               return _buildNewsCard(newsItem, index);
                             },
-                          );
-                        },
-                        loading: () => _buildLoadingShimmer(),
-                        error: (error, stackTrace) => _buildErrorState(error),
-                      );
-                    }),
-                  ),
+                          ),
+                        );
+                      },
+                      loading: () => _buildLoadingShimmer(),
+                      error: (error, stackTrace) => _buildErrorState(error),
+                    );
+                  }),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -522,29 +527,40 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          Icon(
-            Icons.newspaper,
-            size: 64,
-            color: Colors.grey.shade400,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'هیچ خبری وجود ندارد',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'به زودی خبرهای جدید اضافه خواهند شد',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.newspaper,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'هیچ خبری وجود ندارد',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'به زودی خبرهای جدید اضافه خواهند شد',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -553,39 +569,50 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   }
 
   Widget _buildErrorState(Object error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red.shade300,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'خطا در بارگیری اخبار',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.red.shade700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            error.toString(),
-            style: const TextStyle(fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _refreshData,
-            icon: const Icon(Icons.refresh),
-            label: const Text('تلاش مجدد'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.red.shade300,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'خطا در بارگیری اخبار',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.red.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    style: const TextStyle(fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _refreshData,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('تلاش مجدد'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -597,6 +624,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   Widget _buildLoadingShimmer() {
     return ListView(
       padding: const EdgeInsets.all(12),
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         // Regular news item shimmers
         ...List.generate(
@@ -726,39 +754,50 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
 
   // New method for empty search results with localized text
   Widget _buildEmptySearchResults() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          Icon(
-            Icons.search_off,
-            size: 64,
-            color: Colors.grey.shade400,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery), // Localized text with query
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _getText(context, 'emptySearchSuggestion'), // Localized suggestion
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _clearSearch,
-            child: Text(_getText(context, 'clearSearchButton')), // Localized button text
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.search_off,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery), // Localized text with query
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _getText(context, 'emptySearchSuggestion'), // Localized suggestion
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _clearSearch,
+                    child: Text(_getText(context, 'clearSearchButton')), // Localized button text
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

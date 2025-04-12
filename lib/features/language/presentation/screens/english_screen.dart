@@ -43,20 +43,27 @@ class _EnglishScreenState extends State<EnglishScreen> {
               crossAxisSpacing: AppConstants.defaultPadding * 1.5,
               childAspectRatio: 1,
               children: [
-                CustomButton(
-                  title: 'AOP Website',
-                  iconData: Icons.web,
+                // CustomButton(
+                //   title: 'AOP Website',
+                //   iconData: Icons.web,
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //       builder: (context) => WebViewScreen(
+                //         url: AppConstants.aopUrls['english']!,
+                //         language: 'english',
+                //       ),
+                //     ));
+                //   },
+                // ),
+                                CustomButton(
+                  title: 'News',
+                  iconData: Icons.newspaper,
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        url: AppConstants.aopUrls['english']!,
-                        language: 'english',
-                      ),
-                    ));
+                    Navigator.of(context).pushNamed(Routes.news);
                   },
                 ),
                 CustomButton(
-                  title: 'Government Agencies',
+                  title: 'Gov Agencies',
                   iconData: Icons.departure_board,
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
@@ -80,13 +87,7 @@ class _EnglishScreenState extends State<EnglishScreen> {
                     ));
                   },
                 ),
-                CustomButton(
-                  title: 'News',
-                  iconData: Icons.newspaper,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(Routes.news);
-                  },
-                ),
+
               ],
             ),
           ),

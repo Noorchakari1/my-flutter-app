@@ -41,16 +41,23 @@ class _PashtoScreenState extends State<PashtoScreen> {
               crossAxisSpacing: AppConstants.defaultPadding * 1.5,
               childAspectRatio: 1,
               children: [
-                CustomButton(
-                  title: AppConstants.pashtoText['aopWebsite']!,
-                  iconData: Icons.web,
+                // CustomButton(
+                //   title: AppConstants.pashtoText['aopWebsite']!,
+                //   iconData: Icons.web,
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //       builder: (context) => WebViewScreen(
+                //         url: AppConstants.aopUrls['pashto']!,
+                //         language: 'pashto',
+                //       ),
+                //     ));
+                //   },
+                // ),
+                                CustomButton(
+                  title: 'خبرونه',
+                  iconData: Icons.newspaper,
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        url: AppConstants.aopUrls['pashto']!,
-                        language: 'pashto',
-                      ),
-                    ));
+                    Navigator.of(context).pushNamed(Routes.news);
                   },
                 ),
                 CustomButton(
@@ -79,13 +86,7 @@ class _PashtoScreenState extends State<PashtoScreen> {
                     ));
                   },
                 ),
-                CustomButton(
-                  title: 'خبرونه',
-                  iconData: Icons.newspaper,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(Routes.news);
-                  },
-                ),
+
               ],
             ),
           ),
