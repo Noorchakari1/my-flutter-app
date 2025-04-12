@@ -534,6 +534,13 @@ class NewsDetailScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Add circular progress indicator in the center
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 40, bottom: 30),
+                alignment: Alignment.center,
+                child: CircularProgressIndicator(),
+              ),
               Shimmer.fromColors(
                 baseColor: Colors.grey.shade300,
                 highlightColor: Colors.grey.shade100,

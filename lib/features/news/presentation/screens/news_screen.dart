@@ -626,6 +626,13 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       padding: const EdgeInsets.all(12),
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
+        // Add circular progress indicator at the top
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 30),
+          alignment: Alignment.center,
+          child: CircularProgressIndicator(),
+        ),
         // Regular news item shimmers
         ...List.generate(
           5,
