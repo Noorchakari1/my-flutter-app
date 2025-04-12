@@ -8,6 +8,7 @@ import '../../features/language/presentation/screens/pashto_screen.dart';
 import '../../features/language/presentation/screens/persian_screen.dart';
 import '../../features/language/presentation/screens/service_button_screen.dart';
 import '../../features/language/presentation/screens/web_view_screen.dart';
+import '../../features/ministries/presentation/screens/ministries_screen.dart';
 import '../../shared/constants/app_constants.dart';
 
 /// Application routes configuration
@@ -24,6 +25,7 @@ class Routes {
   static const String webView = '/web-view';
   static const String service = '/service';
   static const String news = '/news';
+  static const String ministries = '/ministries';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -47,6 +49,10 @@ class Routes {
       case news:
         return MaterialPageRoute(
           builder: (_) => const NewsScreen(),
+        );
+      case ministries:
+        return MaterialPageRoute(
+          builder: (_) => const MinistriesScreen(),
         );
       case AppConstants.webViewRoute:
         final args = settings.arguments as Map<String, dynamic>;

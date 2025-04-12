@@ -55,7 +55,7 @@ class _PersianScreenState extends State<PersianScreen> {
                 //     ));
                 //   },
                 // ),
-                                CustomButton(
+                CustomButton(
                   title: 'اخبار',
                   iconData: Icons.newspaper,
                   onPressed: () {
@@ -86,6 +86,13 @@ class _PersianScreenState extends State<PersianScreen> {
                         language: 'persian',
                       ),
                     ));
+                  },
+                ),
+                CustomButton(
+                  title: 'وزارت‌خانه‌ها',
+                  iconData: Icons.account_balance,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.ministries);
                   },
                 ),
               ],

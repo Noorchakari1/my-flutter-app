@@ -38,6 +38,24 @@ class AppConstants {
     'english': 'https://passport.moi.gov.af/en/',
   };
 
+  /// AOP Form URLs
+  static const Map<String, String> aopFormUrls = {
+    'persian': '$baseUrl/dr/contact-us',
+    'pashto': '$baseUrl/ps/contact-us',
+    'english': '$baseUrl/en/contact-us',
+  };
+
+  /// Route names
+  static const String homeRoute = '/';
+  static const String languageRoute = '/language';
+  static const String pashtoRoute = '/pashto';
+  static const String persianRoute = '/persian';
+  static const String englishRoute = '/english';
+  static const String webViewRoute = '/web-view';
+  static const String serviceRoute = '/service';
+  static const String feedbackRoute = '/feedback';
+  static const String ministriesRoute = '/ministries';
+
   /// Theme Colors
   static const Color primaryColor = Color(0xFF2196F3);
   static const Color backgroundColor = Color(0xFFF5F6FA);
@@ -81,13 +99,13 @@ class AppConstants {
 
   /// Localization Text Maps
   static const Map<String, Map<String, String>> localizedText = {
-    'persian': _persianText,
-    'pashto': _pashtoText,
-    'english': _englishText,
+    'persian': persianText,
+    'pashto': pashtoText,
+    'english': englishText,
   };
 
   /// Persian Text Constants
-  static const Map<String, String> _persianText = {
+  static const Map<String, String> persianText = {
     'welcome': 'خوش آمدید',
     'headerTitle': 'به اداره امور خوش آمدید',
     'changeLanguage': 'تغییر زبان',
@@ -101,10 +119,17 @@ class AppConstants {
     'agencyList': 'لیست ادارات دولتی افغانستان',
     'publicServices': 'خدمات عمومی دولتی',
     'passportServices': 'خدمات پاسپورت',
+    // Ministries related texts
+    'ministries': 'وزارت‌خانه‌ها',
+    'searchMinistries': 'جستجوی وزارت‌خانه‌ها...',
+    'noMinistries': 'هیچ وزارت‌خانه‌ای یافت نشد',
+    'ministryDetails': 'جزئیات وزارت‌خانه',
+    'ministryContact': 'تماس با وزارت‌خانه',
+    'ministriesList': 'لیست وزارت‌خانه‌ها',
   };
 
   /// Pashto Text Constants
-  static const Map<String, String> _pashtoText = {
+  static const Map<String, String> pashtoText = {
     'welcome': 'ښه راغلاست',
     'headerTitle': 'د چارو ادارې ته ښه راغلاست',
     'changeLanguage': 'د ژبې بدلول',
@@ -118,10 +143,17 @@ class AppConstants {
     'agencyList': 'د افغانستان د دولتي ادارو لیست',
     'publicServices': 'عامه دولتي خدمتونه',
     'passportServices': 'د پاسپورټ خدمتونه',
+    // Ministries related texts
+    'ministries': 'وزارتونه',
+    'searchMinistries': 'د وزارتونو لټون...',
+    'noMinistries': 'هیڅ وزارت ونه موندل شو',
+    'ministryDetails': 'د وزارت جزئیات',
+    'ministryContact': 'د وزارت سره اړیکه',
+    'ministriesList': 'د وزارتونو لیست',
   };
 
   /// English Text Constants
-  static const Map<String, String> _englishText = {
+  static const Map<String, String> englishText = {
     'welcome': 'Welcome',
     'headerTitle': 'Welcome to Administrative Office of the President',
     'changeLanguage': 'Change Language',
@@ -135,5 +167,12 @@ class AppConstants {
     'agencyList': 'List of Afghan Government Agencies',
     'publicServices': 'Public Government Services',
     'passportServices': 'Passport Services',
+    // Ministries related texts
+    'ministries': 'Ministries',
+    'searchMinistries': 'Search ministries...',
+    'noMinistries': 'No ministries found',
+    'ministryDetails': 'Ministry Details',
+    'ministryContact': 'Contact Ministry',
+    'ministriesList': 'List of Ministries',
   };
 } 

@@ -14,7 +14,6 @@ class AppConstants {
   static const double headerImageHeight = 100.0;
 
   // API URLs
-  static const String baseUrl = 'https://qiblafinder.withgoogle.com/intl';
 
   // Asset paths
   static const String logoPath = 'assets/logo.png';
