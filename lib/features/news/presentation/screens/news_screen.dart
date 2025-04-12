@@ -25,10 +25,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   final List<String> _categoryKeys = [
     'newsTabsAll',
     'newsTabsLatest',
-    'newsTabsSocial',
-    'newsTabsEconomic',
-    'newsTabsPolitical',
-    'newsTabsCultural'
   ];
   int _currentPage = 1;
   bool _hasMoreData = true;
