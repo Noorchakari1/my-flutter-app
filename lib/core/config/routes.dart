@@ -1,3 +1,4 @@
+import 'package:aop_sites/features/news/presentation/screens/news_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/language/presentation/screens/english_screen.dart';
@@ -22,6 +23,7 @@ class Routes {
   static const String feedback = '/feedback';
   static const String webView = '/web-view';
   static const String service = '/service';
+  static const String news = '/news';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -41,6 +43,10 @@ class Routes {
       case AppConstants.englishRoute:
         return MaterialPageRoute(
           builder: (_) => const EnglishScreen(),
+        );
+      case news:
+        return MaterialPageRoute(
+          builder: (_) => const NewsScreen(),
         );
       case AppConstants.webViewRoute:
         final args = settings.arguments as Map<String, dynamic>;

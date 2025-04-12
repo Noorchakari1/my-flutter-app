@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/config/routes.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
 import '../widgets/app_header.dart';
@@ -42,16 +43,23 @@ class _PersianScreenState extends State<PersianScreen> {
               crossAxisSpacing: AppConstants.defaultPadding * 1.5,
               childAspectRatio: 1,
               children: [
-                CustomButton(
-                  title: AppConstants.persianText['aopWebsite']!,
-                  iconData: Icons.web,
+                // CustomButton(
+                //   title: AppConstants.persianText['aopWebsite']!,
+                //   iconData: Icons.web,
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //       builder: (context) => WebViewScreen(
+                //         url: AppConstants.aopUrls['persian']!,
+                //         language: 'persian',
+                //       ),
+                //     ));
+                //   },
+                // ),
+                                CustomButton(
+                  title: 'اخبار',
+                  iconData: Icons.newspaper,
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        url: AppConstants.aopUrls['persian']!,
-                        language: 'persian',
-                      ),
-                    ));
+                    Navigator.of(context).pushNamed(Routes.news);
                   },
                 ),
                 CustomButton(

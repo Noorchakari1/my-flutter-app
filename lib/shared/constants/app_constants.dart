@@ -108,7 +108,22 @@ class AppConstants {
     'whatsapp': 'واتساپ',
     'email': 'ایمیل',
     'contactForm': 'فورم تماس',
-    'langGuide': 'لطفاً زبان خود را انتخاب نمایید'
+    'langGuide': 'لطفاً زبان خود را انتخاب نمایید',
+    // News Screen Texts
+    'newsTitle': 'اخبار',
+    'newsTabsAll': 'همه',
+    'newsTabsLatest': 'آخرین اخبار',
+    'newsTabsSocial': 'اجتماعی',
+    'newsTabsEconomic': 'اقتصادی',
+    'newsTabsPolitical': 'سیاسی',
+    'newsTabsCultural': 'فرهنگی',
+    'searchNewsHint': 'جستجو در اخبار...',
+    'clearSearch': 'پاک کردن',
+    'searchLabel': 'جستجو برای:',
+    'emptySearchResult': 'نتیجه‌ای برای "{query}" یافت نشد',
+    'emptySearchSuggestion': 'لطفا با کلمات کلیدی دیگری جستجو کنید',
+    'clearSearchButton': 'پاک کردن جستجو',
+    'savedNews': 'اخبار ذخیره شده',
   };
 
   // Pashto Text
@@ -127,26 +142,25 @@ class AppConstants {
     'whatsapp': 'واټساپ',
     'email': 'بریښنالیک',
     'contactForm': 'د اړیکې فورم',
-    'langGuide': 'مهرباني وکړئ خپله ژبه غوره کړئ'
+    'langGuide': 'مهرباني وکړئ خپله ژبه غوره کړئ',
+    // News Screen Texts
+    'newsTitle': 'خبرونه',
+    'newsTabsAll': 'ټول',
+    'newsTabsLatest': 'وروستي خبرونه',
+    'newsTabsSocial': 'ټولنیز',
+    'newsTabsEconomic': 'اقتصادي',
+    'newsTabsPolitical': 'سیاسي',
+    'newsTabsCultural': 'کلتوري',
+    'searchNewsHint': 'په خبرونو کې پلټنه...',
+    'clearSearch': 'پاکول',
+    'searchLabel': 'لټون د:',
+    'emptySearchResult': 'د "{query}" لپاره پایله ونه موندل شوه',
+    'emptySearchSuggestion': 'مهرباني وکړئ د نورو کلیدي کلمو سره پلټنه وکړئ',
+    'clearSearchButton': 'لټون پاک کړئ',
+    'savedNews': 'خوندي شوي خبرونه',
   };
 
-  // English Screen Text
-  // static const Map<String, String> englishText = {
-  //   'welcome': 'Welcome',
-  //   'headerTitle': 'Welcome to Administrative Office of the President',
-  //   'changeLanguage': 'Change Language',
-  //   'comments': 'Comments/Suggestions',
-  //   'contactUs': 'Contact Us',
-  //   'feedbackGuide': 'Please click on one of the options below to share your comments and suggestions with us',
-  //   'whatsapp': 'WhatsApp',
-  //   'email': 'Email',
-  //   'contactForm': 'Contact Form',
-  //   'aopWebsite': 'AOP Website',
-  //   'agencyList': 'List of Afghan Government Agencies',
-  //   'publicServices': 'Public Government Services',
-  //   'passportServices': 'Passport Services',
-  // };
-
+  // English Text
   static const Map<String, String> englishText = {
     'videos': 'Videos',
     'welcome': 'Welcome',
@@ -162,6 +176,21 @@ class AppConstants {
     'whatsapp': 'WhatsApp',
     'email': 'Email',
     'contactForm': 'Contact Form',
-    'langGuide': 'Please select your language'
+    'langGuide': 'Please select your language',
+    // News Screen Texts
+    'newsTitle': 'News',
+    'newsTabsAll': 'All',
+    'newsTabsLatest': 'Latest News',
+    'newsTabsSocial': 'Social',
+    'newsTabsEconomic': 'Economic',
+    'newsTabsPolitical': 'Political',
+    'newsTabsCultural': 'Cultural',
+    'searchNewsHint': 'Search news...',
+    'clearSearch': 'Clear',
+    'searchLabel': 'Searching for:',
+    'emptySearchResult': 'No results found for "{query}"',
+    'emptySearchSuggestion': 'Please search with different keywords',
+    'clearSearchButton': 'Clear Search',
+    'savedNews': 'Saved News',
   };
 }

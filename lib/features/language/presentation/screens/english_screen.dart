@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/config/routes.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
 import '../widgets/app_header.dart';
@@ -42,20 +43,27 @@ class _EnglishScreenState extends State<EnglishScreen> {
               crossAxisSpacing: AppConstants.defaultPadding * 1.5,
               childAspectRatio: 1,
               children: [
-                CustomButton(
-                  title: 'AOP Website',
-                  iconData: Icons.web,
+                // CustomButton(
+                //   title: 'AOP Website',
+                //   iconData: Icons.web,
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //       builder: (context) => WebViewScreen(
+                //         url: AppConstants.aopUrls['english']!,
+                //         language: 'english',
+                //       ),
+                //     ));
+                //   },
+                // ),
+                                CustomButton(
+                  title: 'News',
+                  iconData: Icons.newspaper,
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        url: AppConstants.aopUrls['english']!,
-                        language: 'english',
-                      ),
-                    ));
+                    Navigator.of(context).pushNamed(Routes.news);
                   },
                 ),
                 CustomButton(
-                  title: 'Government Agencies',
+                  title: 'Gov Agencies',
                   iconData: Icons.departure_board,
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
@@ -79,6 +87,7 @@ class _EnglishScreenState extends State<EnglishScreen> {
                     ));
                   },
                 ),
+
               ],
             ),
           ),

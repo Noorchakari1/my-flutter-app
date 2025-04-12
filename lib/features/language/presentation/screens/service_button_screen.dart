@@ -45,7 +45,7 @@ class _ServiceButtonScreenState extends ConsumerState<ServiceButtonScreen> {
       backgroundColor:
           isDarkMode ? const Color(0xFF121212) : AppConstants.backgroundColor,
       appBar: CustomAppBar(
-        title: widget.passportTitle,
+        title: languageText['selectService'] ?? languageText['publicServices'] ?? widget.passportTitle,
         showBackButton: true,
       ),
       bottomNavigationBar: CustomBottomNavBar(
@@ -63,7 +63,7 @@ class _ServiceButtonScreenState extends ConsumerState<ServiceButtonScreen> {
       body: Column(
         children: [
           AppHeader(
-            title: languageText['selectService'] ?? widget.passportTitle,
+            title: languageText['selectService'] ?? languageText['publicServices'] ?? widget.passportTitle,
             logoPath: AppConstants.logoPath,
             logoHeight: AppConstants.headerImageHeight,
             logoColor: Colors.white,
