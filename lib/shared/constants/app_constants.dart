@@ -14,7 +14,6 @@ class AppConstants {
   static const double headerImageHeight = 100.0;
 
   // API URLs
-  static const String baseUrl = 'https://qiblafinder.withgoogle.com/intl';
 
   // Asset paths
   static const String logoPath = 'assets/logo.png';
@@ -124,6 +123,42 @@ class AppConstants {
     'emptySearchSuggestion': 'لطفا با کلمات کلیدی دیگری جستجو کنید',
     'clearSearchButton': 'پاک کردن جستجو',
     'savedNews': 'اخبار ذخیره شده',
+    // Ministry Screen Texts
+    'ministries': 'وزارت‌خانه‌ها',
+    'searchMinistries': 'جستجو در وزارت‌خانه‌ها...',
+    'noMinistries': 'هیچ وزارت‌خانه‌ای وجود ندارد',
+    'ministryComingSoon': 'به زودی وزارت‌خانه‌های جدید اضافه خواهند شد',
+    'ministryLoadError': 'خطا در بارگیری لیست وزارت‌خانه‌ها',
+    'tryAgain': 'تلاش مجدد',
+    'viewDetails': 'مشاهده جزئیات',
+    'ministry': 'وزارت‌خانه',
+    'aboutMinistry': 'درباره وزارت‌خانه',
+    'contactInfo': 'اطلاعات تماس',
+    'viewOfficialWebsite': 'مشاهده وب‌سایت رسمی',
+    'phone': 'تلفن',
+    'website': 'وب‌سایت',
+    'share': 'اشتراک‌گذاری',
+    'noWebsite': 'وب‌سایتی موجود نیست',
+    'back': 'بازگشت',
+    // Independent Directorates Text
+    'independentDirectorates': 'ریاست‌های مستقل',
+    'searchDirectorates': 'جستجو در ریاست‌های مستقل...',
+    'noDirectorates': 'هیچ ریاست مستقلی وجود ندارد',
+    'directorateComingSoon': 'به زودی ریاست‌های مستقل جدید اضافه خواهند شد',
+    'directorateLoadError': 'خطا در بارگیری لیست ریاست‌های مستقل',
+    'directorate': 'ریاست مستقل',
+    'aboutDirectorate': 'درباره ریاست مستقل',
+    // Provinces Text
+    'provinces': 'ولایات',
+    'searchProvinces': 'جستجو در ولایات...',
+    'noProvinces': 'هیچ ولایتی وجود ندارد',
+    'provinceComingSoon': 'به زودی ولایات جدید اضافه خواهند شد',
+    'provinceLoadError': 'خطا در بارگیری لیست ولایات',
+    'province': 'ولایت',
+    'aboutProvince': 'درباره ولایت',
+    // Error messages
+    'cannotOpenWebsite': 'متاسفانه نمی‌توان وب‌سایت را باز کرد: {url}',
+    'cannotMakeCall': 'متاسفانه نمی‌توان تماس برقرار کرد: {phone}',
   };
 
   // Pashto Text
@@ -158,6 +193,42 @@ class AppConstants {
     'emptySearchSuggestion': 'مهرباني وکړئ د نورو کلیدي کلمو سره پلټنه وکړئ',
     'clearSearchButton': 'لټون پاک کړئ',
     'savedNews': 'خوندي شوي خبرونه',
+    // Ministry Screen Texts
+    'ministries': 'وزارتونه',
+    'searchMinistries': 'په وزارتونو کې پلټنه...',
+    'noMinistries': 'هیڅ وزارت شتون نلري',
+    'ministryComingSoon': 'ژر به نوي وزارتونه اضافه شي',
+    'ministryLoadError': 'د وزارتونو د لیست په بارولو کې ستونزه',
+    'tryAgain': 'بیا هڅه وکړئ',
+    'viewDetails': 'جزئیات وګورئ',
+    'ministry': 'وزارت',
+    'aboutMinistry': 'د وزارت په اړه',
+    'contactInfo': 'د اړیکې معلومات',
+    'viewOfficialWebsite': 'رسمي ویب پاڼه وګورئ',
+    'phone': 'تلیفون',
+    'website': 'ویب پاڼه',
+    'share': 'شریکول',
+    'noWebsite': 'هیڅ ویب پاڼه شتون نلري',
+    'back': 'شاته',
+    // Independent Directorates Text
+    'independentDirectorates': 'خپلواک ریاستونه',
+    'searchDirectorates': 'په خپلواک ریاستونو کې پلټنه...',
+    'noDirectorates': 'هیڅ خپلواک ریاست شتون نلري',
+    'directorateComingSoon': 'ژر به نوي خپلواک ریاستونه اضافه شي',
+    'directorateLoadError': 'د خپلواک ریاستونو د لیست په بارولو کې ستونزه',
+    'directorate': 'خپلواک ریاست',
+    'aboutDirectorate': 'د خپلواک ریاست په اړه',
+    // Provinces Text
+    'provinces': 'ولایتونه',
+    'searchProvinces': 'په ولایتونو کې پلټنه...',
+    'noProvinces': 'هیڅ ولایت شتون نلري',
+    'provinceComingSoon': 'ژر به نوي ولایتونه اضافه شي',
+    'provinceLoadError': 'د ولایتونو د لیست په بارولو کې ستونزه',
+    'province': 'ولایت',
+    'aboutProvince': 'د ولایت په اړه',
+    // Error messages
+    'cannotOpenWebsite': 'په خواشینۍ سره ویب پاڼه نشو خلاصولی: {url}',
+    'cannotMakeCall': 'په خواشینۍ سره تلیفون نشو کولی: {phone}',
   };
 
   // English Text
@@ -192,5 +263,41 @@ class AppConstants {
     'emptySearchSuggestion': 'Please search with different keywords',
     'clearSearchButton': 'Clear Search',
     'savedNews': 'Saved News',
+    // Ministry Screen Texts
+    'ministries': 'Ministries',
+    'searchMinistries': 'Search ministries...',
+    'noMinistries': 'No ministries available',
+    'ministryComingSoon': 'New ministries will be added soon',
+    'ministryLoadError': 'Error loading ministry list',
+    'tryAgain': 'Try Again',
+    'viewDetails': 'View Details',
+    'ministry': 'Ministry',
+    'aboutMinistry': 'About the Ministry',
+    'contactInfo': 'Contact Information',
+    'viewOfficialWebsite': 'View Official Website',
+    'phone': 'Phone',
+    'website': 'Website',
+    'share': 'Share',
+    'noWebsite': 'No website available',
+    'back': 'Back',
+    // Independent Directorates Text
+    'independentDirectorates': 'Independent Directorates',
+    'searchDirectorates': 'Search independent directorates...',
+    'noDirectorates': 'No independent directorates available',
+    'directorateComingSoon': 'New independent directorates will be added soon',
+    'directorateLoadError': 'Error loading independent directorates list',
+    'directorate': 'Independent Directorate',
+    'aboutDirectorate': 'About the Independent Directorate',
+    // Provinces Text
+    'provinces': 'Provinces',
+    'searchProvinces': 'Search provinces...',
+    'noProvinces': 'No provinces available',
+    'provinceComingSoon': 'New provinces will be added soon',
+    'provinceLoadError': 'Error loading provinces list',
+    'province': 'Province',
+    'aboutProvince': 'About the Province',
+    // Error messages
+    'cannotOpenWebsite': 'Sorry, could not open website: {url}',
+    'cannotMakeCall': 'Sorry, could not make call to: {phone}',
   };
 }

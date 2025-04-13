@@ -25,10 +25,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   final List<String> _categoryKeys = [
     'newsTabsAll',
     'newsTabsLatest',
-    'newsTabsSocial',
-    'newsTabsEconomic',
-    'newsTabsPolitical',
-    'newsTabsCultural'
   ];
   int _currentPage = 1;
   bool _hasMoreData = true;
@@ -274,52 +270,62 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       hintText: _getText(context, 'searchNewsHint'), // Localized hint
                       border: InputBorder.none,
                       hintStyle: TextStyle(
-                        color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: Colors.white.withOpacity(0.7),
                       ),
                     ),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
-                      color: isDarkMode ? Colors.white : Colors.black,
+                      color: Colors.white,
                     ),
                     textDirection: TextDirection.rtl,
                     textAlign: TextAlign.right,
                     onChanged: _performSearch,
                     autofocus: true,
+                    cursorColor: Colors.white,
                   )
                 : Text(
                     _getText(context, 'newsTitle'), // Localized title
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
+                      color: Colors.white,
                     ),
                   ),
               centerTitle: true,
               floating: true,
               pinned: true,
               elevation: 0,
-              backgroundColor: isDarkMode 
-                  ? Theme.of(context).appBarTheme.backgroundColor 
-                  : Colors.white,
+              backgroundColor: AppConstants.primaryColor,
               shadowColor: Colors.transparent,
               leading: _isSearchVisible
                 ? IconButton(
-                    icon: const Icon(Icons.arrow_back),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: _toggleSearch,
                   )
-                : null,
+                : Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(50),
                 child: Container(
                   height: 50,
                   decoration: BoxDecoration(
-                    color: isDarkMode 
-                        ? Theme.of(context).appBarTheme.backgroundColor 
-                        : Colors.white,
+                    color: AppConstants.primaryColor,
                     border: Border(
                       bottom: BorderSide(
-                        color: isDarkMode 
-                            ? Colors.grey.shade800 
-                            : Colors.grey.shade200,
+                        color: Colors.white.withOpacity(0.1),
                         width: 1.0,
                       ),
                     ),
@@ -331,11 +337,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       isScrollable: true,
                       padding: EdgeInsets.zero,
                       labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-                      labelColor: Theme.of(context).primaryColor,
-                      unselectedLabelColor: isDarkMode 
-                          ? Colors.grey.shade400 
-                          : Colors.grey.shade600,
-                      indicatorColor: Theme.of(context).primaryColor,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white.withOpacity(0.6),
+                      indicatorColor: Colors.white,
                       indicatorWeight: 3,
                       indicatorSize: TabBarIndicatorSize.label,
                       // Generate tabs using localized keys
@@ -350,16 +354,32 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
               ),
               actions: [
                 if (_isSearchVisible && _searchController.text.isNotEmpty)
-                  IconButton(
-                    icon: const Icon(Icons.clear),
-                    tooltip: _getText(context, 'clearSearch'), // Localized tooltip
-                    onPressed: _clearSearch,
+                  Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.clear, size: 20, color: Colors.white),
+                      tooltip: _getText(context, 'clearSearch'), // Localized tooltip
+                      onPressed: _clearSearch,
+                    ),
                   ),
-                IconButton(
-                  icon: Icon(_isSearchVisible ? Icons.search_off : Icons.search),
-                  tooltip: _getText(context, 'searchNewsHint'), // Localized tooltip
-                  onPressed: _toggleSearch,
-                ),
+                // REMOVED SEARCH TOGGLE BUTTON
+                // Container(
+                //   margin: const EdgeInsets.all(8),
+                //   decoration: BoxDecoration(
+                //     color: Colors.white.withOpacity(0.2),
+                //     shape: BoxShape.circle,
+                //   ),
+                //   child: IconButton(
+                //     icon: Icon(_isSearchVisible ? Icons.search_off : Icons.search, color: Colors.white),
+                //     tooltip: _getText(context, 'searchNewsHint'), // Localized tooltip
+                //     onPressed: _toggleSearch,
+                //     iconSize: 20,
+                //   ),
+                // ),
               ],
             ),
           ];
@@ -626,6 +646,13 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       padding: const EdgeInsets.all(12),
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
+        // Add circular progress indicator at the top
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 30),
+          alignment: Alignment.center,
+          child: CircularProgressIndicator(),
+        ),
         // Regular news item shimmers
         ...List.generate(
           5,

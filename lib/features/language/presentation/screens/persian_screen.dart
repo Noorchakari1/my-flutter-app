@@ -55,7 +55,7 @@ class _PersianScreenState extends State<PersianScreen> {
                 //     ));
                 //   },
                 // ),
-                                CustomButton(
+                CustomButton(
                   title: 'اخبار',
                   iconData: Icons.newspaper,
                   onPressed: () {
@@ -63,15 +63,36 @@ class _PersianScreenState extends State<PersianScreen> {
                   },
                 ),
                 CustomButton(
-                  title: 'لیست ادارات دولتی',
-                  iconData: Icons.departure_board,
+                  title: 'وزارت‌خانه‌ها',
+                  iconData: Icons.account_balance,
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        url: AppConstants.aopMinistryUrls['persian']!,
-                        language: 'persian',
-                      ),
-                    ));
+                    Navigator.of(context).pushNamed(Routes.ministries);
+                  },
+                ),
+                // CustomButton(
+                //   title: 'لیست ادارات دولتی',
+                //   iconData: Icons.departure_board,
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //       builder: (context) => WebViewScreen(
+                //         url: AppConstants.aopMinistryUrls['persian']!,
+                //         language: 'persian',
+                //       ),
+                //     ));
+                //   },
+                // ),
+                CustomButton(
+                  title: 'ادارات مستقل',
+                  iconData: Icons.business,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.independentDirectorates);
+                  },
+                ),
+                CustomButton(
+                  title: 'ولایات',
+                  iconData: Icons.location_city,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.provinces);
                   },
                 ),
                 CustomButton(
@@ -88,6 +109,7 @@ class _PersianScreenState extends State<PersianScreen> {
                     ));
                   },
                 ),
+
               ],
             ),
           ),
@@ -131,9 +153,13 @@ class _PersianScreenState extends State<PersianScreen> {
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _page,
         onTap: (index) {
-          setState(() {
-            _page = index;
-          });
+          if (index == 1) {
+            Navigator.of(context).pushNamed(Routes.news);
+          } else {
+            setState(() {
+              _page = index;
+            });
+          }
         },
         webUrl: AppConstants.aopUrls['persian']!,
         textDirection: TextDirection.rtl,
