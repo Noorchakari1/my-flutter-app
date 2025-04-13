@@ -201,8 +201,7 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
     
     final lowercaseQuery = query.toLowerCase();
     return ministries.where((item) => 
-      (item.title != null && item.title!.toLowerCase().contains(lowercaseQuery)) ||
-      (item.description != null && _stripHtmlTags(item.description!).toLowerCase().contains(lowercaseQuery))
+      (item.title != null && item.title!.toLowerCase().contains(lowercaseQuery))
     ).toList();
   }
   
@@ -272,59 +271,35 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               SliverAppBar(
-                title: _isSearchVisible 
-                  ? TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: _getText(context, 'searchMinistries'),
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                        ),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                      textDirection: textDirection,
-                      onChanged: _performSearch,
-                      autofocus: true,
-                      cursorColor: Colors.white,
-                    )
-                  : Text(
-                      _getText(context, 'ministries'),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                        color: Colors.white,
-                      ),
-                    ),
+                title: Text(
+                  _getText(context, 'ministries'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    color: Colors.white,
+                  ),
+                ),
                 centerTitle: true,
                 floating: true,
                 pinned: true,
                 elevation: 0,
                 backgroundColor: AppConstants.primaryColor,
                 shadowColor: Colors.transparent,
-                leading: _isSearchVisible 
-                  ? IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: _toggleSearch,
-                    )
-                  : Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
+                leading: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      size: 20,
+                      color: Colors.white,
                     ),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
                 actions: [
                   if (_isSearchVisible && _searchController.text.isNotEmpty)
                     Container(
@@ -339,19 +314,6 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
                         onPressed: _clearSearch,
                       ),
                     ),
-                  Container(
-                    margin: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(_isSearchVisible ? Icons.search_off : Icons.search, color: Colors.white),
-                      tooltip: _getText(context, 'searchMinistries'),
-                      onPressed: _toggleSearch,
-                      iconSize: 20,
-                    ),
-                  ),
                 ],
               ),
             ];
@@ -408,6 +370,61 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
                           ],
                         ),
                       ),
+                    ),
+                  )
+                else
+                  // Search field (visible when search is active)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey.shade900 : Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                            size: 20,
+                          ),
+                          onPressed: _toggleSearch,
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: _getText(context, 'searchMinistries'),
+                              border: InputBorder.none,
+                              hintStyle: TextStyle(
+                                color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                              ),
+                            ),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                            textDirection: textDirection,
+                            onChanged: _performSearch,
+                            autofocus: true,
+                          ),
+                        ),
+                        if (_searchController.text.isNotEmpty)
+                          IconButton(
+                            icon: Icon(
+                              Icons.clear,
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                              size: 20,
+                            ),
+                            onPressed: _clearSearch,
+                          ),
+                      ],
                     ),
                   ),
                 
