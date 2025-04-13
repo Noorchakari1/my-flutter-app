@@ -61,17 +61,24 @@ class _PashtoScreenState extends State<PashtoScreen> {
                   },
                 ),
                 CustomButton(
-                  title: 'د دولتي ادارو لیست',
-                  iconData: Icons.departure_board,
+                  title: 'وزارتونه',
+                  iconData: Icons.account_balance,
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        url: AppConstants.aopMinistryUrls['pashto']!,
-                        language: 'pashto',
-                      ),
-                    ));
+                    Navigator.of(context).pushNamed(Routes.ministries);
                   },
                 ),
+                // CustomButton(
+                //   title: 'د دولتي ادارو لیست',
+                //   iconData: Icons.departure_board,
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //       builder: (context) => WebViewScreen(
+                //         url: AppConstants.aopMinistryUrls['pashto']!,
+                //         language: 'pashto',
+                //       ),
+                //     ));
+                //   },
+                // ),
                 CustomButton(
                   title: 'د عامه خدمتونه',
                   iconData: Icons.web,

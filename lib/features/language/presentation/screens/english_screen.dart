@@ -63,17 +63,24 @@ class _EnglishScreenState extends State<EnglishScreen> {
                   },
                 ),
                 CustomButton(
-                  title: 'Gov Agencies',
-                  iconData: Icons.departure_board,
+                  title: 'Ministries',
+                  iconData: Icons.account_balance,
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        url: AppConstants.aopMinistryUrls['english']!,
-                        language: 'english',
-                      ),
-                    ));
+                    Navigator.of(context).pushNamed(Routes.ministries);
                   },
                 ),
+                // CustomButton(
+                //   title: 'Gov Agencies',
+                //   iconData: Icons.departure_board,
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //       builder: (context) => WebViewScreen(
+                //         url: AppConstants.aopMinistryUrls['english']!,
+                //         language: 'english',
+                //       ),
+                //     ));
+                //   },
+                // ),
                 CustomButton(
                   title: 'Public Services',
                   iconData: Icons.public,
