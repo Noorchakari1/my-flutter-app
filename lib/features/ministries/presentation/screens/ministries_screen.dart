@@ -115,7 +115,7 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
         });
         
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطا در بارگیری لیست وزارت ها: ${e.toString()}')),
+          SnackBar(content: Text('${_getText(context, "ministryLoadError")}: ${e.toString()}')),
         );
       }
     }
@@ -305,21 +305,26 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
                 elevation: 0,
                 backgroundColor: AppConstants.primaryColor,
                 shadowColor: Colors.transparent,
-                leading: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      size: 20,
-                      color: Colors.white,
+                leading: _isSearchVisible 
+                  ? IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: _toggleSearch,
+                    )
+                  : Container(
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
                     ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
                 actions: [
                   if (_isSearchVisible && _searchController.text.isNotEmpty)
                     Container(
@@ -359,6 +364,53 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
             ),
             child: Column(
               children: [
+                // Prominent search button (only visible when search is not active)
+                if (!_isSearchVisible)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey.shade900 : Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: InkWell(
+                      onTap: _toggleSearch,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.search,
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              _getText(context, 'searchMinistries'),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                
                 // Search results indicator
                 if (_isSearchVisible && _searchQuery.isNotEmpty)
                   Container(
@@ -555,7 +607,7 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
             baseColor: Colors.grey.shade300,
             highlightColor: Colors.grey.shade100,
             child: Container(
-              height: 160,
+              height: 110,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -571,251 +623,148 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
   Widget _buildMinistryCard(MinistryItem ministry) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 4,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => MinistryDetailScreen(ministryId: ministry.id),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => MinistryDetailScreen(ministryId: ministry.id),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          );
-        },
-        child: Column(
+          ],
+        ),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ministry image
-            if (ministry.image != null && ministry.image!.isNotEmpty)
-              SizedBox(
-                height: 180,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: ministry.image!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Shimmer.fromColors(
-                        baseColor: Colors.grey.shade300,
-                        highlightColor: Colors.grey.shade100,
-                        child: Container(
-                          color: Colors.white,
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey.shade200,
-                        child: Icon(
-                          Icons.account_balance,
-                          size: 48,
-                          color: Colors.grey.shade400,
-                        ),
-                      ),
-                    ),
-                    // Gradient overlay for better text readability
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        height: 80,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withOpacity(0.7),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Title overlay on image
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          ministry.title ?? 'بدون عنوان',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 3.0,
-                                color: Colors.black54,
-                                offset: Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              Container(
-                height: 120,
-                width: double.infinity,
-                color: Colors.grey.shade200,
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.account_balance,
-                  size: 48,
-                  color: Colors.grey.shade400,
-                ),
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(12),
+                bottomRight: Radius.circular(12),
               ),
-            
-            // Ministry details
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Only show title if no image (to avoid duplication with overlay title)
-                  if (ministry.image == null || ministry.image!.isEmpty)
-                    Text(
-                      ministry.title ?? 'بدون عنوان',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black87,
+              child: ministry.image != null && ministry.image!.isNotEmpty 
+                ? CachedNetworkImage(
+                    imageUrl: ministry.image!,
+                    height: 110,
+                    width: 110,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: Colors.grey.shade300,
+                      highlightColor: Colors.grey.shade100,
+                      child: Container(
+                        color: Colors.white,
                       ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey.shade200,
+                      child: const Icon(
+                        Icons.account_balance,
+                        size: 32,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  )
+                : Container(
+                    height: 110,
+                    width: 110,
+                    color: Colors.grey.shade200,
+                    child: const Icon(
+                      Icons.account_balance,
+                      size: 32,
+                      color: Colors.grey,
+                    ),
+                  ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      ministry.title ?? _getText(context, 'ministry'),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        height: 1.3,
+                      ),
+                      textDirection: TextDirection.rtl,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                
-                  // Description (if available)
-                  if (ministry.description != null && ministry.description!.isNotEmpty) ...[
-                    if (ministry.image == null || ministry.image!.isEmpty)
-                      const SizedBox(height: 8),
-                    Container(
-                      constraints: const BoxConstraints(maxHeight: 56),
-                      child: Html(
-                        data: ministry.description!,
-                        style: {
-                          "body": Style(
-                            fontSize: FontSize(14),
-                            color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
-                            lineHeight: LineHeight(1.4),
-                          ),
-                        },
-                        shrinkWrap: true,
-                      ),
-                    ),
                     const SizedBox(height: 12),
-                  ],
-                  
-                  // Divider
-                  Divider(color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300),
-                  const SizedBox(height: 8),
-                  
-                  // Contact info and action buttons
-                  Row(
-                    children: [
-                      // Phone number
-                      if (ministry.phone != null && ministry.phone!.isNotEmpty) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: isDarkMode 
-                                ? Colors.blue.withOpacity(0.2) 
-                                : Colors.blue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.phone, 
-                                size: 14, 
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                ministry.phone!,
-                                style: TextStyle(
-                                  fontSize: 12,
+                    // Show website link or phone if available
+                    Row(
+                      children: [
+                        if (ministry.phone != null && ministry.phone!.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isDarkMode 
+                                  ? Colors.blue.withOpacity(0.2) 
+                                  : Colors.blue.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.phone, 
+                                  size: 14, 
                                   color: Theme.of(context).primaryColor,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 4),
+                                Text(
+                                  ministry.phone!,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                         const SizedBox(width: 8),
-                      ],
-                      
-                      // Website link indicator
-                      if (ministry.link != null && ministry.link!.isNotEmpty) ...[
+                        const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: isDarkMode 
-                                ? Colors.blue.withOpacity(0.2) 
-                                : Colors.blue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Row(
                             children: [
-                              Icon(
-                                Icons.language, 
-                                size: 14, 
-                                color: Theme.of(context).primaryColor,
+                              Text(
+                                _getText(context, 'viewDetails'),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                'وب‌سایت',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context).primaryColor,
-                                ),
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 12,
+                                color: Colors.white,
                               ),
                             ],
                           ),
                         ),
                       ],
-                      
-                      const Spacer(),
-                      
-                      // View details button
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            Text(
-                              'مشاهده جزئیات',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 12,
-                              color: Colors.white,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

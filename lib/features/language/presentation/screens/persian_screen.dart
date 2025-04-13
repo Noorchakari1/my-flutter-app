@@ -62,18 +62,25 @@ class _PersianScreenState extends State<PersianScreen> {
                     Navigator.of(context).pushNamed(Routes.news);
                   },
                 ),
-                CustomButton(
-                  title: 'لیست ادارات دولتی',
-                  iconData: Icons.departure_board,
+                                CustomButton(
+                  title: 'وزارت‌خانه‌ها',
+                  iconData: Icons.account_balance,
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        url: AppConstants.aopMinistryUrls['persian']!,
-                        language: 'persian',
-                      ),
-                    ));
+                    Navigator.of(context).pushNamed(Routes.ministries);
                   },
                 ),
+                // CustomButton(
+                //   title: 'لیست ادارات دولتی',
+                //   iconData: Icons.departure_board,
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //       builder: (context) => WebViewScreen(
+                //         url: AppConstants.aopMinistryUrls['persian']!,
+                //         language: 'persian',
+                //       ),
+                //     ));
+                //   },
+                // ),
                 CustomButton(
                   title: 'خدمات عامه',
                   iconData: Icons.web,
@@ -88,13 +95,7 @@ class _PersianScreenState extends State<PersianScreen> {
                     ));
                   },
                 ),
-                CustomButton(
-                  title: 'وزارت‌خانه‌ها',
-                  iconData: Icons.account_balance,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(Routes.ministries);
-                  },
-                ),
+
               ],
             ),
           ),

@@ -47,16 +47,12 @@ class MinistryService {
   // For getting details of a specific ministry
   Future<MinistryItem> getMinistryDetail(int id, {String? currentLanguage}) async {
     try {
-      // در حالت عادی، باید یک API مخصوص جزئیات وزارت‌خانه داشته باشیم
-      // اما چون چنین API ای وجود ندارد، از همان API لیست وزارت‌خانه‌ها استفاده می‌کنیم
-      
       // Create headers with Accept-Language based on current app language
       final headers = {
         'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
       };
       
-      // در اینجا باید یک endpoint مخصوص جزئیات وزارت‌خانه باشد
-      // اما فعلاً از همان endpoint لیست استفاده می‌کنیم و در کد آن را فیلتر می‌کنیم
+      // First try to get the ministry from the first page
       final response = await http.get(
         Uri.parse('$baseUrl/government/ministries'),
         headers: headers,
@@ -66,13 +62,46 @@ class MinistryService {
         final Map<String, dynamic> data = json.decode(response.body);
         final ministryResponse = MinistryResponse.fromJson(data);
         
-        // یافتن وزارت‌خانه مورد نظر در لیست
+        // Try to find the ministry in the first page
         final ministry = ministryResponse.items.firstWhere(
           (ministry) => ministry.id == id,
-          orElse: () => throw Exception('Ministry not found with ID: $id'),
+          orElse: () => MinistryItem(id: -1), // Return a dummy ministry with id -1 if not found
         );
         
-        return ministry;
+        // If ministry was found on the first page, return it
+        if (ministry.id != -1) {
+          return ministry;
+        }
+        
+        // If ministry was not found on the first page, check if there are more pages
+        if (ministryResponse.pagination.currentPage < ministryResponse.pagination.totalPages) {
+          // Loop through remaining pages to find the ministry
+          for (int page = 2; page <= ministryResponse.pagination.totalPages; page++) {
+            final nextPageResponse = await http.get(
+              Uri.parse('$baseUrl/government/ministries?page=$page'),
+              headers: headers,
+            );
+            
+            if (nextPageResponse.statusCode == 200) {
+              final Map<String, dynamic> nextPageData = json.decode(nextPageResponse.body);
+              final nextPageMinistries = MinistryResponse.fromJson(nextPageData);
+              
+              // Try to find the ministry in this page
+              final ministryOnNextPage = nextPageMinistries.items.firstWhere(
+                (ministry) => ministry.id == id,
+                orElse: () => MinistryItem(id: -1),
+              );
+              
+              // If found on this page, return it
+              if (ministryOnNextPage.id != -1) {
+                return ministryOnNextPage;
+              }
+            }
+          }
+        }
+        
+        // If we've checked all pages and still haven't found the ministry
+        throw Exception('Ministry not found with ID: $id');
       } else {
         throw Exception('Failed to load ministry details: ${response.statusCode}');
       }
