@@ -62,7 +62,7 @@ class _PersianScreenState extends State<PersianScreen> {
                     Navigator.of(context).pushNamed(Routes.news);
                   },
                 ),
-                                CustomButton(
+                CustomButton(
                   title: 'وزارت‌خانه‌ها',
                   iconData: Icons.account_balance,
                   onPressed: () {
@@ -81,6 +81,20 @@ class _PersianScreenState extends State<PersianScreen> {
                 //     ));
                 //   },
                 // ),
+                CustomButton(
+                  title: 'ادارات مستقل',
+                  iconData: Icons.business,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.independentDirectorates);
+                  },
+                ),
+                CustomButton(
+                  title: 'ولایات',
+                  iconData: Icons.location_city,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.provinces);
+                  },
+                ),
                 CustomButton(
                   title: 'خدمات عامه',
                   iconData: Icons.web,

@@ -1,6 +1,7 @@
 import 'package:aop_sites/features/news/presentation/screens/news_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../../features/independent_directorates/presentation/screens/independent_directorates_screen.dart';
 import '../../features/language/presentation/screens/english_screen.dart';
 import '../../features/language/presentation/screens/feedback_screen.dart';
 import '../../features/language/presentation/screens/language_screen.dart';
@@ -9,6 +10,7 @@ import '../../features/language/presentation/screens/persian_screen.dart';
 import '../../features/language/presentation/screens/service_button_screen.dart';
 import '../../features/language/presentation/screens/web_view_screen.dart';
 import '../../features/ministries/presentation/screens/ministries_screen.dart';
+import '../../features/provinces/presentation/screens/provinces_screen.dart';
 import '../../shared/constants/app_constants.dart';
 
 /// Application routes configuration
@@ -26,6 +28,8 @@ class Routes {
   static const String service = '/service';
   static const String news = '/news';
   static const String ministries = '/ministries';
+  static const String independentDirectorates = '/independent-directorates';
+  static const String provinces = '/provinces';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -53,6 +57,14 @@ class Routes {
       case ministries:
         return MaterialPageRoute(
           builder: (_) => const MinistriesScreen(),
+        );
+      case independentDirectorates:
+        return MaterialPageRoute(
+          builder: (_) => const IndependentDirectoratesScreen(),
+        );
+      case provinces:
+        return MaterialPageRoute(
+          builder: (_) => const ProvincesScreen(),
         );
       case AppConstants.webViewRoute:
         final args = settings.arguments as Map<String, dynamic>;

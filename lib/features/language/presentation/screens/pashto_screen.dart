@@ -80,6 +80,20 @@ class _PashtoScreenState extends State<PashtoScreen> {
                 //   },
                 // ),
                 CustomButton(
+                  title: 'خپلواک ریاستونه',
+                  iconData: Icons.business,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.independentDirectorates);
+                  },
+                ),
+                CustomButton(
+                  title: 'ولایتونه',
+                  iconData: Icons.location_city,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.provinces);
+                  },
+                ),
+                CustomButton(
                   title: 'د عامه خدمتونه',
                   iconData: Icons.web,
                   onPressed: () {

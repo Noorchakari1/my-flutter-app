@@ -82,6 +82,20 @@ class _EnglishScreenState extends State<EnglishScreen> {
                 //   },
                 // ),
                 CustomButton(
+                  title: 'Independent Directorates',
+                  iconData: Icons.business,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.independentDirectorates);
+                  },
+                ),
+                CustomButton(
+                  title: 'Provinces',
+                  iconData: Icons.location_city,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(Routes.provinces);
+                  },
+                ),
+                CustomButton(
                   title: 'Public Services',
                   iconData: Icons.public,
                   onPressed: () {
