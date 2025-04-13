@@ -9,7 +9,10 @@ import '../../data/providers/ministry_provider.dart';
 import '../../data/services/ministry_service.dart';
 import 'ministry_detail_screen.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/services/api_exception.dart';
+import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/widgets/error_display.dart';
 
 class MinistriesScreen extends ConsumerStatefulWidget {
   const MinistriesScreen({Key? key}) : super(key: key);
@@ -23,6 +26,7 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
   bool _isLoadingMore = false;
   int _currentPage = 1;
   bool _hasMoreData = true;
+  dynamic _error;
   
   // Search related variables
   final TextEditingController _searchController = TextEditingController();
@@ -85,10 +89,24 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
   }
 
   Future<void> _loadFirstPage() async {
+    // First check connectivity
+    final isConnected = await ref.read(connectivityServiceProvider).checkConnectivity();
+    if (!isConnected) {
+      setState(() {
+        _error = ApiException(
+          message: _getText(context, 'noConnection'),
+          code: 'no_connection',
+        );
+        _isLoadingMore = false;
+      });
+      return;
+    }
+    
     setState(() {
       _isLoadingMore = true;
       _currentPage = 1;
       _hasMoreData = true;
+      _error = null;
     });
     
     try {
@@ -111,12 +129,9 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
+          _error = e;
           _isLoadingMore = false;
         });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${_getText(context, "ministryLoadError")}: ${e.toString()}')),
-        );
       }
     }
   }
@@ -124,8 +139,23 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
   Future<void> _loadNextPage() async {
     if (_isLoadingMore || !_hasMoreData) return;
     
+    // Check connectivity before loading more
+    final isConnected = await ref.read(connectivityServiceProvider).checkConnectivity();
+    if (!isConnected) {
+      // Instead of showing a snackbar, just set error state
+      setState(() {
+        _error = ApiException(
+          message: _getText(context, 'offline'),
+          code: 'no_connection',
+        );
+        _isLoadingMore = false;
+      });
+      return;
+    }
+    
     setState(() {
       _isLoadingMore = true;
+      _error = null; // Clear any previous errors
     });
     
     try {
@@ -154,11 +184,8 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
         setState(() {
           _currentPage--; // Revert page increment on error
           _isLoadingMore = false;
+          _error = e; // Store the error for display
         });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطا در بارگیری اطلاعات بیشتر: ${e.toString()}')),
-        );
       }
     }
   }
@@ -226,10 +253,14 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
+      // Don't show snackbar for URL launch failures
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $url')),
-        );
+        setState(() {
+          _error = ApiException(
+            message: _getText(context, 'cannotOpenWebsite').replaceAll('{url}', url),
+            code: 'url_launch_failed',
+          );
+        });
       }
     }
   }
@@ -245,259 +276,125 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ministries = ref.watch(ministryNotifierProvider);
-    final isDark = ref.watch(themeNotifierProvider).isDarkMode;
+    final ministryState = ref.watch(ministryNotifierProvider);
+    final isConnected = ref.watch(isConnectedProvider);
     
-    // Get text direction based on language
-    final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
-    final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
+    return Scaffold(
+      appBar: AppBar(
+        title: _isSearchVisible
+          ? _buildSearchField()
+          : Text(_getText(context, 'ministries')),
+        backgroundColor: AppConstants.primaryColor,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(_isSearchVisible ? Icons.close : Icons.search),
+            onPressed: _toggleSearch,
+          ),
+        ],
+      ),
+      body: _buildBody(ministryState, isConnected),
+      floatingActionButton: _showScrollToTop
+        ? FloatingActionButton(
+            backgroundColor: AppConstants.primaryColor,
+            child: const Icon(Icons.arrow_upward),
+            onPressed: () {
+              _scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+              );
+            },
+          )
+        : null,
+    );
+  }
+  
+  Widget _buildBody(AsyncValue<List<MinistryItem>> ministryState, bool isConnected) {
+    // If we have a specific error from our loading attempts, show that first
+    if (_error != null) {
+      return ErrorDisplay(
+        error: _error,
+        onRetry: _refreshData,
+      );
+    }
     
-    return Directionality(
-      textDirection: textDirection,
-      child: Scaffold(
-        // Add floating action button for scroll to top
-        floatingActionButton: _showScrollToTop 
-            ? FloatingActionButton(
-                onPressed: _scrollToTop,
-                mini: true,
-                backgroundColor: Theme.of(context).primaryColor,
-                child: const Icon(
-                  Icons.arrow_upward,
-                  color: Colors.white,
-                ),
-              )
-            : null,
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverAppBar(
-                title: Text(
-                  _getText(context, 'ministries'),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: Colors.white,
-                  ),
-                ),
-                centerTitle: true,
-                floating: true,
-                pinned: true,
-                elevation: 0,
-                backgroundColor: AppConstants.primaryColor,
-                shadowColor: Colors.transparent,
-                leading: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
-                actions: [
-                  if (_isSearchVisible && _searchController.text.isNotEmpty)
-                    Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.clear, size: 20, color: Colors.white),
-                        tooltip: _getText(context, 'clearSearch'),
-                        onPressed: _clearSearch,
-                      ),
-                    ),
-                ],
-              ),
-            ];
-          },
-          body: Container(
-            decoration: BoxDecoration(
-              color: isDark 
-                  ? Theme.of(context).scaffoldBackgroundColor 
-                  : Colors.grey.shade100,
-            ),
+    // Show no connection message if disconnected
+    if (!isConnected) {
+      return ErrorDisplay(
+        error: ApiException(
+          message: _getText(context, 'noConnection'),
+          code: 'no_connection',
+        ),
+        onRetry: _refreshData,
+      );
+    }
+    
+    // Handle various states from the provider
+    return ministryState.when(
+      data: (ministries) {
+        // Show search results if there's a search query
+        final displayedMinistries = _searchQuery.isNotEmpty 
+            ? _filterMinistries(ministries, _searchQuery) 
+            : ministries;
+            
+        if (displayedMinistries.isEmpty) {
+          return Center(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Prominent search button (only visible when search is not active)
-                if (!_isSearchVisible)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey.shade900 : Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: _toggleSearch,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.search,
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              _getText(context, 'searchMinistries'),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  // Search field (visible when search is active)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey.shade900 : Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.arrow_back,
-                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
-                            size: 20,
-                          ),
-                          onPressed: _toggleSearch,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: _getText(context, 'searchMinistries'),
-                              border: InputBorder.none,
-                              hintStyle: TextStyle(
-                                color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
-                              ),
-                            ),
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                            textDirection: textDirection,
-                            onChanged: _performSearch,
-                            autofocus: true,
-                          ),
-                        ),
-                        if (_searchController.text.isNotEmpty)
-                          IconButton(
-                            icon: Icon(
-                              Icons.clear,
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
-                              size: 20,
-                            ),
-                            onPressed: _clearSearch,
-                          ),
-                      ],
-                    ),
-                  ),
-                
-                // Search results indicator
-                if (_isSearchVisible && _searchQuery.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    color: isDark ? Colors.grey.shade900 : Colors.white,
-                    child: Row(
-                      children: [
-                        Text(
-                          '${_getText(context, 'searchLabel')} "$_searchQuery"',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: _clearSearch,
-                          child: Text(_getText(context, 'clearSearchButton')),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Theme.of(context).primaryColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                
-                // Ministries List
-                Expanded(
-                  child: ministries.when(
-                    data: (data) {
-                      if (_searchQuery.isNotEmpty) {
-                        // Filter locally if search query exists
-                        data = _filterMinistries(data, _searchQuery);
-                      }
-                      
-                      if (data.isEmpty) {
-                        return _searchQuery.isNotEmpty
-                            ? _buildEmptySearchResults()
-                            : _buildEmptyState();
-                      }
-                      
-                      return RefreshIndicator(
-                        onRefresh: _refreshData,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.all(12),
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: data.length + (_hasMoreData && _searchQuery.isEmpty ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index == data.length) {
-                              return _buildLoadingMoreIndicator();
-                            }
-                            
-                            final ministry = data[index];
-                            return _buildMinistryCard(ministry);
-                          },
-                        ),
-                      );
-                    },
-                    loading: () => _buildLoadingShimmer(),
-                    error: (error, stack) => _buildErrorState(error),
-                  ),
+                Icon(
+                  Icons.search_off,
+                  size: 64,
+                  color: AppConstants.primaryColor.withOpacity(0.7),
                 ),
+                const SizedBox(height: 16),
+                Text(
+                  _searchQuery.isNotEmpty
+                    ? _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery)
+                    : _getText(context, 'noMinistries'),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                if (_searchQuery.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: ElevatedButton(
+                      onPressed: _clearSearch,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppConstants.primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(_getText(context, 'clearSearchButton')),
+                    ),
+                  ),
               ],
             ),
+          );
+        }
+        
+        return RefreshIndicator(
+          onRefresh: _refreshData,
+          color: AppConstants.primaryColor,
+          child: ListView.builder(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: displayedMinistries.length + (_isLoadingMore && _hasMoreData ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == displayedMinistries.length) {
+                return _buildLoadingIndicator();
+              }
+              return _buildMinistryCard(displayedMinistries[index]);
+            },
           ),
-        ),
+        );
+      },
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      error: (error, stackTrace) => ErrorDisplay(
+        error: error,
+        onRetry: _refreshData,
       ),
     );
   }
@@ -838,6 +735,70 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      alignment: Alignment.center,
+      child: const CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+              size: 20,
+            ),
+            onPressed: _toggleSearch,
+          ),
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: _getText(context, 'searchMinistries'),
+                border: InputBorder.none,
+                hintStyle: TextStyle(
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+              ),
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+              textDirection: TextDirection.rtl,
+              onChanged: _performSearch,
+              autofocus: true,
+            ),
+          ),
+          if (_searchController.text.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                Icons.clear,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                size: 20,
+              ),
+              onPressed: _clearSearch,
+            ),
         ],
       ),
     );

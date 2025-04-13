@@ -2,9 +2,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/province_model.dart';
+import '../../../../core/services/api_client.dart';
+import '../../../../core/services/api_exception.dart';
 
 class ProvinceService {
   static const String baseUrl = 'https://aop.gov.af/api/v1';
+  final ApiClient _apiClient;
+  
+  ProvinceService({ApiClient? apiClient}) 
+      : _apiClient = apiClient ?? ApiClient(baseUrl: baseUrl);
 
   // Map app language to API language code
   String getLanguageHeader(String appLanguage) {
@@ -23,115 +29,91 @@ class ProvinceService {
 
   Future<ProvinceResponse> getProvinces({int page = 1, String? currentLanguage}) async {
     try {
-      // Create headers with Accept-Language based on current app language
-      final headers = {
-        'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
-      };
+      final queryParams = {'page': page.toString()};
       
-      final response = await http.get(
-        Uri.parse('$baseUrl/government/provinces?page=$page'),
-        headers: headers,
+      return await _apiClient.get<ProvinceResponse>(
+        endpoint: 'government/provinces',
+        language: currentLanguage,
+        queryParams: queryParams,
+        converter: (data) => ProvinceResponse.fromJson(data),
       );
-      
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return ProvinceResponse.fromJson(data);
-      } else {
-        throw Exception('Failed to load provinces: ${response.statusCode}');
-      }
     } catch (e) {
-      throw Exception('Failed to load provinces: $e');
+      // Convert to ApiException
+      final apiException = ApiExceptionHandler.handleError(e);
+      throw apiException;
     }
   }
   
   // For getting details of a specific province
   Future<ProvinceItem> getProvinceDetail(int id, {String? currentLanguage}) async {
     try {
-      // Create headers with Accept-Language based on current app language
-      final headers = {
-        'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
-      };
-      
       // First try to get the province from the first page
-      final response = await http.get(
-        Uri.parse('$baseUrl/government/provinces'),
-        headers: headers,
+      final response = await getProvinces(currentLanguage: currentLanguage);
+      
+      // Try to find the province in the first page
+      final province = response.items.firstWhere(
+        (province) => province.id == id,
+        orElse: () => ProvinceItem(id: -1), // Return a dummy province with id -1 if not found
       );
       
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        final provinceResponse = ProvinceResponse.fromJson(data);
-        
-        // Try to find the province in the first page
-        final province = provinceResponse.items.firstWhere(
-          (province) => province.id == id,
-          orElse: () => ProvinceItem(id: -1), // Return a dummy province with id -1 if not found
-        );
-        
-        // If province was found on the first page, return it
-        if (province.id != -1) {
-          return province;
-        }
-        
-        // If province was not found on the first page, check if there are more pages
-        if (provinceResponse.pagination.currentPage < provinceResponse.pagination.totalPages) {
-          // Loop through remaining pages to find the province
-          for (int page = 2; page <= provinceResponse.pagination.totalPages; page++) {
-            final nextPageResponse = await http.get(
-              Uri.parse('$baseUrl/government/provinces?page=$page'),
-              headers: headers,
-            );
-            
-            if (nextPageResponse.statusCode == 200) {
-              final Map<String, dynamic> nextPageData = json.decode(nextPageResponse.body);
-              final nextPageProvinces = ProvinceResponse.fromJson(nextPageData);
-              
-              // Try to find the province in this page
-              final provinceOnNextPage = nextPageProvinces.items.firstWhere(
-                (province) => province.id == id,
-                orElse: () => ProvinceItem(id: -1),
-              );
-              
-              // If found on this page, return it
-              if (provinceOnNextPage.id != -1) {
-                return provinceOnNextPage;
-              }
-            }
+      // If province was found on the first page, return it
+      if (province.id != -1) {
+        return province;
+      }
+      
+      // If province was not found on the first page, check if there are more pages
+      if (response.pagination.currentPage < response.pagination.totalPages) {
+        // Loop through remaining pages to find the province
+        for (int page = 2; page <= response.pagination.totalPages; page++) {
+          final nextPageResponse = await getProvinces(
+            page: page,
+            currentLanguage: currentLanguage
+          );
+          
+          // Try to find the province in this page
+          final provinceOnNextPage = nextPageResponse.items.firstWhere(
+            (province) => province.id == id,
+            orElse: () => ProvinceItem(id: -1),
+          );
+          
+          // If found on this page, return it
+          if (provinceOnNextPage.id != -1) {
+            return provinceOnNextPage;
           }
         }
-        
-        // If we've checked all pages and still haven't found the province
-        throw Exception('Province not found with ID: $id');
-      } else {
-        throw Exception('Failed to load province details: ${response.statusCode}');
       }
+      
+      // If we've checked all pages and still haven't found the province
+      throw ApiException(
+        message: 'Province not found with ID: $id',
+        code: 'not_found',
+        statusCode: 404,
+      );
     } catch (e) {
-      throw Exception('Failed to load province details: $e');
+      // Convert to ApiException
+      final apiException = ApiExceptionHandler.handleError(e);
+      throw apiException;
     }
   }
   
   // Search functionality
   Future<ProvinceResponse> searchProvinces(String query, {int page = 1, String? currentLanguage}) async {
     try {
-      final encodedQuery = Uri.encodeComponent(query);
-      // Create headers with Accept-Language based on current app language
-      final headers = {
-        'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
+      final queryParams = {
+        'search': query,
+        'page': page.toString(),
       };
       
-      final response = await http.get(
-        Uri.parse('$baseUrl/government/provinces?search=$encodedQuery&page=$page'),
-        headers: headers,
+      return await _apiClient.get<ProvinceResponse>(
+        endpoint: 'government/provinces',
+        language: currentLanguage,
+        queryParams: queryParams,
+        converter: (data) => ProvinceResponse.fromJson(data),
       );
-      
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return ProvinceResponse.fromJson(data);
-      } else {
-        throw Exception('Failed to search provinces: ${response.statusCode}');
-      }
     } catch (e) {
-      throw Exception('Failed to search provinces: $e');
+      // Convert to ApiException
+      final apiException = ApiExceptionHandler.handleError(e);
+      throw apiException;
     }
   }
   

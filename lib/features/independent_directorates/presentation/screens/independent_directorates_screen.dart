@@ -6,7 +6,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_html/flutter_html.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/services/api_exception.dart';
+import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/widgets/error_display.dart';
 import '../../data/models/independent_directorate_model.dart';
 import '../../data/services/independent_directorate_service.dart';
 import 'independent_directorate_detail_screen.dart';
@@ -24,6 +27,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
   bool _isLoadingMore = false;
   int _currentPage = 1;
   bool _hasMoreData = true;
+  dynamic _error;
   
   // Search related variables
   final TextEditingController _searchController = TextEditingController();
@@ -86,10 +90,24 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
   }
 
   Future<void> _loadFirstPage() async {
+    // First check connectivity
+    final isConnected = await ref.read(connectivityServiceProvider).checkConnectivity();
+    if (!isConnected) {
+      setState(() {
+        _error = ApiException(
+          message: _getText(context, 'noConnection'),
+          code: 'no_connection',
+        );
+        _isLoadingMore = false;
+      });
+      return;
+    }
+    
     setState(() {
       _isLoadingMore = true;
       _currentPage = 1;
       _hasMoreData = true;
+      _error = null;
     });
     
     try {
@@ -112,12 +130,9 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
     } catch (e) {
       if (mounted) {
         setState(() {
+          _error = e;
           _isLoadingMore = false;
         });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${_getText(context, "directorateLoadError")}: ${e.toString()}')),
-        );
       }
     }
   }
@@ -125,8 +140,23 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
   Future<void> _loadNextPage() async {
     if (_isLoadingMore || !_hasMoreData) return;
     
+    // Check connectivity before loading more
+    final isConnected = await ref.read(connectivityServiceProvider).checkConnectivity();
+    if (!isConnected) {
+      // Instead of showing a snackbar, just set error state
+      setState(() {
+        _error = ApiException(
+          message: _getText(context, 'offline'),
+          code: 'no_connection',
+        );
+        _isLoadingMore = false;
+      });
+      return;
+    }
+    
     setState(() {
       _isLoadingMore = true;
+      _error = null; // Clear any previous errors
     });
     
     try {
@@ -155,11 +185,8 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
         setState(() {
           _currentPage--; // Revert page increment on error
           _isLoadingMore = false;
+          _error = e; // Store the error for display
         });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${_getText(context, "directorateLoadError")}: ${e.toString()}')),
-        );
       }
     }
   }
@@ -235,10 +262,14 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
+      // Don't show snackbar for URL launch failures
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $url')),
-        );
+        setState(() {
+          _error = ApiException(
+            message: _getText(context, 'cannotOpenWebsite').replaceAll('{url}', url),
+            code: 'url_launch_failed',
+          );
+        });
       }
     }
   }
@@ -254,264 +285,130 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
 
   @override
   Widget build(BuildContext context) {
-    final directoratesAsync = ref.watch(independentDirectorateNotifierProvider);
-    final isDark = ref.watch(themeNotifierProvider).isDarkMode;
+    final directorateState = ref.watch(independentDirectorateNotifierProvider);
+    final isConnected = ref.watch(isConnectedProvider);
     
-    // Get text direction based on language
-    final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
-    final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
+    return Scaffold(
+      appBar: AppBar(
+        title: _isSearchVisible
+          ? _buildSearchField()
+          : Text(_getText(context, 'independentDirectorates')),
+        backgroundColor: AppConstants.primaryColor,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(_isSearchVisible ? Icons.close : Icons.search),
+            onPressed: _toggleSearch,
+          ),
+        ],
+      ),
+      body: _buildBody(directorateState, isConnected),
+      floatingActionButton: _showScrollToTop
+        ? FloatingActionButton(
+            backgroundColor: AppConstants.primaryColor,
+            child: const Icon(Icons.arrow_upward),
+            onPressed: () {
+              _scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+              );
+            },
+          )
+        : null,
+    );
+  }
+  
+  Widget _buildBody(AsyncValue<List<IndependentDirectorateItem>> directorateState, bool isConnected) {
+    // If we have a specific error from our loading attempts, show that first
+    if (_error != null) {
+      return ErrorDisplay(
+        error: _error,
+        onRetry: _refreshData,
+      );
+    }
     
-    return Directionality(
-      textDirection: textDirection,
-      child: Scaffold(
-        // Add floating action button for scroll to top
-        floatingActionButton: _showScrollToTop 
-            ? FloatingActionButton(
-                onPressed: _scrollToTop,
-                mini: true,
-                backgroundColor: Theme.of(context).primaryColor,
-                child: const Icon(
-                  Icons.arrow_upward,
-                  color: Colors.white,
-                ),
-              )
-            : null,
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverAppBar(
-                title: Text(
-                  _getText(context, 'independentDirectorates'),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: Colors.white,
-                  ),
-                ),
-                centerTitle: true,
-                floating: true,
-                pinned: true,
-                elevation: 0,
-                backgroundColor: AppConstants.primaryColor,
-                shadowColor: Colors.transparent,
-                leading: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
-                actions: [
-                  if (_isSearchVisible && _searchController.text.isNotEmpty)
-                    Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.clear, size: 20, color: Colors.white),
-                        tooltip: _getText(context, 'clearSearch'),
-                        onPressed: _clearSearch,
-                      ),
-                    ),
-                ],
-              ),
-            ];
-          },
-          body: Container(
-            decoration: BoxDecoration(
-              color: isDark 
-                  ? Theme.of(context).scaffoldBackgroundColor 
-                  : Colors.grey.shade100,
-            ),
+    // Show no connection message if disconnected
+    if (!isConnected) {
+      return ErrorDisplay(
+        error: ApiException(
+          message: _getText(context, 'noConnection'),
+          code: 'no_connection',
+        ),
+        onRetry: _refreshData,
+      );
+    }
+    
+    // Handle various states from the provider
+    return directorateState.when(
+      data: (directorates) {
+        // Show search results if there's a search query
+        final displayedDirectorates = _searchQuery.isNotEmpty 
+            ? _filterDirectorates(directorates, _searchQuery) 
+            : directorates;
+            
+        if (displayedDirectorates.isEmpty) {
+          return Center(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Prominent search button (only visible when search is not active)
-                if (!_isSearchVisible)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey.shade900 : Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: _toggleSearch,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.search,
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              _getText(context, 'searchDirectorates'),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  // Search field (visible when search is active)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey.shade900 : Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.arrow_back,
-                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
-                            size: 20,
-                          ),
-                          onPressed: _toggleSearch,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: _getText(context, 'searchDirectorates'),
-                              border: InputBorder.none,
-                              hintStyle: TextStyle(
-                                color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
-                              ),
-                            ),
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                            textDirection: textDirection,
-                            onChanged: _performSearch,
-                            autofocus: true,
-                          ),
-                        ),
-                        if (_searchController.text.isNotEmpty)
-                          IconButton(
-                            icon: Icon(
-                              Icons.clear,
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
-                              size: 20,
-                            ),
-                            onPressed: _clearSearch,
-                          ),
-                      ],
-                    ),
-                  ),
-                
-                // Search results indicator
-                if (_isSearchVisible && _searchQuery.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    color: isDark ? Colors.grey.shade900 : Colors.white,
-                    child: Row(
-                      children: [
-                        Text(
-                          '${_getText(context, 'searchLabel')} "$_searchQuery"',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: _clearSearch,
-                          child: Text(_getText(context, 'clearSearchButton')),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Theme.of(context).primaryColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                
-                // Directorates List
-                Expanded(
-                  child: directoratesAsync.when(
-                    data: (directorates) {
-                      if (_searchQuery.isNotEmpty) {
-                        // Filter locally if search query exists
-                        directorates = _filterDirectorates(directorates, _searchQuery);
-                      }
-                      
-                      if (directorates.isEmpty) {
-                        return _searchQuery.isNotEmpty
-                            ? _buildEmptySearchResults()
-                            : _buildEmptyState();
-                      }
-                      
-                      return RefreshIndicator(
-                        onRefresh: _refreshData,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.all(12),
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: directorates.length + (_hasMoreData && _searchQuery.isEmpty ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index == directorates.length) {
-                              return _isLoadingMore ? _buildLoadingMoreIndicator() : const SizedBox.shrink();
-                            }
-                            
-                            final directorate = directorates[index];
-                            return _buildDirectorateCard(directorate);
-                          },
-                        ),
-                      );
-                    },
-                    loading: () => _buildLoadingShimmer(),
-                    error: (error, stack) => _buildErrorState(error),
-                  ),
+                Icon(
+                  Icons.search_off,
+                  size: 64,
+                  color: AppConstants.primaryColor.withOpacity(0.7),
                 ),
+                const SizedBox(height: 16),
+                Text(
+                  _searchQuery.isNotEmpty
+                    ? _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery)
+                    : _getText(context, 'noDirectorates'),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                if (_searchQuery.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: ElevatedButton(
+                      onPressed: _clearSearch,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppConstants.primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(_getText(context, 'clearSearchButton')),
+                    ),
+                  ),
               ],
             ),
+          );
+        }
+        
+        return RefreshIndicator(
+          onRefresh: _refreshData,
+          color: AppConstants.primaryColor,
+          child: ListView.builder(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: displayedDirectorates.length + (_isLoadingMore && _hasMoreData ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == displayedDirectorates.length) {
+                return _buildLoadingIndicator();
+              }
+              return _buildDirectorateCard(displayedDirectorates[index]);
+            },
           ),
-        ),
+        );
+      },
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      error: (error, stackTrace) => ErrorDisplay(
+        error: error,
+        onRetry: _refreshData,
       ),
     );
   }
-
-  Widget _buildLoadingMoreIndicator() {
+  
+  Widget _buildLoadingIndicator() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       alignment: Alignment.center,
@@ -519,130 +416,59 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
     );
   }
 
-  Widget _buildEmptyState() {
-    return RefreshIndicator(
-      onRefresh: _refreshData,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.business_outlined,
-                    size: 64,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _getText(context, 'noDirectorates'),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _getText(context, 'directorateComingSoon'),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+  Widget _buildSearchField() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildErrorState(Object error) {
-    return RefreshIndicator(
-      onRefresh: _refreshData,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+      child: Row(
         children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red.shade300,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _getText(context, 'directorateLoadError'),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.red.shade700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    error.toString(),
-                    style: const TextStyle(fontSize: 14),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: _refreshData,
-                    icon: const Icon(Icons.refresh),
-                    label: Text(_getText(context, 'tryAgain')),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
+          IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).primaryColor,
+              size: 20,
+            ),
+            onPressed: _toggleSearch,
+          ),
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: _getText(context, 'searchDirectorates'),
+                border: InputBorder.none,
+                hintStyle: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).primaryColor,
+              ),
+              textDirection: TextDirection.rtl,
+              onChanged: _performSearch,
+              autofocus: true,
             ),
           ),
+          if (_searchController.text.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                Icons.clear,
+                color: Theme.of(context).primaryColor,
+                size: 20,
+              ),
+              onPressed: _clearSearch,
+            ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLoadingShimmer() {
-    return ListView(
-      padding: const EdgeInsets.all(12),
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        // Add circular progress indicator at the top
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 30),
-          alignment: Alignment.center,
-          child: const CircularProgressIndicator(),
-        ),
-        // Regular directorate item shimmers
-        ...List.generate(
-          5,
-          (index) => Shimmer.fromColors(
-            baseColor: Colors.grey.shade300,
-            highlightColor: Colors.grey.shade100,
-            child: Container(
-              height: 110,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -798,59 +624,6 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
             ),
           ],
         ),
-      ),
-    );
-  }
-  
-  // Widget for empty search results
-  Widget _buildEmptySearchResults() {
-    return RefreshIndicator(
-      onRefresh: _refreshData,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.search_off,
-                    size: 64,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _getText(context, 'emptySearchSuggestion'),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _clearSearch,
-                    child: Text(_getText(context, 'clearSearchButton')),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

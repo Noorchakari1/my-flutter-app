@@ -8,7 +8,10 @@ import '../../data/services/news_service.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'news_detail_screen.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/services/api_exception.dart';
+import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart'; // Import AppConstants
+import '../../../../shared/widgets/error_display.dart';
 
 class NewsScreen extends ConsumerStatefulWidget {
   const NewsScreen({Key? key}) : super(key: key);
@@ -28,6 +31,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   ];
   int _currentPage = 1;
   bool _hasMoreData = true;
+  dynamic _error;
   
   // Search related variables
   final TextEditingController _searchController = TextEditingController();
@@ -93,10 +97,24 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   }
 
   Future<void> _loadFirstPage() async {
+    // First check connectivity
+    final isConnected = await ref.read(connectivityServiceProvider).checkConnectivity();
+    if (!isConnected) {
+      setState(() {
+        _error = ApiException(
+          message: _getText(context, 'noConnection'),
+          code: 'no_connection',
+        );
+        _isLoadingMore = false;
+      });
+      return;
+    }
+    
     setState(() {
       _isLoadingMore = true;
       _currentPage = 1;
       _hasMoreData = true;
+      _error = null;
     });
     
     try {
@@ -119,12 +137,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     } catch (e) {
       if (mounted) {
         setState(() {
+          _error = e;
           _isLoadingMore = false;
         });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطا در بارگیری اخبار: ${e.toString()}')),
-        );
       }
     }
   }
@@ -132,8 +147,23 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   Future<void> _loadNextPage() async {
     if (_isLoadingMore || !_hasMoreData) return;
     
+    // Check connectivity before loading more
+    final isConnected = await ref.read(connectivityServiceProvider).checkConnectivity();
+    if (!isConnected) {
+      // Instead of showing a snackbar, just set error state
+      setState(() {
+        _error = ApiException(
+          message: _getText(context, 'offline'),
+          code: 'no_connection',
+        );
+        _isLoadingMore = false;
+      });
+      return;
+    }
+    
     setState(() {
       _isLoadingMore = true;
+      _error = null; // Clear any previous errors
     });
     
     try {
@@ -162,16 +192,16 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
         setState(() {
           _currentPage--; // Revert page increment on error
           _isLoadingMore = false;
+          _error = e; // Store the error for display
         });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطا در بارگیری اخبار بیشتر: ${e.toString()}')),
-        );
       }
     }
   }
 
   Future<void> _refreshData() async {
+    setState(() {
+      _error = null; // Clear any errors when refreshing
+    });
     _loadFirstPage();
     return Future.value();
   }
@@ -244,7 +274,41 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final newsState = ref.watch(newsNotifierProvider);
+    final isConnected = ref.watch(isConnectedProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    // If we have a specific error from our loading attempts, show that first
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(_getText(context, 'newsTitle')),
+          backgroundColor: AppConstants.primaryColor,
+          centerTitle: true,
+        ),
+        body: ErrorDisplay(
+          error: _error,
+          onRetry: _refreshData,
+        ),
+      );
+    }
+    
+    // Show no connection message if disconnected
+    if (!isConnected) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(_getText(context, 'newsTitle')),
+          backgroundColor: AppConstants.primaryColor,
+          centerTitle: true,
+        ),
+        body: ErrorDisplay(
+          error: ApiException(
+            message: _getText(context, 'noConnection'),
+            code: 'no_connection',
+          ),
+          onRetry: _refreshData,
+        ),
+      );
+    }
     
     return Scaffold(
       // Add floating action button for scroll to top
@@ -526,7 +590,10 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                         );
                       },
                       loading: () => _buildLoadingShimmer(),
-                      error: (error, stackTrace) => _buildErrorState(error),
+                      error: (error, stackTrace) => ErrorDisplay(
+                        error: error,
+                        onRetry: _refreshData,
+                      ),
                     );
                   }),
                 ),
@@ -547,94 +614,22 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   }
 
   Widget _buildEmptyState() {
-    return RefreshIndicator(
-      onRefresh: _refreshData,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.newspaper,
-                    size: 64,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'هیچ خبری وجود ندارد',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'به زودی خبرهای جدید اضافه خواهند شد',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          Icon(
+            Icons.newspaper,
+            size: 64,
+            color: AppConstants.primaryColor.withOpacity(0.7),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(Object error) {
-    return RefreshIndicator(
-      onRefresh: _refreshData,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red.shade300,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'خطا در بارگیری اخبار',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.red.shade700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    error.toString(),
-                    style: const TextStyle(fontSize: 14),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: _refreshData,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('تلاش مجدد'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          const SizedBox(height: 16),
+          Text(
+            _getText(context, 'noNews'),
+            style: const TextStyle(
+              fontSize: 16,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -746,7 +741,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      newsItem.title ?? 'بدون عنوان',
+                      newsItem.title ?? _getText(context, 'noTitle'),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -758,7 +753,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      newsItem.date ?? 'تاریخ نامشخص',
+                      newsItem.date ?? _getText(context, 'noDate'),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
@@ -781,52 +776,33 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
 
   // New method for empty search results with localized text
   Widget _buildEmptySearchResults() {
-    return RefreshIndicator(
-      onRefresh: _refreshData,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.search_off,
-                    size: 64,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery), // Localized text with query
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _getText(context, 'emptySearchSuggestion'), // Localized suggestion
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _clearSearch,
-                    child: Text(_getText(context, 'clearSearchButton')), // Localized button text
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    ),
-                  ),
-                ],
+          Icon(
+            Icons.search_off,
+            size: 64,
+            color: AppConstants.primaryColor.withOpacity(0.7),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16),
+          ),
+          if (_searchQuery.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 24.0),
+              child: ElevatedButton(
+                onPressed: _clearSearch,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppConstants.primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(_getText(context, 'clearSearchButton')),
               ),
             ),
-          ),
         ],
       ),
     );

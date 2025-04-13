@@ -2,9 +2,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/ministry_model.dart';
+import '../../../../core/services/api_client.dart';
+import '../../../../core/services/api_exception.dart';
 
 class MinistryService {
   static const String baseUrl = 'https://aop.gov.af/api/v1';
+  final ApiClient _apiClient;
+  
+  MinistryService({ApiClient? apiClient}) 
+      : _apiClient = apiClient ?? ApiClient(baseUrl: baseUrl);
 
   // Map app language to API language code
   String getLanguageHeader(String appLanguage) {
@@ -23,115 +29,91 @@ class MinistryService {
 
   Future<MinistryResponse> getMinistries({int page = 1, String? currentLanguage}) async {
     try {
-      // Create headers with Accept-Language based on current app language
-      final headers = {
-        'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
-      };
+      final queryParams = {'page': page.toString()};
       
-      final response = await http.get(
-        Uri.parse('$baseUrl/government/ministries?page=$page'),
-        headers: headers,
+      return await _apiClient.get<MinistryResponse>(
+        endpoint: 'government/ministries',
+        language: currentLanguage,
+        queryParams: queryParams,
+        converter: (data) => MinistryResponse.fromJson(data),
       );
-      
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return MinistryResponse.fromJson(data);
-      } else {
-        throw Exception('Failed to load ministries: ${response.statusCode}');
-      }
     } catch (e) {
-      throw Exception('Failed to load ministries: $e');
+      // Convert to ApiException
+      final apiException = ApiExceptionHandler.handleError(e);
+      throw apiException;
     }
   }
   
   // For getting details of a specific ministry
   Future<MinistryItem> getMinistryDetail(int id, {String? currentLanguage}) async {
     try {
-      // Create headers with Accept-Language based on current app language
-      final headers = {
-        'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
-      };
-      
       // First try to get the ministry from the first page
-      final response = await http.get(
-        Uri.parse('$baseUrl/government/ministries'),
-        headers: headers,
+      final response = await getMinistries(currentLanguage: currentLanguage);
+      
+      // Try to find the ministry in the first page
+      final ministry = response.items.firstWhere(
+        (ministry) => ministry.id == id,
+        orElse: () => MinistryItem(id: -1), // Return a dummy ministry with id -1 if not found
       );
       
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        final ministryResponse = MinistryResponse.fromJson(data);
-        
-        // Try to find the ministry in the first page
-        final ministry = ministryResponse.items.firstWhere(
-          (ministry) => ministry.id == id,
-          orElse: () => MinistryItem(id: -1), // Return a dummy ministry with id -1 if not found
-        );
-        
-        // If ministry was found on the first page, return it
-        if (ministry.id != -1) {
-          return ministry;
-        }
-        
-        // If ministry was not found on the first page, check if there are more pages
-        if (ministryResponse.pagination.currentPage < ministryResponse.pagination.totalPages) {
-          // Loop through remaining pages to find the ministry
-          for (int page = 2; page <= ministryResponse.pagination.totalPages; page++) {
-            final nextPageResponse = await http.get(
-              Uri.parse('$baseUrl/government/ministries?page=$page'),
-              headers: headers,
-            );
-            
-            if (nextPageResponse.statusCode == 200) {
-              final Map<String, dynamic> nextPageData = json.decode(nextPageResponse.body);
-              final nextPageMinistries = MinistryResponse.fromJson(nextPageData);
-              
-              // Try to find the ministry in this page
-              final ministryOnNextPage = nextPageMinistries.items.firstWhere(
-                (ministry) => ministry.id == id,
-                orElse: () => MinistryItem(id: -1),
-              );
-              
-              // If found on this page, return it
-              if (ministryOnNextPage.id != -1) {
-                return ministryOnNextPage;
-              }
-            }
+      // If ministry was found on the first page, return it
+      if (ministry.id != -1) {
+        return ministry;
+      }
+      
+      // If ministry was not found on the first page, check if there are more pages
+      if (response.pagination.currentPage < response.pagination.totalPages) {
+        // Loop through remaining pages to find the ministry
+        for (int page = 2; page <= response.pagination.totalPages; page++) {
+          final nextPageResponse = await getMinistries(
+            page: page,
+            currentLanguage: currentLanguage
+          );
+          
+          // Try to find the ministry in this page
+          final ministryOnNextPage = nextPageResponse.items.firstWhere(
+            (ministry) => ministry.id == id,
+            orElse: () => MinistryItem(id: -1),
+          );
+          
+          // If found on this page, return it
+          if (ministryOnNextPage.id != -1) {
+            return ministryOnNextPage;
           }
         }
-        
-        // If we've checked all pages and still haven't found the ministry
-        throw Exception('Ministry not found with ID: $id');
-      } else {
-        throw Exception('Failed to load ministry details: ${response.statusCode}');
       }
+      
+      // If we've checked all pages and still haven't found the ministry
+      throw ApiException(
+        message: 'Ministry not found with ID: $id',
+        code: 'not_found',
+        statusCode: 404,
+      );
     } catch (e) {
-      throw Exception('Failed to load ministry details: $e');
+      // Convert to ApiException
+      final apiException = ApiExceptionHandler.handleError(e);
+      throw apiException;
     }
   }
   
   // Search functionality
   Future<MinistryResponse> searchMinistries(String query, {int page = 1, String? currentLanguage}) async {
     try {
-      final encodedQuery = Uri.encodeComponent(query);
-      // Create headers with Accept-Language based on current app language
-      final headers = {
-        'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
+      final queryParams = {
+        'search': query,
+        'page': page.toString(),
       };
       
-      final response = await http.get(
-        Uri.parse('$baseUrl/government/ministries?search=$encodedQuery&page=$page'),
-        headers: headers,
+      return await _apiClient.get<MinistryResponse>(
+        endpoint: 'government/ministries',
+        language: currentLanguage,
+        queryParams: queryParams,
+        converter: (data) => MinistryResponse.fromJson(data),
       );
-      
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return MinistryResponse.fromJson(data);
-      } else {
-        throw Exception('Failed to search ministries: ${response.statusCode}');
-      }
     } catch (e) {
-      throw Exception('Failed to search ministries: $e');
+      // Convert to ApiException
+      final apiException = ApiExceptionHandler.handleError(e);
+      throw apiException;
     }
   }
   

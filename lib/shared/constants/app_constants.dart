@@ -159,6 +159,15 @@ class AppConstants {
     // Error messages
     'cannotOpenWebsite': 'متاسفانه نمی‌توان وب‌سایت را باز کرد: {url}',
     'cannotMakeCall': 'متاسفانه نمی‌توان تماس برقرار کرد: {phone}',
+    // API Error Messages
+    'cannotLoadData': 'خطا در بارگیری اطلاعات',
+    'noConnection': 'اتصال به اینترنت برقرار نیست',
+    'timeout': 'زمان درخواست به پایان رسید',
+    'serverError': 'خطا در سرور رخ داده است',
+    'retry': 'تلاش مجدد',
+    'backToHome': 'بازگشت به صفحه اصلی',
+    'offline': 'شما آفلاین هستید',
+    'checkConnection': 'لطفا اتصال اینترنت خود را بررسی کنید',
   };
 
   // Pashto Text
@@ -229,6 +238,15 @@ class AppConstants {
     // Error messages
     'cannotOpenWebsite': 'په خواشینۍ سره ویب پاڼه نشو خلاصولی: {url}',
     'cannotMakeCall': 'په خواشینۍ سره تلیفون نشو کولی: {phone}',
+    // API Error Messages
+    'cannotLoadData': 'د معلوماتو په بارولو کې ستونزه',
+    'noConnection': 'انټرنیټ سره اړیکه نشته',
+    'timeout': 'د غوښتنې وخت پای ته ورسېد',
+    'serverError': 'په سرور کې ستونزه شتون لري',
+    'retry': 'بیا هڅه وکړئ',
+    'backToHome': 'اصلي پاڼې ته ستنېدل',
+    'offline': 'تاسو آفلاین یاست',
+    'checkConnection': 'مهرباني وکړئ خپله انټرنیټ اړیکه وګورئ',
   };
 
   // English Text
@@ -297,7 +315,16 @@ class AppConstants {
     'province': 'Province',
     'aboutProvince': 'About the Province',
     // Error messages
-    'cannotOpenWebsite': 'Sorry, could not open website: {url}',
-    'cannotMakeCall': 'Sorry, could not make call to: {phone}',
+    'cannotOpenWebsite': 'Unfortunately, cannot open the website: {url}',
+    'cannotMakeCall': 'Unfortunately, cannot make the call: {phone}',
+    // API Error Messages
+    'cannotLoadData': 'Failed to load data',
+    'noConnection': 'No internet connection',
+    'timeout': 'Request timed out',
+    'serverError': 'Server error occurred',
+    'retry': 'Try Again',
+    'backToHome': 'Back to Home',
+    'offline': 'You are offline',
+    'checkConnection': 'Please check your internet connection',
   };
 }
