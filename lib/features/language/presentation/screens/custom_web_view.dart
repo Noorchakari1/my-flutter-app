@@ -156,18 +156,48 @@ class _CustomWebViewState extends ConsumerState<CustomWebView> with SingleTicker
           title: Text(widget.title),
           backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : AppConstants.primaryColor,
           elevation: 0,
+          bottom: _downloadProgress < 1.0 && !_isDownloading
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(2.0),
+                child: LinearProgressIndicator(
+                  value: _downloadProgress,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isDarkMode ? Colors.white : AppConstants.primaryColor,
+                  ),
+                ),
+              )
+            : null,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                _controller.reload();
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.home),
+              onPressed: () {
+                _controller.loadRequest(Uri.parse(widget.url));
+              },
+            ),
+          ],
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              if (await _controller.canGoBack()) {
+                _controller.goBack();
+              } else {
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              }
+            },
+          ),
         ),
         body: Stack(
           children: [
             WebViewWidget(controller: _controller),
-            if (_downloadProgress < 1.0 && !_isDownloading)
-              LinearProgressIndicator(
-                value: _downloadProgress,
-                backgroundColor: Colors.grey[200],
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isDarkMode ? Colors.white : AppConstants.primaryColor,
-                ),
-              ),
             if (_isDownloading)
               Container(
                 color: Colors.black54,

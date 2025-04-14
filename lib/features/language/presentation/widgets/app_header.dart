@@ -44,7 +44,7 @@ class AppHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: 5),
           if (logoPath != null)
             Hero(
               tag: 'logo',
@@ -54,7 +54,7 @@ class AppHeader extends StatelessWidget {
                 color: logoColor ?? Colors.white,
               ),
             ),
-          const SizedBox(height: AppConstants.defaultPadding * 1.5),
+          const SizedBox(height: AppConstants.defaultPadding * 0.5),
           Text(
             title,
             textAlign: TextAlign.center,

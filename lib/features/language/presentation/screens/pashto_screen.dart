@@ -148,18 +148,6 @@ class _PashtoScreenState extends State<PashtoScreen> {
               title: AppConstants.pashtoText['welcome']!,
             )
           : null,
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _page,
-        onTap: (index) {
-          setState(() {
-            _page = index;
-          });
-        },
-        webUrl: AppConstants.aopUrls['pashto']!,
-        textDirection: TextDirection.rtl,
-        feedbackTitle: AppConstants.pashtoText['contactUs']!,
-        feedbackText: AppConstants.pashtoText['feedbackGuide']!,
-      ),
       body: IndexedStack(
         index: _page,
         children: [

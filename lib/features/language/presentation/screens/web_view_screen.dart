@@ -189,20 +189,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
         opacity: _animation,
         child: Scaffold(
           backgroundColor: AppConstants.backgroundColor,
-          bottomNavigationBar: widget.showBottomNav
-              ? CustomBottomNavBar(
-                  currentIndex: _page,
-                  onTap: (index) {
-                    if (index != _page) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  webUrl: widget.url,
-                  textDirection: textDirection,
-                  feedbackTitle: languageText['contactUs']!,
-                  feedbackText: languageText['feedbackGuide']!,
-                )
-              : null,
+          bottomNavigationBar: null,
           body: SafeArea(
             child: Stack(
               children: [

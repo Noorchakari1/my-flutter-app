@@ -150,22 +150,6 @@ class _PersianScreenState extends State<PersianScreen> {
               title: AppConstants.persianText['welcome']!,
             )
           : null,
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _page,
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.of(context).pushNamed(Routes.news);
-          } else {
-            setState(() {
-              _page = index;
-            });
-          }
-        },
-        webUrl: AppConstants.aopUrls['persian']!,
-        textDirection: TextDirection.rtl,
-        feedbackTitle: AppConstants.persianText['contactUs']!,
-        feedbackText: AppConstants.persianText['feedbackGuide']!,
-      ),
       body: IndexedStack(
         index: _page,
         children: [

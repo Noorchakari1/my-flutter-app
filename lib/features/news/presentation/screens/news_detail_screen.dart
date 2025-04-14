@@ -5,8 +5,10 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../data/models/news_model.dart';
 import '../../data/providers/news_provider.dart';
+import '../../data/providers/saved_news_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../shared/constants/app_constants.dart';
 
 class NewsDetailScreen extends ConsumerWidget {
   final int newsId;
@@ -16,22 +18,46 @@ class NewsDetailScreen extends ConsumerWidget {
     required this.newsId,
   }) : super(key: key);
 
+  // Helper function to get localized text
+  String _getText(BuildContext context, WidgetRef ref, String key) {
+    final language = ref.watch(themeNotifierProvider).currentLanguage;
+    Map<String, String> textMap;
+    switch (language) {
+      case 'pashto':
+        textMap = AppConstants.pashtoText;
+        break;
+      case 'persian':
+        textMap = AppConstants.persianText;
+        break;
+      default:
+        textMap = AppConstants.englishText;
+    }
+    return textMap[key] ?? key; // Return key if translation not found
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final newsDetailAsync = ref.watch(newsDetailProvider(newsId));
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    // Determine text direction based on current language
+    final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
+    final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
 
-    return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.white,
-      body: newsDetailAsync.when(
-        data: (newsDetail) => _buildNewsDetailView(context, newsDetail),
-        loading: () => _buildLoadingView(),
-        error: (error, stackTrace) => _buildErrorView(context, error, ref),
+    return Directionality(
+      textDirection: textDirection,
+      child: Scaffold(
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        body: newsDetailAsync.when(
+          data: (newsDetail) => _buildNewsDetailView(context, ref, newsDetail),
+          loading: () => _buildLoadingView(),
+          error: (error, stackTrace) => _buildErrorView(context, error, ref),
+        ),
       ),
     );
   }
 
-  Widget _buildNewsDetailView(BuildContext context, NewsDetail newsDetail) {
+  Widget _buildNewsDetailView(BuildContext context, WidgetRef ref, NewsDetail newsDetail) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     return CustomScrollView(
@@ -61,14 +87,13 @@ class NewsDetailScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      newsDetail.title ?? 'بدون عنوان',
+                      newsDetail.title ?? _getText(context, ref, 'noTitle'),
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         height: 1.4,
                         color: isDarkMode ? Colors.white : Colors.black87,
                       ),
-                      textDirection: TextDirection.rtl,
                     ),
                     const SizedBox(height: 16),
                     _buildMetadataRow(context, newsDetail),
@@ -98,7 +123,8 @@ class NewsDetailScreen extends ConsumerWidget {
                       "body": Style(
                         fontSize: FontSize(16),
                         lineHeight: LineHeight(1.8),
-                        direction: TextDirection.rtl,
+                        direction: ref.watch(themeNotifierProvider).currentLanguage != 'english' ? 
+                          TextDirection.rtl : TextDirection.ltr,
                         textAlign: TextAlign.justify,
                         color: isDarkMode ? Colors.grey.shade300 : Colors.black87,
                       ),
@@ -122,57 +148,8 @@ class NewsDetailScreen extends ConsumerWidget {
               ),
               
               if (newsDetail.gallery != null && newsDetail.gallery!.isNotEmpty) ...[
-                _buildGallery(context, newsDetail),
+                _buildGallery(context, ref, newsDetail),
               ],
-              
-              // Related content section
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: isDarkMode 
-                      ? Theme.of(context).primaryColor.withOpacity(0.15) 
-                      : Theme.of(context).primaryColor.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: Theme.of(context).primaryColor,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'اطلاعات تکمیلی',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'این خبر تاکنون ${newsDetail.views ?? 0} بار مشاهده شده است.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        height: 1.6,
-                        color: isDarkMode ? Colors.grey.shade300 : Colors.black87,
-                      ),
-                      textDirection: TextDirection.rtl,
-                    ),
-                  ],
-                ),
-              ),
               
               // Action buttons
               Padding(
@@ -182,29 +159,38 @@ class NewsDetailScreen extends ConsumerWidget {
                   children: [
                     _buildActionButton(
                       context,
+                      ref,
                       icon: Icons.share,
-                      label: 'اشتراک گذاری',
+                      label: _getText(context, ref, 'share'),
                       onTap: () {
-                        Share.share('${newsDetail.title ?? 'خبر'}\n\nمشاهده خبر کامل در اپلیکیشن ما');
+                        Share.share('${newsDetail.title ?? _getText(context, ref, 'newsItem')}\n\n${_getText(context, ref, 'viewFullNews')}');
                       },
                     ),
                     _buildActionButton(
                       context,
+                      ref,
                       icon: Icons.bookmark_border,
-                      label: 'ذخیره',
+                      label: _getText(context, ref, 'save'),
                       onTap: () {
+                        ref.read(savedNewsProvider.notifier).toggleSaveNews(newsDetail);
+                        final isSaved = ref.read(savedNewsProvider.notifier).isNewsSaved(newsDetail.id);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('خبر ذخیره شد')),
+                          SnackBar(
+                            content: Text(isSaved 
+                              ? _getText(context, ref, 'newsSaved')
+                              : _getText(context, ref, 'newsUnsaved')),
+                          ),
                         );
                       },
                     ),
                     _buildActionButton(
                       context,
+                      ref,
                       icon: Icons.text_increase,
-                      label: 'تغییر سایز متن',
+                      label: _getText(context, ref, 'changeTextSize'),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('این قابلیت به زودی اضافه خواهد شد')),
+                          SnackBar(content: Text(_getText(context, ref, 'comingSoon'))),
                         );
                       },
                     ),
@@ -282,7 +268,7 @@ class NewsDetailScreen extends ConsumerWidget {
             child: const Icon(Icons.share, size: 20),
           ),
           onPressed: () {
-            Share.share('${newsDetail.title ?? 'خبر'}\n\nمشاهده خبر کامل در اپلیکیشن ما');
+            Share.share('${newsDetail.title ?? 'News'}\n\nView full news in our app');
           },
         ),
       ],
@@ -366,7 +352,7 @@ class NewsDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildGallery(BuildContext context, NewsDetail newsDetail) {
+  Widget _buildGallery(BuildContext context, WidgetRef ref, NewsDetail newsDetail) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final galleryImages = newsDetail.gallery ?? [];
     
@@ -396,7 +382,7 @@ class NewsDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'گالری تصاویر',
+                _getText(context, ref, 'imageGallery'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -405,7 +391,7 @@ class NewsDetailScreen extends ConsumerWidget {
               ),
               const Spacer(),
               Text(
-                '${galleryImages.length} تصویر',
+                _getText(context, ref, 'imageCount').replaceAll('{count}', '${galleryImages.length}'),
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
@@ -419,7 +405,7 @@ class NewsDetailScreen extends ConsumerWidget {
             child: galleryImages.isEmpty 
                 ? Center(
                     child: Text(
-                      'تصویری یافت نشد',
+                      _getText(context, ref, 'noImages'),
                       style: TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
@@ -449,7 +435,7 @@ class NewsDetailScreen extends ConsumerWidget {
                             onTap: () {
                               // Show full screen gallery
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('نمایش تصویر در حالت تمام صفحه به زودی اضافه خواهد شد')),
+                                SnackBar(content: Text(_getText(context, ref, 'fullscreenComingSoon'))),
                               );
                             },
                             child: CachedNetworkImage(
@@ -479,7 +465,8 @@ class NewsDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildActionButton(
-    BuildContext context, {
+    BuildContext context,
+    WidgetRef ref, {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -621,7 +608,7 @@ class NewsDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'خطا در بارگیری جزئیات خبر',
+              _getText(context, ref, 'errorLoadingNews'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -641,7 +628,7 @@ class NewsDetailScreen extends ConsumerWidget {
             ElevatedButton.icon(
               onPressed: () => ref.refresh(newsDetailProvider(newsId)),
               icon: const Icon(Icons.refresh),
-              label: const Text('تلاش مجدد'),
+              label: Text(_getText(context, ref, 'tryAgain')),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -653,7 +640,7 @@ class NewsDetailScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('بازگشت'),
+              child: Text(_getText(context, ref, 'goBack')),
             ),
           ],
         ),

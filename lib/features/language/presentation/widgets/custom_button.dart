@@ -36,35 +36,19 @@ class CustomButton extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isDarkMode ? const Color(0xFF2A2A2A) : Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: isDarkMode 
-                            ? Colors.black.withOpacity(0.3)
-                            : AppConstants.shadowColor.withOpacity(0.1),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 2),
+                  child: flagAsset != null
+                    ? Image.asset(
+                        flagAsset!,
+                        fit: BoxFit.contain,
+                      )
+                    : FittedBox(
+                        fit: BoxFit.contain,
+                        child: Icon(
+                          iconData ?? Icons.error,
+                          color: isDarkMode ? Colors.white : theme.primaryColor,
+                          size: 20,
                         ),
-                      ],
-                    ),
-                    child: flagAsset != null
-                      ? Image.asset(
-                          flagAsset!,
-                          fit: BoxFit.contain,
-                        )
-                      : FittedBox(
-                          fit: BoxFit.contain,
-                          child: Icon(
-                            iconData ?? Icons.error,
-                            color: isDarkMode ? Colors.white : theme.primaryColor,
-                          ),
-                        ),
-                  ),
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Expanded(

@@ -40,12 +40,21 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
         title,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 22,
+          fontSize: 18,
           color: Colors.white,
         ),
       ),
       centerTitle: true,
       actions: [
+        IconButton(
+          icon: const Icon(
+            Icons.favorite_border,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pushNamed(context, '/saved_news');
+          },
+        ),
         if (showLanguageButton)
           PopupMenuButton<String>(
             icon: const Icon(
@@ -135,5 +144,5 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight * 0.8);
 } 

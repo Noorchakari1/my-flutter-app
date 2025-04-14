@@ -51,20 +51,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(title: widget.appbarTitle, showBackButton: false),
-      bottomNavigationBar: widget.showBottomNav
-          ? CustomBottomNavBar(
-              currentIndex: _page,
-              onTap: (index) {
-                if (index != 2) {
-                  Navigator.pop(context);
-                }
-              },
-              webUrl: AppConstants.aopUrls[widget.language]!,
-              textDirection: widget.txtDir,
-              feedbackTitle: widget.appbarTitle,
-              feedbackText: widget.guidedText,
-            )
-          : null,
+      bottomNavigationBar: null,
       body: Column(
         children: [
           AppHeader(

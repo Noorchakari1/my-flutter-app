@@ -149,18 +149,6 @@ class _EnglishScreenState extends State<EnglishScreen> {
               title: AppConstants.englishText['welcome']!,
             )
           : null,
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _page,
-        onTap: (index) {
-          setState(() {
-            _page = index;
-          });
-        },
-        webUrl: AppConstants.aopUrls['english']!,
-        textDirection: TextDirection.ltr,
-        feedbackTitle: 'Contact Us',
-        feedbackText: 'How would you like to contact us?',
-      ),
       body: IndexedStack(
         index: _page,
         children: [

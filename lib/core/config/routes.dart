@@ -1,4 +1,5 @@
 import 'package:aop_sites/features/news/presentation/screens/news_screen.dart';
+import 'package:aop_sites/features/news/presentation/screens/saved_news_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/independent_directorates/presentation/screens/independent_directorates_screen.dart';
@@ -27,6 +28,7 @@ class Routes {
   static const String webView = '/web-view';
   static const String service = '/service';
   static const String news = '/news';
+  static const String savedNews = '/saved_news';
   static const String ministries = '/ministries';
   static const String independentDirectorates = '/independent-directorates';
   static const String provinces = '/provinces';
@@ -53,6 +55,10 @@ class Routes {
       case news:
         return MaterialPageRoute(
           builder: (_) => const NewsScreen(),
+        );
+      case savedNews:
+        return MaterialPageRoute(
+          builder: (_) => const SavedNewsScreen(),
         );
       case ministries:
         return MaterialPageRoute(

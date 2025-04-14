@@ -48,18 +48,6 @@ class _ServiceButtonScreenState extends ConsumerState<ServiceButtonScreen> {
         title: languageText['selectService'] ?? languageText['publicServices'] ?? widget.passportTitle,
         showBackButton: true,
       ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _page,
-        onTap: (index) {
-          setState(() {
-            _page = index;
-          });
-        },
-        webUrl: AppConstants.aopUrls[widget.language]!,
-        textDirection: textDirection,
-        feedbackTitle: languageText['contactUs']!,
-        feedbackText: languageText['feedbackGuide']!,
-      ),
       body: Column(
         children: [
           AppHeader(

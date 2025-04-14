@@ -277,125 +277,134 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     final isConnected = ref.watch(isConnectedProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
+    // Determine text direction based on current language
+    final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
+    final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
+    
     // If we have a specific error from our loading attempts, show that first
     if (_error != null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(_getText(context, 'newsTitle')),
-          backgroundColor: AppConstants.primaryColor,
-          centerTitle: true,
-        ),
-        body: ErrorDisplay(
-          error: _error,
-          onRetry: _refreshData,
+      return Directionality(
+        textDirection: textDirection,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(_getText(context, 'newsTitle')),
+            backgroundColor: AppConstants.primaryColor,
+            centerTitle: true,
+          ),
+          body: ErrorDisplay(
+            error: _error,
+            onRetry: _refreshData,
+          ),
         ),
       );
     }
     
     // Show no connection message if disconnected
     if (!isConnected) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(_getText(context, 'newsTitle')),
-          backgroundColor: AppConstants.primaryColor,
-          centerTitle: true,
-        ),
-        body: ErrorDisplay(
-          error: ApiException(
-            message: _getText(context, 'noConnection'),
-            code: 'no_connection',
+      return Directionality(
+        textDirection: textDirection,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(_getText(context, 'newsTitle')),
+            backgroundColor: AppConstants.primaryColor,
+            centerTitle: true,
           ),
-          onRetry: _refreshData,
+          body: ErrorDisplay(
+            error: ApiException(
+              message: _getText(context, 'noConnection'),
+              code: 'no_connection',
+            ),
+            onRetry: _refreshData,
+          ),
         ),
       );
     }
     
-    return Scaffold(
-      // Add floating action button for scroll to top
-      floatingActionButton: _showScrollToTop 
-          ? FloatingActionButton(
-              onPressed: _scrollToTop,
-              mini: true,
-              backgroundColor: Theme.of(context).primaryColor,
-              child: const Icon(
-                Icons.arrow_upward,
-                color: Colors.white,
-              ),
-            )
-          : null,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              title: _isSearchVisible 
-                ? TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: _getText(context, 'searchNewsHint'), // Localized hint
-                      border: InputBorder.none,
-                      hintStyle: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+    return Directionality(
+      textDirection: textDirection,
+      child: Scaffold(
+        // Add floating action button for scroll to top
+        floatingActionButton: _showScrollToTop 
+            ? FloatingActionButton(
+                onPressed: _scrollToTop,
+                mini: true,
+                backgroundColor: Theme.of(context).primaryColor,
+                child: const Icon(
+                  Icons.arrow_upward,
+                  color: Colors.white,
+                ),
+              )
+            : null,
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                title: _isSearchVisible 
+                  ? TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: _getText(context, 'searchNewsHint'), // Localized hint
+                        border: InputBorder.none,
+                        hintStyle: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                        ),
                       ),
-                    ),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.right,
-                    onChanged: _performSearch,
-                    autofocus: true,
-                    cursorColor: Colors.white,
-                  )
-                : Text(
-                    _getText(context, 'newsTitle'), // Localized title
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                      color: Colors.white,
-                    ),
-                  ),
-              centerTitle: true,
-              floating: true,
-              pinned: true,
-              elevation: 0,
-              backgroundColor: AppConstants.primaryColor,
-              shadowColor: Colors.transparent,
-              leading: _isSearchVisible
-                ? IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: _toggleSearch,
-                  )
-                : Container(
-                    margin: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        size: 20,
+                      style: const TextStyle(
+                        fontSize: 16,
                         color: Colors.white,
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(50),
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: AppConstants.primaryColor,
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.white.withOpacity(0.1),
-                        width: 1.0,
+                      // No need to force textDirection here, as we're using Directionality parent
+                      onChanged: _performSearch,
+                      autofocus: true,
+                      cursorColor: Colors.white,
+                    )
+                  : Text(
+                      _getText(context, 'newsTitle'), // Localized title
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                        color: Colors.white,
                       ),
                     ),
-                  ),
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
+                centerTitle: true,
+                floating: true,
+                pinned: true,
+                elevation: 0,
+                backgroundColor: AppConstants.primaryColor,
+                shadowColor: Colors.transparent,
+                leading: _isSearchVisible
+                  ? IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: _toggleSearch,
+                    )
+                  : Container(
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(50),
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: AppConstants.primaryColor,
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.white.withOpacity(0.1),
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
                     child: TabBar(
                       controller: _tabController,
                       isScrollable: true,
@@ -415,190 +424,176 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                     ),
                   ),
                 ),
-              ),
-              actions: [
-                if (_isSearchVisible && _searchController.text.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.clear, size: 20, color: Colors.white),
-                      tooltip: _getText(context, 'clearSearch'), // Localized tooltip
-                      onPressed: _clearSearch,
-                    ),
-                  ),
-                // REMOVED SEARCH TOGGLE BUTTON
-                // Container(
-                //   margin: const EdgeInsets.all(8),
-                //   decoration: BoxDecoration(
-                //     color: Colors.white.withOpacity(0.2),
-                //     shape: BoxShape.circle,
-                //   ),
-                //   child: IconButton(
-                //     icon: Icon(_isSearchVisible ? Icons.search_off : Icons.search, color: Colors.white),
-                //     tooltip: _getText(context, 'searchNewsHint'), // Localized tooltip
-                //     onPressed: _toggleSearch,
-                //     iconSize: 20,
-                //   ),
-                // ),
-              ],
-            ),
-          ];
-        },
-        body: Container(
-          decoration: BoxDecoration(
-            color: isDarkMode 
-                ? Theme.of(context).scaffoldBackgroundColor 
-                : Colors.grey.shade100,
-          ),
-          child: Column(
-            children: [
-              // Prominent search button (only visible when search is not active)
-              if (!_isSearchVisible)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: _toggleSearch,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                actions: [
+                  if (_isSearchVisible && _searchController.text.isNotEmpty)
+                    Container(
+                      margin: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                          width: 1,
-                        ),
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.search,
-                            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
-                            size: 18,
+                      child: IconButton(
+                        icon: const Icon(Icons.clear, size: 20, color: Colors.white),
+                        tooltip: _getText(context, 'clearSearch'), // Localized tooltip
+                        onPressed: _clearSearch,
+                      ),
+                    ),
+                ],
+              ),
+            ];
+          },
+          body: Container(
+            decoration: BoxDecoration(
+              color: isDarkMode 
+                  ? Theme.of(context).scaffoldBackgroundColor 
+                  : Colors.grey.shade100,
+            ),
+            child: Column(
+              children: [
+                // Prominent search button (only visible when search is not active)
+                if (!_isSearchVisible)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: InkWell(
+                      onTap: _toggleSearch,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                            width: 1,
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            _getText(context, 'searchNewsHint'), // Localized hint
-                            style: TextStyle(
-                              fontSize: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.search,
                               color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                              size: 18,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 12),
+                            Text(
+                              _getText(context, 'searchNewsHint'), // Localized hint
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              // Search results indicator
-              if (_isSearchVisible && _searchQuery.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-                  child: Row(
-                    children: [
-                      Text(
-                        '${_getText(context, 'searchLabel')} "$_searchQuery"', // Localized label
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: isDarkMode ? Colors.white : Colors.black87,
+                // Search results indicator
+                if (_isSearchVisible && _searchQuery.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                    child: Row(
+                      children: [
+                        Text(
+                          '${_getText(context, 'searchLabel')} "$_searchQuery"', // Localized label
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: isDarkMode ? Colors.white : Colors.black87,
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: _clearSearch,
-                        child: Text(_getText(context, 'clearSearchButton')), // Localized button text
-                        style: TextButton.styleFrom(
-                          foregroundColor: Theme.of(context).primaryColor,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          visualDensity: VisualDensity.compact,
+                        const Spacer(),
+                        TextButton(
+                          onPressed: _clearSearch,
+                          child: Text(_getText(context, 'clearSearchButton')), // Localized button text
+                          style: TextButton.styleFrom(
+                            foregroundColor: Theme.of(context).primaryColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            visualDensity: VisualDensity.compact,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              // News TabBarView
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: List.generate(_categoryKeys.length, (tabIndex) {
-                    return newsState.when(
-                      data: (news) {
-                        // Apply search filter if search query exists
-                        final displayedNews = _searchQuery.isNotEmpty 
-                            ? _filterNews(news, _searchQuery)
-                            : news;
+                // News TabBarView
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: List.generate(_categoryKeys.length, (tabIndex) {
+                      return newsState.when(
+                        data: (news) {
+                          // Apply search filter if search query exists
+                          final displayedNews = _searchQuery.isNotEmpty 
+                              ? _filterNews(news, _searchQuery)
+                              : news;
+                              
+                          if (displayedNews.isEmpty) {
+                            return _searchQuery.isNotEmpty
+                                ? _buildEmptySearchResults()
+                                : _buildEmptyState();
+                          }
+                          
+                          // Sort all news by date (newest first)
+                          final sortedNews = _sortNewsByDate(displayedNews);
+                          
+                          // For "Latest News" tab, show only latest 10 news (unless searching)
+                          // Use the key for comparison
+                          if (_categoryKeys[tabIndex] == 'newsTabsLatest' && _searchQuery.isEmpty) {
+                            final latestNews = sortedNews.take(10).toList();
                             
-                        if (displayedNews.isEmpty) {
-                          return _searchQuery.isNotEmpty
-                              ? _buildEmptySearchResults()
-                              : _buildEmptyState();
-                        }
-                        
-                        // Sort all news by date (newest first)
-                        final sortedNews = _sortNewsByDate(displayedNews);
-                        
-                        // For "Latest News" tab, show only latest 10 news (unless searching)
-                        // Use the key for comparison
-                        if (_categoryKeys[tabIndex] == 'newsTabsLatest' && _searchQuery.isEmpty) {
-                          final latestNews = sortedNews.take(10).toList();
+                            return RefreshIndicator(
+                              onRefresh: _refreshData,
+                              child: ListView.builder(
+                                padding: const EdgeInsets.all(12),
+                                itemCount: latestNews.length,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  final newsItem = latestNews[index];
+                                  return _buildNewsCard(newsItem, index);
+                                },
+                              ),
+                            ); 
+                          }
                           
                           return RefreshIndicator(
                             onRefresh: _refreshData,
                             child: ListView.builder(
                               padding: const EdgeInsets.all(12),
-                              itemCount: latestNews.length,
+                              controller: _scrollController,
                               physics: const AlwaysScrollableScrollPhysics(),
+                              itemCount: sortedNews.length + (_hasMoreData && _searchQuery.isEmpty ? 1 : 0),
                               itemBuilder: (context, index) {
-                                final newsItem = latestNews[index];
+                                // Show loading indicator at the end (only when not searching)
+                                if (index == sortedNews.length && _searchQuery.isEmpty) {
+                                  return _buildLoadingMoreIndicator();
+                                }
+                                
+                                final newsItem = sortedNews[index];
                                 return _buildNewsCard(newsItem, index);
                               },
                             ),
-                          ); 
-                        }
-                        
-                        return RefreshIndicator(
-                          onRefresh: _refreshData,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.all(12),
-                            controller: _scrollController,
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: sortedNews.length + (_hasMoreData && _searchQuery.isEmpty ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              // Show loading indicator at the end (only when not searching)
-                              if (index == sortedNews.length && _searchQuery.isEmpty) {
-                                return _buildLoadingMoreIndicator();
-                              }
-                              
-                              final newsItem = sortedNews[index];
-                              return _buildNewsCard(newsItem, index);
-                            },
-                          ),
-                        );
-                      },
-                      loading: () => _buildLoadingShimmer(),
-                      error: (error, stackTrace) => ErrorDisplay(
-                        error: error,
-                        onRetry: _refreshData,
-                      ),
-                    );
-                  }),
+                          );
+                        },
+                        loading: () => _buildLoadingShimmer(),
+                        error: (error, stackTrace) => ErrorDisplay(
+                          error: error,
+                          onRetry: _refreshData,
+                        ),
+                      );
+                    }),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -696,9 +691,13 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(12),
-                bottomRight: Radius.circular(12),
+              borderRadius: BorderRadius.horizontal(
+                right: ref.watch(themeNotifierProvider).currentLanguage != 'english' 
+                    ? const Radius.circular(12) 
+                    : Radius.zero,
+                left: ref.watch(themeNotifierProvider).currentLanguage == 'english' 
+                    ? const Radius.circular(12) 
+                    : Radius.zero,
               ),
               child: newsItem.image != null && newsItem.image!.isNotEmpty 
                 ? CachedNetworkImage(
@@ -747,7 +746,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                         fontWeight: FontWeight.bold,
                         height: 1.3,
                       ),
-                      textDirection: TextDirection.rtl,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
