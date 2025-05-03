@@ -183,17 +183,17 @@ class NewsDetailScreen extends ConsumerWidget {
                         );
                       },
                     ),
-                    _buildActionButton(
-                      context,
-                      ref,
-                      icon: Icons.text_increase,
-                      label: _getText(context, ref, 'changeTextSize'),
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(_getText(context, ref, 'comingSoon'))),
-                        );
-                      },
-                    ),
+                    // _buildActionButton(
+                    //   context,
+                    //   ref,
+                    //   icon: Icons.text_increase,
+                    //   label: _getText(context, ref, 'changeTextSize'),
+                    //   onTap: () {
+                    //     ScaffoldMessenger.of(context).showSnackBar(
+                    //       SnackBar(content: Text(_getText(context, ref, 'comingSoon'))),
+                    //     );
+                    //   },
+                    // ),
                   ],
                 ),
               ),
