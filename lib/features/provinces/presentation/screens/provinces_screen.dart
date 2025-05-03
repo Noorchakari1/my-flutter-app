@@ -16,7 +16,7 @@ import '../../data/providers/province_provider.dart';
 import 'province_detail_screen.dart';
 
 class ProvincesScreen extends ConsumerStatefulWidget {
-  const ProvincesScreen({Key? key}) : super(key: key);
+  const ProvincesScreen({super.key});
 
   @override
   ConsumerState<ProvincesScreen> createState() => _ProvincesScreenState();

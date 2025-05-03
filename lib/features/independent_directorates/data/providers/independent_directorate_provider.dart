@@ -31,7 +31,7 @@ class IndependentDirectorateNotifier extends StateNotifier<AsyncValue<List<Indep
     if (!_hasMore || state is AsyncLoading) return;
     
     final currentItems = state.value ?? [];
-    state = AsyncLoading<List<IndependentDirectorateItem>>();
+    state = const AsyncLoading<List<IndependentDirectorateItem>>();
     
     try {
       _currentPage++;

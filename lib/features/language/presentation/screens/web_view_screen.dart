@@ -6,7 +6,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 import '../../../../shared/constants/app_constants.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
+import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
 import '../widgets/download_dialog.dart';
 import '../widgets/download_progress_indicator.dart';
 import '../widgets/page_loading_indicator.dart';
@@ -35,15 +35,12 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
   late Animation<double> _animation;
   bool _isLoading = true;
   bool _isDownloading = false;
-  bool _canGoBack = false;
   double _downloadProgress = 0;
   String? _currentFileName;
-  int _page = 1;
 
   @override
   void initState() {
     super.initState();
-    _page = widget.initialPage;
     _setupAnimation();
     _setupWebViewController();
   }
@@ -70,14 +67,12 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
               _isLoading = true;
               _downloadProgress = 0;
             });
-            _updateCanGoBack();
           },
           onPageFinished: (String url) {
             setState(() {
               _isLoading = false;
               _downloadProgress = 1.0;
             });
-            _updateCanGoBack();
           },
           onProgress: (progress) {
             setState(() {
@@ -86,8 +81,8 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
           },
           onNavigationRequest: (request) async {
             final url = request.url.toLowerCase();
-            if (url.endsWith('.pdf') || 
-                url.endsWith('.doc') || 
+            if (url.endsWith('.pdf') ||
+                url.endsWith('.doc') ||
                 url.endsWith('.docx') ||
                 url.endsWith('.xls') ||
                 url.endsWith('.xlsx') ||
@@ -116,21 +111,6 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
         return [];
       });
     }
-  }
-
-  Future<void> _updateCanGoBack() async {
-    final canGoBack = await _webViewController.canGoBack();
-    setState(() {
-      _canGoBack = canGoBack;
-    });
-  }
-
-  Future<bool> _handleBackPress() async {
-    if (_canGoBack) {
-      _webViewController.goBack();
-      return false;
-    }
-    return true;
   }
 
   Future<void> _handleFileDownload(String url) async {
@@ -174,42 +154,96 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    final languageText = widget.language == 'persian'
-        ? AppConstants.persianText
-        : widget.language == 'pashto'
-            ? AppConstants.pashtoText
-            : AppConstants.englishText;
-
-    final textDirection =
-        widget.language == 'english' ? TextDirection.ltr : TextDirection.rtl;
-
-    return WillPopScope(
-      onWillPop: _handleBackPress,
-      child: FadeTransition(
+    return Scaffold(
+      backgroundColor: AppConstants.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: AppConstants.primaryColor,
+        leading: BackButton(
+          color: Colors.white,
+          onPressed: () async {
+            if (await _webViewController.canGoBack()) {
+              _webViewController.goBack();
+            } else {
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
+            }
+          },
+        ),
+        title: Text(
+          widget.language == 'english'
+              ? 'Website'
+              : widget.language == 'persian'
+                  ? 'وبسایت'
+                  : 'ویبسایټ',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: FadeTransition(
         opacity: _animation,
-        child: Scaffold(
-          backgroundColor: AppConstants.backgroundColor,
-          bottomNavigationBar: null,
-          body: SafeArea(
-            child: Stack(
-              children: [
-                WebViewWidget(
-                  controller: _webViewController,
-                ),
-                PageLoadingIndicator(
-                  isLoading: _isLoading,
-                  progress: _downloadProgress,
-                ),
-                DownloadProgressIndicator(
-                  isDownloading: _isDownloading,
-                  downloadProgress: _downloadProgress,
-                  fileName: _currentFileName,
-                ),
-              ],
-            ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              WebViewWidget(
+                controller: _webViewController,
+              ),
+              PageLoadingIndicator(
+                isLoading: _isLoading,
+                progress: _downloadProgress,
+              ),
+              DownloadProgressIndicator(
+                isDownloading: _isDownloading,
+                downloadProgress: _downloadProgress,
+                fileName: _currentFileName,
+              ),
+            ],
           ),
         ),
       ),
+      bottomNavigationBar: widget.showBottomNav ? ModernBottomNavBar(
+        currentIndex: 1, // Always show the web tab as selected
+        onTap: (index) {
+          if (index != 1) {
+            Navigator.pop(context);
+          }
+        },
+        backgroundColor: AppConstants.primaryColor,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white.withAlpha(179),
+        elevation: 8.0,
+        iconSize: 24.0,
+        height: 60.0,
+        items: [
+          BottomNavigationItem(
+            icon: Icons.home,
+            label: widget.language == 'english'
+                ? 'Home'
+                : widget.language == 'persian'
+                    ? 'خانه'
+                    : 'کور',
+          ),
+          BottomNavigationItem(
+            icon: Icons.web,
+            label: widget.language == 'english'
+                ? 'Website'
+                : widget.language == 'persian'
+                    ? 'وبسایت'
+                    : 'ویبسایټ',
+          ),
+          BottomNavigationItem(
+            icon: Icons.feedback,
+            label: widget.language == 'english'
+                ? 'Contact'
+                : widget.language == 'persian'
+                    ? 'تماس'
+                    : 'اړیکه',
+          ),
+        ],
+      ) : null,
     );
   }
-} 
+}

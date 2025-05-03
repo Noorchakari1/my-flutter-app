@@ -5,7 +5,6 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
 import '../widgets/app_header.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_button.dart';
 import 'web_view_screen.dart';
 
@@ -27,7 +26,7 @@ class ServiceButtonScreen extends ConsumerStatefulWidget {
 }
 
 class _ServiceButtonScreenState extends ConsumerState<ServiceButtonScreen> {
-  int _page = 0;
+  final int _page = 0;
 
   @override
   Widget build(BuildContext context) {

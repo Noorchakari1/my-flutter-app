@@ -3,8 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
+import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
 import '../widgets/app_header.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_button.dart';
 import 'web_view_screen.dart';
 
@@ -37,21 +37,52 @@ class FeedbackScreen extends StatefulWidget {
 }
 
 class _FeedbackScreenState extends State<FeedbackScreen> {
-  final int _page = 2; // Set to 2 since this is the feedback page
-
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final languageText = widget.language == 'persian'
-        ? AppConstants.persianText
-        : widget.language == 'pashto'
-            ? AppConstants.pashtoText
-            : AppConstants.englishText;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(title: widget.appbarTitle, showBackButton: false),
-      bottomNavigationBar: null,
+      bottomNavigationBar: widget.showBottomNav ? ModernBottomNavBar(
+        currentIndex: 2, // Always show the feedback tab as selected
+        onTap: (index) {
+          if (index != 2) {
+            Navigator.pop(context);
+          }
+        },
+        backgroundColor: AppConstants.primaryColor,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white.withAlpha(179),
+        elevation: 8.0,
+        iconSize: 24.0,
+        height: 60.0,
+        items: [
+          BottomNavigationItem(
+            icon: Icons.home,
+            label: widget.language == 'english'
+                ? 'Home'
+                : widget.language == 'persian'
+                    ? 'خانه'
+                    : 'کور',
+          ),
+          BottomNavigationItem(
+            icon: Icons.web,
+            label: widget.language == 'english'
+                ? 'Website'
+                : widget.language == 'persian'
+                    ? 'وبسایت'
+                    : 'ویبسایټ',
+          ),
+          BottomNavigationItem(
+            icon: Icons.feedback,
+            label: widget.language == 'english'
+                ? 'Contact'
+                : widget.language == 'persian'
+                    ? 'تماس'
+                    : 'اړیکه',
+          ),
+        ],
+      ) : null,
       body: Column(
         children: [
           AppHeader(

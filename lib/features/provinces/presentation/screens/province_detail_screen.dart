@@ -16,10 +16,10 @@ class ProvinceDetailScreen extends ConsumerWidget {
   final String language;
 
   const ProvinceDetailScreen({
-    Key? key,
+    super.key,
     required this.provinceId,
     required this.language,
-  }) : super(key: key);
+  });
 
   // Helper function to get localized text
   String _getText(BuildContext context, WidgetRef ref, String key) {
@@ -123,7 +123,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 40, bottom: 30),
                 alignment: Alignment.center,
-                child: CircularProgressIndicator(),
+                child: const CircularProgressIndicator(),
               ),
               Shimmer.fromColors(
                 baseColor: Colors.grey.shade300,
@@ -421,11 +421,11 @@ class ProvinceDetailScreen extends ConsumerWidget {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
                                 children: [
-                                  Icon(Icons.phone, color: Colors.blue, size: 20),
-                                  SizedBox(width: 12),
+                                  const Icon(Icons.phone, color: Colors.blue, size: 20),
+                                  const SizedBox(width: 12),
                                   Text(
                                     province.phone!,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       color: Colors.blue,
                                     ),
@@ -443,12 +443,12 @@ class ProvinceDetailScreen extends ConsumerWidget {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
                                 children: [
-                                  Icon(Icons.language, color: Colors.blue, size: 20),
-                                  SizedBox(width: 12),
+                                  const Icon(Icons.language, color: Colors.blue, size: 20),
+                                  const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
                                       province.link!,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         color: Colors.blue,
                                         decoration: TextDecoration.underline,
@@ -509,7 +509,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
                                   style: {
                                     "body": Style(
                                       fontSize: FontSize(16),
-                                      lineHeight: LineHeight(1.8),
+                                      lineHeight: const LineHeight(1.8),
                                       direction: TextDirection.rtl,
                                       textAlign: TextAlign.justify,
                                       color: isDarkMode ? Colors.grey.shade300 : Colors.black87,

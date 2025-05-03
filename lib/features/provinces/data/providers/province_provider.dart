@@ -31,7 +31,7 @@ class ProvinceNotifier extends StateNotifier<AsyncValue<List<ProvinceItem>>> {
     if (!_hasMore || state is AsyncLoading) return;
     
     final currentItems = state.value ?? [];
-    state = AsyncLoading<List<ProvinceItem>>();
+    state = const AsyncLoading<List<ProvinceItem>>();
     
     try {
       _currentPage++;

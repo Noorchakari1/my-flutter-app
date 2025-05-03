@@ -16,7 +16,7 @@ import 'independent_directorate_detail_screen.dart';
 import '../../data/providers/independent_directorate_provider.dart';
 
 class IndependentDirectoratesScreen extends ConsumerStatefulWidget {
-  const IndependentDirectoratesScreen({Key? key}) : super(key: key);
+  const IndependentDirectoratesScreen({super.key});
 
   @override
   ConsumerState<IndependentDirectoratesScreen> createState() => _IndependentDirectoratesScreenState();

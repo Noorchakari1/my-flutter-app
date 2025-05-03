@@ -15,7 +15,7 @@ import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/error_display.dart';
 
 class MinistriesScreen extends ConsumerStatefulWidget {
-  const MinistriesScreen({Key? key}) : super(key: key);
+  const MinistriesScreen({super.key});
 
   @override
   ConsumerState<MinistriesScreen> createState() => _MinistriesScreenState();
@@ -435,7 +435,7 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
                   const SizedBox(height: 8),
                   Text(
                     _getText(context, 'ministryComingSoon'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
                     ),
@@ -717,7 +717,7 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
                   const SizedBox(height: 8),
                   Text(
                     _getText(context, 'emptySearchSuggestion'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
                     ),
@@ -726,10 +726,10 @@ class _MinistriesScreenState extends ConsumerState<MinistriesScreen> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _clearSearch,
-                    child: Text(_getText(context, 'clearSearchButton')),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
+                    child: Text(_getText(context, 'clearSearchButton')),
                   ),
                 ],
               ),

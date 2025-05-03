@@ -1,9 +1,8 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/ministry_model.dart';
+
 import '../../../../core/services/api_client.dart';
 import '../../../../core/services/api_exception.dart';
+import '../models/ministry_model.dart';
 
 class MinistryService {
   static const String baseUrl = 'https://aop.gov.af/api/v1';

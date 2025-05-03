@@ -14,9 +14,9 @@ class NewsDetailScreen extends ConsumerWidget {
   final int newsId;
   
   const NewsDetailScreen({
-    Key? key,
+    super.key,
     required this.newsId,
-  }) : super(key: key);
+  });
 
   // Helper function to get localized text
   String _getText(BuildContext context, WidgetRef ref, String key) {
@@ -122,7 +122,7 @@ class NewsDetailScreen extends ConsumerWidget {
                     style: {
                       "body": Style(
                         fontSize: FontSize(16),
-                        lineHeight: LineHeight(1.8),
+                        lineHeight: const LineHeight(1.8),
                         direction: ref.watch(themeNotifierProvider).currentLanguage != 'english' ? 
                           TextDirection.rtl : TextDirection.ltr,
                         textAlign: TextAlign.justify,
@@ -392,7 +392,7 @@ class NewsDetailScreen extends ConsumerWidget {
               const Spacer(),
               Text(
                 _getText(context, ref, 'imageCount').replaceAll('{count}', '${galleryImages.length}'),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
                 ),
@@ -406,7 +406,7 @@ class NewsDetailScreen extends ConsumerWidget {
                 ? Center(
                     child: Text(
                       _getText(context, ref, 'noImages'),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                       ),
@@ -526,7 +526,7 @@ class NewsDetailScreen extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 40, bottom: 30),
                 alignment: Alignment.center,
-                child: CircularProgressIndicator(),
+                child: const CircularProgressIndicator(),
               ),
               Shimmer.fromColors(
                 baseColor: Colors.grey.shade300,

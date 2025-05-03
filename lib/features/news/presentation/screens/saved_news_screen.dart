@@ -8,7 +8,7 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
 
 class SavedNewsScreen extends ConsumerWidget {
-  const SavedNewsScreen({Key? key}) : super(key: key);
+  const SavedNewsScreen({super.key});
 
   // Helper function to get localized text
   String _getText(BuildContext context, WidgetRef ref, String key) {

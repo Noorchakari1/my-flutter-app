@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../../core/config/routes.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
+import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
 import '../widgets/app_header.dart';
 import '../widgets/custom_button.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/service_button.dart';
 import 'web_view_screen.dart';
 import 'service_button_screen.dart';
@@ -22,7 +22,7 @@ class _EnglishScreenState extends State<EnglishScreen> {
 
   Widget _buildHomeContent() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Column(
       children: [
          AppHeader(
@@ -140,12 +140,18 @@ class _EnglishScreenState extends State<EnglishScreen> {
     );
   }
 
+  void _onNavItemTapped(int index) {
+    setState(() {
+      _page = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _page == 0
-          ?  CustomAppBar(
+          ? CustomAppBar(
               title: AppConstants.englishText['welcome']!,
             )
           : null,
@@ -155,6 +161,30 @@ class _EnglishScreenState extends State<EnglishScreen> {
           _buildHomeContent(),
           _buildWebContent(),
           _buildFeedbackContent(),
+        ],
+      ),
+      bottomNavigationBar: ModernBottomNavBar(
+        currentIndex: _page,
+        onTap: _onNavItemTapped,
+        backgroundColor: AppConstants.primaryColor,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white.withAlpha(179),
+        elevation: 8.0,
+        iconSize: 24.0,
+        height: 60.0,
+        items: const [
+          BottomNavigationItem(
+            icon: Icons.home,
+            label: 'Home',
+          ),
+          BottomNavigationItem(
+            icon: Icons.web,
+            label: 'Website',
+          ),
+          BottomNavigationItem(
+            icon: Icons.feedback,
+            label: 'Contact',
+          ),
         ],
       ),
     );

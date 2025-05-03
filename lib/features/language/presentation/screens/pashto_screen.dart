@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/config/routes.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
+import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
 import '../widgets/app_header.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_button.dart';
 import 'feedback_screen.dart';
 import 'service_button_screen.dart';
@@ -139,6 +139,12 @@ class _PashtoScreenState extends State<PashtoScreen> {
     );
   }
 
+  void _onNavItemTapped(int index) {
+    setState(() {
+      _page = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,6 +162,30 @@ class _PashtoScreenState extends State<PashtoScreen> {
           _buildFeedbackContent(),
         ],
       ),
+      bottomNavigationBar: ModernBottomNavBar(
+        currentIndex: _page,
+        onTap: _onNavItemTapped,
+        backgroundColor: AppConstants.primaryColor,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white.withAlpha(179),
+        elevation: 8.0,
+        iconSize: 24.0,
+        height: 60.0,
+        items: const [
+          BottomNavigationItem(
+            icon: Icons.home,
+            label: 'کور',
+          ),
+          BottomNavigationItem(
+            icon: Icons.web,
+            label: 'ویبسایټ',
+          ),
+          BottomNavigationItem(
+            icon: Icons.feedback,
+            label: 'اړیکه',
+          ),
+        ],
+      ),
     );
   }
-} 
+}

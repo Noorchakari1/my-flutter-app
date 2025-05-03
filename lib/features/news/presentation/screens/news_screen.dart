@@ -14,7 +14,7 @@ import '../../../../shared/constants/app_constants.dart'; // Import AppConstants
 import '../../../../shared/widgets/error_display.dart';
 
 class NewsScreen extends ConsumerStatefulWidget {
-  const NewsScreen({Key? key}) : super(key: key);
+  const NewsScreen({super.key});
 
   @override
   ConsumerState<NewsScreen> createState() => _NewsScreenState();
@@ -513,13 +513,13 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                         ),
                         const Spacer(),
                         TextButton(
-                          onPressed: _clearSearch,
-                          child: Text(_getText(context, 'clearSearchButton')), // Localized button text
+                          onPressed: _clearSearch, // Localized button text
                           style: TextButton.styleFrom(
                             foregroundColor: Theme.of(context).primaryColor,
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             visualDensity: VisualDensity.compact,
                           ),
+                          child: Text(_getText(context, 'clearSearchButton')),
                         ),
                       ],
                     ),
@@ -641,7 +641,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 30),
           alignment: Alignment.center,
-          child: CircularProgressIndicator(),
+          child: const CircularProgressIndicator(),
         ),
         // Regular news item shimmers
         ...List.generate(

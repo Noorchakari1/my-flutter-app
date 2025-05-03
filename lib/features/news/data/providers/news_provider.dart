@@ -31,7 +31,7 @@ class NewsNotifier extends StateNotifier<AsyncValue<List<NewsItem>>> {
     if (!_hasMore || state is AsyncLoading) return;
     
     final currentItems = state.value ?? [];
-    state = AsyncLoading<List<NewsItem>>();
+    state = const AsyncLoading<List<NewsItem>>();
     
     try {
       _currentPage++;

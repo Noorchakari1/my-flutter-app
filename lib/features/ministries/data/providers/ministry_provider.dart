@@ -31,7 +31,7 @@ class MinistryNotifier extends StateNotifier<AsyncValue<List<MinistryItem>>> {
     if (!_hasMore || state is AsyncLoading) return;
     
     final currentItems = state.value ?? [];
-    state = AsyncLoading<List<MinistryItem>>();
+    state = const AsyncLoading<List<MinistryItem>>();
     
     try {
       _currentPage++;

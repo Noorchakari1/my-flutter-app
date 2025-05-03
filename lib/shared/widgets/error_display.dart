@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants/app_constants.dart';
+
 import '../../core/services/api_exception.dart';
+import '../constants/app_constants.dart';
 
 /// A standardized widget to display API errors
 class ErrorDisplay extends StatelessWidget {

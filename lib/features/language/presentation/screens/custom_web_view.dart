@@ -1,10 +1,12 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
-import '../../../../shared/constants/app_constants.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../shared/constants/app_constants.dart';
 
 class CustomWebView extends ConsumerStatefulWidget {
   final String url;
