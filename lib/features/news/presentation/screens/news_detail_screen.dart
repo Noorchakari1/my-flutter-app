@@ -12,7 +12,7 @@ import '../../../../shared/constants/app_constants.dart';
 
 class NewsDetailScreen extends ConsumerWidget {
   final int newsId;
-  
+
   const NewsDetailScreen({
     super.key,
     required this.newsId,
@@ -35,11 +35,31 @@ class NewsDetailScreen extends ConsumerWidget {
     return textMap[key] ?? key; // Return key if translation not found
   }
 
+  // Helper method to strip HTML tags from text
+  String _stripHtmlTags(String htmlString) {
+    // Simple regex to remove HTML tags
+    final RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
+    String result = htmlString.replaceAll(exp, '');
+
+    // Replace common HTML entities
+    result = result.replaceAll('&nbsp;', ' ')
+                  .replaceAll('&amp;', '&')
+                  .replaceAll('&lt;', '<')
+                  .replaceAll('&gt;', '>')
+                  .replaceAll('&quot;', '"')
+                  .replaceAll('&#39;', "'");
+
+    // Trim extra whitespace
+    result = result.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final newsDetailAsync = ref.watch(newsDetailProvider(newsId));
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Determine text direction based on current language
     final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
     final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
@@ -59,11 +79,11 @@ class NewsDetailScreen extends ConsumerWidget {
 
   Widget _buildNewsDetailView(BuildContext context, WidgetRef ref, NewsDetail newsDetail) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
-        _buildAppBar(context, newsDetail),
+        _buildAppBar(context, ref, newsDetail),
         SliverToBoxAdapter(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +120,7 @@ class NewsDetailScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              
+
               // Content with modern styling
               Container(
                 margin: const EdgeInsets.all(16),
@@ -123,7 +143,7 @@ class NewsDetailScreen extends ConsumerWidget {
                       "body": Style(
                         fontSize: FontSize(16),
                         lineHeight: const LineHeight(1.8),
-                        direction: ref.watch(themeNotifierProvider).currentLanguage != 'english' ? 
+                        direction: ref.watch(themeNotifierProvider).currentLanguage != 'english' ?
                           TextDirection.rtl : TextDirection.ltr,
                         textAlign: TextAlign.justify,
                         color: isDarkMode ? Colors.grey.shade300 : Colors.black87,
@@ -146,11 +166,11 @@ class NewsDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              
+
               if (newsDetail.gallery != null && newsDetail.gallery!.isNotEmpty) ...[
                 _buildGallery(context, ref, newsDetail),
               ],
-              
+
               // Action buttons
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
@@ -163,23 +183,36 @@ class NewsDetailScreen extends ConsumerWidget {
                       icon: Icons.share,
                       label: _getText(context, ref, 'share'),
                       onTap: () {
-                        Share.share('${newsDetail.title ?? _getText(context, ref, 'newsItem')}\n\n${_getText(context, ref, 'viewFullNews')}');
+                        // Share both title and description
+                        final title = newsDetail.title ?? _getText(context, ref, 'newsItem');
+                        final description = _stripHtmlTags(newsDetail.description ?? '');
+                        Share.share('$title\n\n$description\n\n${_getText(context, ref, 'viewFullNews')}');
                       },
                     ),
-                    _buildActionButton(
-                      context,
-                      ref,
-                      icon: Icons.bookmark_border,
-                      label: _getText(context, ref, 'save'),
-                      onTap: () {
-                        ref.read(savedNewsProvider.notifier).toggleSaveNews(newsDetail);
-                        final isSaved = ref.read(savedNewsProvider.notifier).isNewsSaved(newsDetail.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(isSaved 
-                              ? _getText(context, ref, 'newsSaved')
-                              : _getText(context, ref, 'newsUnsaved')),
-                          ),
+                    // Use a Consumer to rebuild when savedNewsProvider changes
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final savedNewsList = ref.watch(savedNewsProvider);
+                        final isSaved = savedNewsList.any((news) => news.id == newsDetail.id);
+
+                        return _buildActionButton(
+                          context,
+                          ref,
+                          icon: isSaved ? Icons.bookmark : Icons.bookmark_border,
+                          label: _getText(context, ref, 'save'),
+                          isActive: isSaved,
+                          onTap: () {
+                            ref.read(savedNewsProvider.notifier).toggleSaveNews(newsDetail);
+                            // Get the updated state after toggling
+                            final updatedIsSaved = ref.read(savedNewsProvider).any((news) => news.id == newsDetail.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(updatedIsSaved
+                                  ? _getText(context, ref, 'newsSaved')
+                                  : _getText(context, ref, 'newsUnsaved')),
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -204,9 +237,9 @@ class NewsDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context, NewsDetail newsDetail) {
+  Widget _buildAppBar(BuildContext context, WidgetRef ref, NewsDetail newsDetail) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
@@ -248,7 +281,7 @@ class NewsDetailScreen extends ConsumerWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.7),
+                    Colors.black.withAlpha(179), // Using withAlpha instead of withOpacity
                   ],
                   stops: const [0.7, 1.0],
                 ),
@@ -262,20 +295,56 @@ class NewsDetailScreen extends ConsumerWidget {
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withAlpha(102), // Using withAlpha instead of withOpacity
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.share, size: 20),
           ),
           onPressed: () {
-            Share.share('${newsDetail.title ?? 'News'}\n\nView full news in our app');
+            // Share both title and description
+            final title = newsDetail.title ?? _getText(context, ref, 'newsItem');
+            final description = _stripHtmlTags(newsDetail.description ?? '');
+            Share.share('$title\n\n$description\n\n${_getText(context, ref, 'viewFullNews')}');
+          },
+        ),
+        // Add bookmark button to app bar
+        Consumer(
+          builder: (context, ref, child) {
+            final savedNewsList = ref.watch(savedNewsProvider);
+            final isSaved = savedNewsList.any((news) => news.id == newsDetail.id);
+
+            return IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withAlpha(102), // Using withAlpha instead of withOpacity
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isSaved ? Icons.bookmark : Icons.bookmark_border,
+                  size: 20,
+                  color: isSaved ? Theme.of(context).colorScheme.secondary : Colors.white,
+                ),
+              ),
+              onPressed: () {
+                ref.read(savedNewsProvider.notifier).toggleSaveNews(newsDetail);
+                final updatedIsSaved = ref.read(savedNewsProvider).any((news) => news.id == newsDetail.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(updatedIsSaved
+                      ? _getText(context, ref, 'newsSaved')
+                      : _getText(context, ref, 'newsUnsaved')),
+                  ),
+                );
+              },
+            );
           },
         ),
       ],
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.4),
+          color: Colors.black.withAlpha(102), // Using withAlpha instead of withOpacity
           shape: BoxShape.circle,
         ),
         child: IconButton(
@@ -288,23 +357,23 @@ class NewsDetailScreen extends ConsumerWidget {
 
   Widget _buildMetadataRow(BuildContext context, NewsDetail newsDetail) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Row(
       children: [
         // Date with card style
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: isDarkMode 
-                ? Colors.grey.shade800 
+            color: isDarkMode
+                ? Colors.grey.shade800
                 : Colors.grey.shade200,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
               Icon(
-                Icons.calendar_today, 
-                size: 14, 
+                Icons.calendar_today,
+                size: 14,
                 color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700
               ),
               const SizedBox(width: 6),
@@ -324,16 +393,16 @@ class NewsDetailScreen extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: isDarkMode 
-                ? Colors.grey.shade800 
+            color: isDarkMode
+                ? Colors.grey.shade800
                 : Colors.grey.shade200,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
               Icon(
-                Icons.remove_red_eye, 
-                size: 14, 
+                Icons.remove_red_eye,
+                size: 14,
                 color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700
               ),
               const SizedBox(width: 6),
@@ -355,7 +424,7 @@ class NewsDetailScreen extends ConsumerWidget {
   Widget _buildGallery(BuildContext context, WidgetRef ref, NewsDetail newsDetail) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final galleryImages = newsDetail.gallery ?? [];
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(20),
@@ -364,7 +433,7 @@ class NewsDetailScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13), // Using withAlpha instead of withOpacity
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -402,7 +471,7 @@ class NewsDetailScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           SizedBox(
             height: 140,
-            child: galleryImages.isEmpty 
+            child: galleryImages.isEmpty
                 ? Center(
                     child: Text(
                       _getText(context, ref, 'noImages'),
@@ -423,7 +492,7 @@ class NewsDetailScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withAlpha(26), // Using withAlpha instead of withOpacity
                               blurRadius: 5,
                               offset: const Offset(0, 3),
                             ),
@@ -470,9 +539,10 @@ class NewsDetailScreen extends ConsumerWidget {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    bool isActive = false,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -482,7 +552,7 @@ class NewsDetailScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(13), // Using withAlpha instead of withOpacity
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -492,7 +562,9 @@ class NewsDetailScreen extends ConsumerWidget {
           children: [
             Icon(
               icon,
-              color: Theme.of(context).primaryColor,
+              color: isActive
+                ? Theme.of(context).colorScheme.secondary
+                : Theme.of(context).primaryColor,
               size: 24,
             ),
             const SizedBox(height: 6),
@@ -501,7 +573,9 @@ class NewsDetailScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                color: isActive
+                  ? Theme.of(context).colorScheme.secondary
+                  : (isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700),
               ),
             ),
           ],
@@ -574,7 +648,7 @@ class NewsDetailScreen extends ConsumerWidget {
 
   Widget _buildErrorView(BuildContext context, Object error, WidgetRef ref) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Center(
       child: Container(
         margin: const EdgeInsets.all(24),
@@ -584,7 +658,7 @@ class NewsDetailScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withAlpha(26), // Using withAlpha instead of withOpacity
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -647,4 +721,4 @@ class NewsDetailScreen extends ConsumerWidget {
       ),
     );
   }
-} 
+}
