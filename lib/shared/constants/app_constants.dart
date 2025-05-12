@@ -91,6 +91,11 @@ class AppConstants {
     'english': 'https://aop.gov.af/en/forms',
   };
 
+  // Multilingual welcome messages
+  static const String welcomeAppMessagePashto = 'د ادارې ایپ ته ښه راغلاست.';
+  static const String welcomeAppMessagePersian = 'به اپلیکیشن اداره امور خوش آمدید';
+  static const String welcomeAppMessageEnglish = 'Welcome to the AOP App';
+
   // Persian Text
   static const Map<String, String> persianText = {
     'videos': 'ویدیوها',
@@ -103,7 +108,7 @@ class AppConstants {
     'changeLanguage': 'تغییر زبان',
     'comments': 'نظریات',
     'contactUs': 'تماس با ما',
-    'feedbackGuide': 'لطفاً نظریات خود را با ما شریک سازید',
+    'feedbackGuide': 'لطفاً نظریات/شکایات خود را با ما شریک سازید',
     'whatsapp': 'واتساپ',
     'email': 'ایمیل',
     'contactForm': 'فورم تماس',
@@ -206,7 +211,7 @@ class AppConstants {
     'changeLanguage': 'د ژبې بدلول',
     'comments': 'نظرونه',
     'contactUs': 'له موږ سره اړیکه',
-    'feedbackGuide': 'مهرباني وکړئ خپل نظرونه له موږ سره شریک کړئ',
+    'feedbackGuide': 'مهرباني وکړئ خپل نظرونه/شکایتونه له موږ سره شریک کړئ',
     'whatsapp': 'واټساپ',
     'email': 'بریښنالیک',
     'contactForm': 'د اړیکې فورم',

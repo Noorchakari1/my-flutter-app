@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/services/language_service.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/widgets/typing_text.dart';
 import '../../../language/presentation/screens/language_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -53,16 +54,62 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppConstants.primaryColor,
-      body: Center(
-        child: Hero(
-          tag: 'logo',
-          child: Image.asset(
-            AppConstants.logoPath,
-            height: AppConstants.headerImageHeight * 1.5,
-            color: Colors.white,
-          ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+            Hero(
+              tag: 'splash_logo',
+              child: Image.asset(
+                AppConstants.logoPath,
+                height: AppConstants.headerImageHeight * 1.5,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 40),
+            // Welcome text in Pashto
+            const TypingText(
+              text: AppConstants.welcomeAppMessagePashto,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              duration: Duration(milliseconds: 1500),
+              startDelay: Duration.zero,
+            ),
+            const SizedBox(height: 10),
+            // Welcome text in Dari/Persian
+            const TypingText(
+              text: AppConstants.welcomeAppMessagePersian,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              duration: Duration(milliseconds: 1500),
+              startDelay: Duration(milliseconds: 500),
+            ),
+            const SizedBox(height: 10),
+            // Welcome text in English
+            const TypingText(
+              text: AppConstants.welcomeAppMessageEnglish,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              duration: Duration(milliseconds: 1500),
+              startDelay: Duration(milliseconds: 1000),
+            ),
+          ],
         ),
       ),
-    );
+    ));
   }
-} 
+}
