@@ -28,20 +28,20 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
   int _currentPage = 1;
   bool _hasMoreData = true;
   dynamic _error;
-  
+
   // Search related variables
   final TextEditingController _searchController = TextEditingController();
   bool _isSearchVisible = false;
   String _searchQuery = '';
-  
+
   // Scroll to top button visibility
   bool _showScrollToTop = false;
-  
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadFirstPage();
     });
@@ -54,7 +54,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
     _searchController.dispose();
     super.dispose();
   }
-  
+
   // Helper function to get localized text
   String _getText(BuildContext context, String key) {
     final language = ref.watch(themeNotifierProvider).currentLanguage;
@@ -71,18 +71,18 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
     }
     return textMap[key] ?? key; // Return key if translation not found
   }
-  
+
   void _scrollListener() {
     if (!_scrollController.hasClients) return;
-    
+
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    
+
     // Show scroll to top button when user has scrolled down enough
     setState(() {
       _showScrollToTop = currentScroll > 300; // Show button after scrolling 300px
     });
-    
+
     // Load more when we reach 70% of the list
     if (maxScroll - currentScroll <= maxScroll * 0.3 && !_isLoadingMore && _hasMoreData) {
       _loadNextPage();
@@ -102,24 +102,24 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
       });
       return;
     }
-    
+
     setState(() {
       _isLoadingMore = true;
       _currentPage = 1;
       _hasMoreData = true;
       _error = null;
     });
-    
+
     try {
       // Get current language from theme provider
       final themeState = ref.read(themeNotifierProvider);
       final currentLanguage = themeState.currentLanguage;
-      
+
       final response = await ref.read(independentDirectorateServiceProvider).getIndependentDirectorates(
         page: _currentPage,
         currentLanguage: currentLanguage,
       );
-      
+
       if (mounted) {
         setState(() {
           ref.read(independentDirectorateNotifierProvider.notifier).replaceItems(response.items);
@@ -136,10 +136,10 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
       }
     }
   }
-  
+
   Future<void> _loadNextPage() async {
     if (_isLoadingMore || !_hasMoreData) return;
-    
+
     // Check connectivity before loading more
     final isConnected = await ref.read(connectivityServiceProvider).checkConnectivity();
     if (!isConnected) {
@@ -153,25 +153,25 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
       });
       return;
     }
-    
+
     setState(() {
       _isLoadingMore = true;
       _error = null; // Clear any previous errors
     });
-    
+
     try {
       _currentPage++;
       // Get current language from theme provider
       final themeState = ref.read(themeNotifierProvider);
       final currentLanguage = themeState.currentLanguage;
-      
+
       final response = await ref.read(independentDirectorateServiceProvider).getIndependentDirectorates(
         page: _currentPage,
         currentLanguage: currentLanguage,
       );
-      
+
       final currentDirectorates = ref.read(independentDirectorateNotifierProvider).value ?? [];
-      
+
       if (mounted) {
         setState(() {
           ref.read(independentDirectorateNotifierProvider.notifier)
@@ -208,20 +208,20 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
       }
     });
   }
-  
+
   // Perform search
   void _performSearch(String query) {
     setState(() {
       _searchQuery = query;
     });
-    
+
     if (query.isEmpty) {
       _refreshData();
     } else {
       ref.read(independentDirectorateNotifierProvider.notifier).searchDirectorates(query);
     }
   }
-  
+
   // Clear search
   void _clearSearch() {
     setState(() {
@@ -230,17 +230,17 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
       _refreshData();
     });
   }
-  
+
   // Filter directorates based on search query
   List<IndependentDirectorateItem> _filterDirectorates(List<IndependentDirectorateItem> directorates, String query) {
     if (query.isEmpty) return directorates;
-    
+
     final lowercaseQuery = query.toLowerCase();
-    return directorates.where((item) => 
+    return directorates.where((item) =>
       (item.title != null && item.title!.toLowerCase().contains(lowercaseQuery))
     ).toList();
   }
-  
+
   // Helper function to strip HTML tags from content
   String _stripHtmlTags(String htmlString) {
     // Basic HTML tag removal for search purposes
@@ -253,11 +253,11 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
         .replaceAll('&quot;', '"')
         .replaceAll('&#39;', "'");
   }
-  
+
   // Launch directorate website
   Future<void> _launchURL(String? url) async {
     if (url == null || url.isEmpty) return;
-    
+
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -273,7 +273,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
       }
     }
   }
-  
+
   // Scroll to top
   void _scrollToTop() {
     _scrollController.animateTo(
@@ -287,7 +287,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
   Widget build(BuildContext context) {
     final directorateState = ref.watch(independentDirectorateNotifierProvider);
     final isConnected = ref.watch(isConnectedProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: _isSearchVisible
@@ -306,7 +306,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
       floatingActionButton: _showScrollToTop
         ? FloatingActionButton(
             backgroundColor: AppConstants.primaryColor,
-            child: const Icon(Icons.arrow_upward),
+            child: const Icon(Icons.arrow_upward, color: Colors.white),
             onPressed: () {
               _scrollController.animateTo(
                 0,
@@ -318,7 +318,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
         : null,
     );
   }
-  
+
   Widget _buildBody(AsyncValue<List<IndependentDirectorateItem>> directorateState, bool isConnected) {
     // If we have a specific error from our loading attempts, show that first
     if (_error != null) {
@@ -327,7 +327,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
         onRetry: _refreshData,
       );
     }
-    
+
     // Show no connection message if disconnected
     if (!isConnected) {
       return ErrorDisplay(
@@ -338,15 +338,15 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
         onRetry: _refreshData,
       );
     }
-    
+
     // Handle various states from the provider
     return directorateState.when(
       data: (directorates) {
         // Show search results if there's a search query
-        final displayedDirectorates = _searchQuery.isNotEmpty 
-            ? _filterDirectorates(directorates, _searchQuery) 
+        final displayedDirectorates = _searchQuery.isNotEmpty
+            ? _filterDirectorates(directorates, _searchQuery)
             : directorates;
-            
+
         if (displayedDirectorates.isEmpty) {
           return Center(
             child: Column(
@@ -381,7 +381,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
             ),
           );
         }
-        
+
         return RefreshIndicator(
           onRefresh: _refreshData,
           color: AppConstants.primaryColor,
@@ -407,7 +407,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
       ),
     );
   }
-  
+
   Widget _buildLoadingIndicator() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -474,7 +474,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
 
   Widget _buildDirectorateCard(IndependentDirectorateItem directorate) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
@@ -507,7 +507,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
                 topRight: Radius.circular(12),
                 bottomRight: Radius.circular(12),
               ),
-              child: directorate.image != null && directorate.image!.isNotEmpty 
+              child: directorate.image != null && directorate.image!.isNotEmpty
                 ? CachedNetworkImage(
                     imageUrl: directorate.image!,
                     height: 110,
@@ -566,16 +566,16 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: isDarkMode 
-                                  ? Colors.blue.withOpacity(0.2) 
+                              color: isDarkMode
+                                  ? Colors.blue.withOpacity(0.2)
                                   : Colors.blue.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.phone, 
-                                  size: 14, 
+                                  Icons.phone,
+                                  size: 14,
                                   color: Theme.of(context).primaryColor,
                                 ),
                                 const SizedBox(width: 4),
@@ -627,4 +627,4 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
       ),
     );
   }
-} 
+}

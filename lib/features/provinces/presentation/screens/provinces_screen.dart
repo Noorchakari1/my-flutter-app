@@ -28,20 +28,20 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
   int _currentPage = 1;
   bool _hasMoreData = true;
   dynamic _error;
-  
+
   // Search related variables
   final TextEditingController _searchController = TextEditingController();
   bool _isSearchVisible = false;
   String _searchQuery = '';
-  
+
   // Scroll to top button visibility
   bool _showScrollToTop = false;
-  
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadFirstPage();
     });
@@ -54,7 +54,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
     _searchController.dispose();
     super.dispose();
   }
-  
+
   // Helper function to get localized text
   String _getText(BuildContext context, String key) {
     final language = ref.watch(themeNotifierProvider).currentLanguage;
@@ -71,18 +71,18 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
     }
     return textMap[key] ?? key; // Return key if translation not found
   }
-  
+
   void _scrollListener() {
     if (!_scrollController.hasClients) return;
-    
+
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    
+
     // Show scroll to top button when user has scrolled down enough
     setState(() {
       _showScrollToTop = currentScroll > 300; // Show button after scrolling 300px
     });
-    
+
     // Load more when we reach 70% of the list
     if (maxScroll - currentScroll <= maxScroll * 0.3 && !_isLoadingMore && _hasMoreData) {
       _loadNextPage();
@@ -102,24 +102,24 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       });
       return;
     }
-    
+
     setState(() {
       _isLoadingMore = true;
       _currentPage = 1;
       _hasMoreData = true;
       _error = null;
     });
-    
+
     try {
       // Get current language from theme provider
       final themeState = ref.read(themeNotifierProvider);
       final currentLanguage = themeState.currentLanguage;
-      
+
       final response = await ref.read(provinceServiceProvider).getProvinces(
         page: _currentPage,
         currentLanguage: currentLanguage,
       );
-      
+
       if (mounted) {
         setState(() {
           ref.read(provinceNotifierProvider.notifier).replaceItems(response.items);
@@ -136,10 +136,10 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       }
     }
   }
-  
+
   Future<void> _loadNextPage() async {
     if (_isLoadingMore || !_hasMoreData) return;
-    
+
     // Check connectivity before loading more
     final isConnected = await ref.read(connectivityServiceProvider).checkConnectivity();
     if (!isConnected) {
@@ -153,25 +153,25 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       });
       return;
     }
-    
+
     setState(() {
       _isLoadingMore = true;
       _error = null; // Clear any previous errors
     });
-    
+
     try {
       _currentPage++;
       // Get current language from theme provider
       final themeState = ref.read(themeNotifierProvider);
       final currentLanguage = themeState.currentLanguage;
-      
+
       final response = await ref.read(provinceServiceProvider).getProvinces(
         page: _currentPage,
         currentLanguage: currentLanguage,
       );
-      
+
       final currentProvinces = ref.read(provinceNotifierProvider).value ?? [];
-      
+
       if (mounted) {
         setState(() {
           ref.read(provinceNotifierProvider.notifier)
@@ -207,20 +207,20 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       }
     });
   }
-  
+
   // Perform search
   void _performSearch(String query) {
     setState(() {
       _searchQuery = query;
     });
-    
+
     if (query.isEmpty) {
       _refreshData();
     } else {
       ref.read(provinceNotifierProvider.notifier).searchProvinces(query);
     }
   }
-  
+
   // Clear search
   void _clearSearch() {
     setState(() {
@@ -229,17 +229,17 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       _refreshData();
     });
   }
-  
+
   // Filter provinces based on search query
   List<ProvinceItem> _filterProvinces(List<ProvinceItem> provinces, String query) {
     if (query.isEmpty) return provinces;
-    
+
     final lowercaseQuery = query.toLowerCase();
-    return provinces.where((item) => 
+    return provinces.where((item) =>
       (item.title != null && item.title!.toLowerCase().contains(lowercaseQuery))
     ).toList();
   }
-  
+
   // Helper function to strip HTML tags from content
   String _stripHtmlTags(String htmlString) {
     // Basic HTML tag removal for search purposes
@@ -252,11 +252,11 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
         .replaceAll('&quot;', '"')
         .replaceAll('&#39;', "'");
   }
-  
+
   // Launch province website
   Future<void> _launchURL(String? url) async {
     if (url == null || url.isEmpty) return;
-    
+
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -277,7 +277,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
   Widget build(BuildContext context) {
     final provinceState = ref.watch(provinceNotifierProvider);
     final isConnected = ref.watch(isConnectedProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: _isSearchVisible
@@ -296,7 +296,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       floatingActionButton: _showScrollToTop
         ? FloatingActionButton(
             backgroundColor: AppConstants.primaryColor,
-            child: const Icon(Icons.arrow_upward),
+            child: const Icon(Icons.arrow_upward, color: Colors.white),
             onPressed: () {
               _scrollController.animateTo(
                 0,
@@ -308,7 +308,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
         : null,
     );
   }
-  
+
   Widget _buildBody(AsyncValue<List<ProvinceItem>> provinceState, bool isConnected) {
     // If we have a specific error from our loading attempts, show that first
     if (_error != null) {
@@ -317,7 +317,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
         onRetry: _refreshData,
       );
     }
-    
+
     // Show no connection message if disconnected
     if (!isConnected) {
       return ErrorDisplay(
@@ -328,15 +328,15 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
         onRetry: _refreshData,
       );
     }
-    
+
     // Handle various states from the provider
     return provinceState.when(
       data: (provinces) {
         // Show search results if there's a search query
-        final displayedProvinces = _searchQuery.isNotEmpty 
-            ? _filterProvinces(provinces, _searchQuery) 
+        final displayedProvinces = _searchQuery.isNotEmpty
+            ? _filterProvinces(provinces, _searchQuery)
             : provinces;
-            
+
         if (displayedProvinces.isEmpty) {
           return Center(
             child: Column(
@@ -371,7 +371,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
             ),
           );
         }
-        
+
         return RefreshIndicator(
           onRefresh: _refreshData,
           color: AppConstants.primaryColor,
@@ -397,7 +397,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       ),
     );
   }
-  
+
   Widget _buildLoadingIndicator() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -405,7 +405,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       child: const CircularProgressIndicator(),
     );
   }
-  
+
   Widget _buildSearchField() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -461,10 +461,10 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       ),
     );
   }
-  
+
   Widget _buildProvinceCard(ProvinceItem province) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
@@ -497,7 +497,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
                 topRight: Radius.circular(12),
                 bottomRight: Radius.circular(12),
               ),
-              child: province.image != null && province.image!.isNotEmpty 
+              child: province.image != null && province.image!.isNotEmpty
                 ? CachedNetworkImage(
                     imageUrl: province.image!,
                     height: 110,
@@ -556,16 +556,16 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: isDarkMode 
-                                  ? Colors.blue.withOpacity(0.2) 
+                              color: isDarkMode
+                                  ? Colors.blue.withOpacity(0.2)
                                   : Colors.blue.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.phone, 
-                                  size: 14, 
+                                  Icons.phone,
+                                  size: 14,
                                   color: Theme.of(context).primaryColor,
                                 ),
                                 const SizedBox(width: 4),
@@ -617,4 +617,4 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
       ),
     );
   }
-} 
+}
