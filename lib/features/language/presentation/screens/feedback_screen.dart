@@ -107,10 +107,72 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     title: widget.whatsAppTitle,
                     iconData: Icons.chat,
                     onPressed: () async {
+                      // Create WhatsApp URL with phone number
                       final Uri whatsappUrl =
                           Uri.parse("whatsapp://send?phone=+93744724357");
-                      if (await canLaunchUrl(whatsappUrl)) {
-                        await launchUrl(whatsappUrl);
+
+                      // Alternative URL for web or if app URL fails
+                      final Uri whatsappWebUrl =
+                          Uri.parse("https://wa.me/93744724357");
+
+                      // Show loading indicator
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                widget.language == 'english'
+                                    ? 'Opening WhatsApp...'
+                                    : widget.language == 'persian'
+                                        ? 'در حال باز کردن واتساپ...'
+                                        : 'واټساپ پرانیستل...',
+                              ),
+                            ],
+                          ),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+
+                      try {
+                        // Try to launch WhatsApp app first
+                        bool launched = await launchUrl(
+                          whatsappUrl,
+                          mode: LaunchMode.externalApplication,
+                        );
+
+                        // If app launch fails, try web version
+                        if (!launched && context.mounted) {
+                          await launchUrl(
+                            whatsappWebUrl,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      } catch (e) {
+                        // If both attempts fail, show error message
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                widget.language == 'english'
+                                    ? 'Could not open WhatsApp. Please make sure WhatsApp is installed.'
+                                    : widget.language == 'persian'
+                                        ? 'نمی‌توان واتساپ را باز کرد. لطفاً مطمئن شوید که واتساپ نصب شده است.'
+                                        : 'واټساپ نه شي پرانیستل کیدای. مهرباني وکړئ ډاډ ترلاسه کړئ چې واټساپ نصب شوی دی.',
+                              ),
+                              backgroundColor: Colors.red,
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
                       }
                     },
                   ),
@@ -118,9 +180,66 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     title: widget.emailTitle,
                     iconData: Icons.email,
                     onPressed: () async {
-                      final Uri emailUrl = Uri.parse("mailto:info@aop.gov.af");
-                      if (await canLaunchUrl(emailUrl)) {
-                        await launchUrl(emailUrl);
+                      // Create email URL with subject and body
+                      final Uri emailUrl = Uri.parse(
+                        "mailto:info@aop.gov.af?subject=${Uri.encodeComponent(
+                          widget.language == 'english'
+                              ? 'Feedback from AOP App'
+                              : widget.language == 'persian'
+                                  ? 'بازخورد از برنامه ریاست عمومی اداره امور'
+                                  : 'د چارو ادارې له اپلیکیشن څخه نظر',
+                        )}"
+                      );
+
+                      // Show loading indicator
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                widget.language == 'english'
+                                    ? 'Opening Email app...'
+                                    : widget.language == 'persian'
+                                        ? 'در حال باز کردن برنامه ایمیل...'
+                                        : 'د بریښنالیک اپلیکیشن پرانیستل...',
+                              ),
+                            ],
+                          ),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+
+                      try {
+                        // Force launch without checking canLaunchUrl
+                        await launchUrl(
+                          emailUrl,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                widget.language == 'english'
+                                    ? 'Could not open email app. Please make sure you have an email app installed.'
+                                    : widget.language == 'persian'
+                                        ? 'نمی‌توان برنامه ایمیل را باز کرد. لطفاً مطمئن شوید که یک برنامه ایمیل نصب کرده‌اید.'
+                                        : 'د بریښنالیک اپلیکیشن نه شي پرانیستل کیدای. مهرباني وکړئ ډاډ ترلاسه کړئ چې تاسو د بریښنالیک اپلیکیشن نصب کړی دی.',
+                              ),
+                              backgroundColor: Colors.red,
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
                       }
                     },
                   ),
