@@ -24,7 +24,7 @@
         android:hardwareAccelerated="true"
 
 
-        android:label="د چارو اداري لوی ریاست"
+        android:label="اداره امور"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
 
