@@ -98,7 +98,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 vertical: AppConstants.defaultPadding * 2,
               ),
               child: GridView.count(
-                crossAxisCount: 2,
+                crossAxisCount: 3,
                 mainAxisSpacing: AppConstants.defaultPadding * 1.5,
                 crossAxisSpacing: AppConstants.defaultPadding * 1.5,
                 childAspectRatio: 1,
