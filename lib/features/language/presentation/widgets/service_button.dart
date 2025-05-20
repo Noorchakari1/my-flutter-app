@@ -36,7 +36,7 @@ class ServiceButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
-    
+
     return AspectRatio(
       aspectRatio: 1,
       child: Material(
@@ -47,20 +47,20 @@ class ServiceButton extends StatelessWidget {
           onTap: () => _launchUrl(context),
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8), // Reduced padding
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
                   flex: 3,
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12), // Reduced padding
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isDarkMode ? const Color(0xFF2A2A2A) : Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: isDarkMode 
+                          color: isDarkMode
                             ? Colors.black.withOpacity(0.3)
                             : Colors.black.withOpacity(0.1),
                           blurRadius: 6,
@@ -74,6 +74,7 @@ class ServiceButton extends StatelessWidget {
                       child: Icon(
                         iconData,
                         color: isDarkMode ? Colors.white : theme.primaryColor,
+                        size: 18, // Reduced icon size
                       ),
                     ),
                   ),
@@ -87,9 +88,10 @@ class ServiceButton extends StatelessWidget {
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white : Colors.black87,
+                        fontSize: 12, // Reduced font size
                       ),
                     ),
                   ),
@@ -101,4 +103,4 @@ class ServiceButton extends StatelessWidget {
       ),
     );
   }
-} 
+}

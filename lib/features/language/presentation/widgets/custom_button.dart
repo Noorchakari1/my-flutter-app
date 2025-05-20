@@ -18,7 +18,7 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
-    
+
     return AspectRatio(
       aspectRatio: 1,
       child: Material(
@@ -29,7 +29,7 @@ class CustomButton extends StatelessWidget {
           onTap: onPressed,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8), // Reduced padding
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -45,7 +45,7 @@ class CustomButton extends StatelessWidget {
                         child: Icon(
                           iconData ?? Icons.error,
                           color: isDarkMode ? Colors.white : theme.primaryColor,
-                          size: 20,
+                          size: 18, // Reduced icon size
                         ),
                       ),
                 ),
@@ -58,9 +58,10 @@ class CustomButton extends StatelessWidget {
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white : Colors.black87,
+                        fontSize: 12, // Reduced font size
                       ),
                     ),
                   ),
@@ -72,4 +73,4 @@ class CustomButton extends StatelessWidget {
       ),
     );
   }
-} 
+}
