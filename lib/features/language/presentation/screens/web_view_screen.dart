@@ -16,6 +16,7 @@ class WebViewScreen extends StatefulWidget {
   final String language;
   final int initialPage;
   final bool showBottomNav;
+  final bool showAppBar;
 
   const WebViewScreen({
     super.key,
@@ -23,6 +24,7 @@ class WebViewScreen extends StatefulWidget {
     required this.language,
     this.initialPage = 1,
     this.showBottomNav = true,
+    this.showAppBar = true,
   });
 
   @override
@@ -156,7 +158,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
+      appBar: widget.showAppBar ? AppBar(
         backgroundColor: AppConstants.primaryColor,
         leading: BackButton(
           color: Colors.white,
@@ -182,7 +184,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
           ),
         ),
         centerTitle: true,
-      ),
+      ) : null,
       body: FadeTransition(
         opacity: _animation,
         child: SafeArea(

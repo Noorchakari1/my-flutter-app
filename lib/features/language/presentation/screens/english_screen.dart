@@ -123,6 +123,7 @@ class _EnglishScreenState extends State<EnglishScreen> {
       language: 'english',
       initialPage: _page,
       showBottomNav: false,
+      showAppBar: false,
     );
   }
 

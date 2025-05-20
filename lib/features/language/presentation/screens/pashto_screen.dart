@@ -122,6 +122,7 @@ class _PashtoScreenState extends State<PashtoScreen> {
       language: 'pashto',
       initialPage: _page,
       showBottomNav: false,
+      showAppBar: false,
     );
   }
 

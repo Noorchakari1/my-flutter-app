@@ -124,6 +124,7 @@ class _PersianScreenState extends State<PersianScreen> {
       language: 'persian',
       initialPage: _page,
       showBottomNav: false,
+      showAppBar: false,
     );
   }
 
