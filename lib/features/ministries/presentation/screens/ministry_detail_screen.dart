@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_html/flutter_html.dart';
-import '../../data/models/ministry_model.dart';
-import '../../data/providers/ministry_provider.dart';
-import '../../data/services/ministry_service.dart';
+
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../data/models/ministry_model.dart';
+import '../../data/providers/ministry_provider.dart';
 
 class MinistryDetailScreen extends ConsumerWidget {
   final int ministryId;
-  
+
   const MinistryDetailScreen({
     super.key,
     required this.ministryId,
@@ -38,14 +38,26 @@ class MinistryDetailScreen extends ConsumerWidget {
   // برای باز کردن وب‌سایت وزارت‌خانه
   Future<void> _launchURL(BuildContext context, String? url) async {
     if (url == null || url.isEmpty) return;
-    
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+
+    try {
+      // Ensure URL has proper scheme
+      String urlToLaunch = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        urlToLaunch = 'https://$url';
+      }
+
+      final Uri uri = Uri.parse(urlToLaunch);
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('متاسفانه نمی‌توان وب‌سایت را باز کرد: $url')),
+          );
+        }
+      }
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('متاسفانه نمی‌توان وب‌سایت را باز کرد: $url')),
+          SnackBar(content: Text('خطا در باز کردن وب‌سایت: ${e.toString()}')),
         );
       }
     }
@@ -54,20 +66,31 @@ class MinistryDetailScreen extends ConsumerWidget {
   // برای تماس با وزارت‌خانه
   Future<void> _callMinistry(BuildContext context, String? phone) async {
     if (phone == null || phone.isEmpty) return;
-    
-    final Uri uri = Uri(scheme: 'tel', path: phone);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
+
+    try {
+      // Clean phone number - remove spaces, dashes, etc.
+      final cleanPhone = phone.replaceAll(RegExp(r'\s+|-|\(|\)'), '');
+
+      final Uri uri = Uri(scheme: 'tel', path: cleanPhone);
+      if (!await launchUrl(uri)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('متاسفانه نمی‌توان تماس برقرار کرد: $phone')),
+          );
+        }
+      }
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('متاسفانه نمی‌توان تماس برقرار کرد: $phone')),
+          SnackBar(content: Text('خطا در برقراری تماس: ${e.toString()}')),
         );
       }
     }
   }
-  
+
   // Helper function to strip HTML tags from content if needed
+  // This method is kept for future use but currently not used
+  // ignore: unused_element
   String _stripHtmlTags(String htmlString) {
     // Basic HTML tag removal for cases where we want plain text
     return htmlString
@@ -84,11 +107,11 @@ class MinistryDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final ministryDetailAsync = ref.watch(ministryDetailProvider(ministryId));
-    
+
     // تعیین جهت متن بر اساس زبان
     final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
     final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
-    
+
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
@@ -166,7 +189,7 @@ class MinistryDetailScreen extends ConsumerWidget {
 
   Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Center(
       child: Container(
         margin: const EdgeInsets.all(24),
@@ -176,7 +199,7 @@ class MinistryDetailScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withAlpha(26), // ~0.1 opacity
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -285,7 +308,7 @@ class MinistryDetailScreen extends ConsumerWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withAlpha(179), // ~0.7 opacity
                       ],
                       stops: const [0.7, 1.0],
                     ),
@@ -299,7 +322,7 @@ class MinistryDetailScreen extends ConsumerWidget {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withAlpha(102), // ~0.4 opacity
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.language, size: 20),
@@ -318,7 +341,7 @@ class MinistryDetailScreen extends ConsumerWidget {
           leading: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withAlpha(102), // ~0.4 opacity
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -344,7 +367,7 @@ class MinistryDetailScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withAlpha(13), // ~0.05 opacity
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -379,7 +402,7 @@ class MinistryDetailScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withAlpha(13), // ~0.05 opacity
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         ),
@@ -407,7 +430,7 @@ class MinistryDetailScreen extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        
+
                         // شماره تلفن
                         if (ministry.phone != null && ministry.phone!.isNotEmpty)
                           InkWell(
@@ -429,7 +452,7 @@ class MinistryDetailScreen extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          
+
                         // وب‌سایت
                         if (ministry.link != null && ministry.link!.isNotEmpty)
                           InkWell(
@@ -469,7 +492,7 @@ class MinistryDetailScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withAlpha(13), // ~0.05 opacity
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         ),
@@ -549,19 +572,7 @@ class MinistryDetailScreen extends ConsumerWidget {
                         onTap: () => _launchURL(context, ministry.link),
                         enabled: ministry.link != null && ministry.link!.isNotEmpty,
                       ),
-                      _buildActionButton(
-                        context,
-                        icon: Icons.share,
-                        label: _getText(context, ref, 'share'),
-                        onTap: () {
-                          // Simple share implementation - can be expanded
-                          final message = '${ministry.title}\n${ministry.link ?? ""}';
-                          // Implement sharing functionality
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Sharing: $message')),
-                          );
-                        },
-                      ),
+                      // Removed share button as per user requirements
                     ],
                   ),
                 ),
@@ -575,7 +586,7 @@ class MinistryDetailScreen extends ConsumerWidget {
 
   Widget _buildMetadataRow(BuildContext context, MinistryItem ministry) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Row(
       children: [
         // Contact info with card style
@@ -583,16 +594,16 @@ class MinistryDetailScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: isDarkMode 
-                  ? Colors.grey.shade800 
+              color: isDarkMode
+                  ? Colors.grey.shade800
                   : Colors.grey.shade200,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
                 Icon(
-                  Icons.phone, 
-                  size: 14, 
+                  Icons.phone,
+                  size: 14,
                   color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700
                 ),
                 const SizedBox(width: 6),
@@ -613,16 +624,16 @@ class MinistryDetailScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: isDarkMode 
-                  ? Colors.grey.shade800 
+              color: isDarkMode
+                  ? Colors.grey.shade800
                   : Colors.grey.shade200,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
                 Icon(
-                  Icons.language, 
-                  size: 14, 
+                  Icons.language,
+                  size: 14,
                   color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700
                 ),
                 const SizedBox(width: 6),
@@ -649,44 +660,48 @@ class MinistryDetailScreen extends ConsumerWidget {
     bool enabled = true,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.5,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                color: Theme.of(context).primaryColor,
-                size: 24,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(12),
+        child: Opacity(
+          opacity: enabled ? 1.0 : 0.5,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(13), // Using withAlpha instead of withOpacity
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  icon,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-} 
+}

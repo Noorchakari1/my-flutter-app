@@ -41,14 +41,26 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
   // Launch website
   Future<void> _launchURL(BuildContext context, WidgetRef ref, String? url) async {
     if (url == null || url.isEmpty) return;
-    
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+
+    try {
+      // Ensure URL has proper scheme
+      String urlToLaunch = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        urlToLaunch = 'https://$url';
+      }
+
+      final Uri uri = Uri.parse(urlToLaunch);
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(_getText(context, ref, 'cannotOpenWebsite').replaceAll('{url}', url))),
+          );
+        }
+      }
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_getText(context, ref, 'cannotOpenWebsite').replaceAll('{url}', url))),
+          SnackBar(content: Text('Error opening website: ${e.toString()}')),
         );
       }
     }
@@ -57,20 +69,31 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
   // Make a phone call
   Future<void> _callDirectorate(BuildContext context, WidgetRef ref, String? phone) async {
     if (phone == null || phone.isEmpty) return;
-    
-    final Uri uri = Uri(scheme: 'tel', path: phone);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
+
+    try {
+      // Clean phone number - remove spaces, dashes, etc.
+      final cleanPhone = phone.replaceAll(RegExp(r'\s+|-|\(|\)'), '');
+
+      final Uri uri = Uri(scheme: 'tel', path: cleanPhone);
+      if (!await launchUrl(uri)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(_getText(context, ref, 'cannotMakeCall').replaceAll('{phone}', phone))),
+          );
+        }
+      }
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_getText(context, ref, 'cannotMakeCall').replaceAll('{phone}', phone))),
+          SnackBar(content: Text('Error making call: ${e.toString()}')),
         );
       }
     }
   }
-  
+
   // Helper function to strip HTML tags from content
+  // This method is kept for future use but currently not used
+  // ignore: unused_element
   String _stripHtmlTags(String htmlString) {
     // Basic HTML tag removal for cases where we want plain text
     return htmlString
@@ -86,14 +109,14 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Use the provider from the provider file instead of the map parameter version
     final directorateDetailAsync = ref.watch(independentDirectorateDetailProvider(directorateId));
-    
+
     // Get text direction based on language
     final isRTL = language != 'english';
     final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
-    
+
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
@@ -171,7 +194,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
 
   Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Center(
       child: Container(
         margin: const EdgeInsets.all(24),
@@ -412,7 +435,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        
+
                         // Phone number
                         if (directorate.phone != null && directorate.phone!.isNotEmpty)
                           InkWell(
@@ -434,7 +457,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          
+
                         // Website
                         if (directorate.link != null && directorate.link!.isNotEmpty)
                           InkWell(
@@ -565,19 +588,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                         onTap: () => _launchURL(context, ref, directorate.link),
                         enabled: directorate.link != null && directorate.link!.isNotEmpty,
                       ),
-                      _buildActionButton(
-                        context,
-                        icon: Icons.share,
-                        label: _getText(context, ref, 'share'),
-                        onTap: () {
-                          // Simple share implementation - can be expanded
-                          final message = '${directorate.title}\n${directorate.link ?? ""}';
-                          // Implement sharing functionality
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Sharing: $message')),
-                          );
-                        },
-                      ),
+                      // Removed share button as per user requirements
                     ],
                   ),
                 ),
@@ -591,7 +602,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
 
   Widget _buildMetadataRow(BuildContext context, IndependentDirectorateItem directorate) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Row(
       children: [
         // Contact info with card style
@@ -599,16 +610,16 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: isDarkMode 
-                  ? Colors.grey.shade800 
+              color: isDarkMode
+                  ? Colors.grey.shade800
                   : Colors.grey.shade200,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
                 Icon(
-                  Icons.phone, 
-                  size: 14, 
+                  Icons.phone,
+                  size: 14,
                   color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700
                 ),
                 const SizedBox(width: 6),
@@ -629,16 +640,16 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: isDarkMode 
-                  ? Colors.grey.shade800 
+              color: isDarkMode
+                  ? Colors.grey.shade800
                   : Colors.grey.shade200,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
                 Icon(
-                  Icons.language, 
-                  size: 14, 
+                  Icons.language,
+                  size: 14,
                   color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700
                 ),
                 const SizedBox(width: 6),
@@ -665,44 +676,48 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
     bool enabled = true,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.5,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                color: Theme.of(context).primaryColor,
-                size: 24,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(12),
+        child: Opacity(
+          opacity: enabled ? 1.0 : 0.5,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(13), // ~0.05 opacity
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  icon,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-} 
+}
