@@ -20,6 +20,47 @@ class ApiException implements Exception {
   @override
   String toString() => 'ApiException: $message (Code: $code, Status: $statusCode)';
 
+  /// Factory to create ApiException from any error
+  static ApiException fromError(dynamic error) {
+    // If already an ApiException, return as is
+    if (error is ApiException) {
+      return error;
+    }
+
+    // Handle standard exceptions
+    else if (error is SocketException) {
+      return const ApiException(
+        message: 'No internet connection',
+        code: 'no_connection',
+      );
+    }
+    else if (error is HttpException) {
+      return ApiException(
+        message: 'HTTP error: ${error.message}',
+        code: 'http_error',
+      );
+    }
+    else if (error is FormatException) {
+      return ApiException(
+        message: 'Invalid data format: ${error.message}',
+        code: 'format_error',
+      );
+    }
+    else if (error is TimeoutException) {
+      return const ApiException(
+        message: 'Connection timeout',
+        code: 'timeout',
+      );
+    }
+    // Default case for unknown errors
+    else {
+      return ApiException(
+        message: error.toString(),
+        code: 'unknown_error',
+      );
+    }
+  }
+
   // Factory to create appropriate exception from HTTP response
   static ApiException fromResponse(http.Response response) {
     try {
@@ -35,7 +76,7 @@ class ApiException implements Exception {
       }
 
       // Extract error message if exists in response
-      final errorMessage = errorData?['message'] as String? ?? 
+      final errorMessage = errorData?['message'] as String? ??
                           errorData?['error'] as String? ??
                           _getMessageFromStatusCode(statusCode);
 
@@ -77,49 +118,7 @@ class ApiException implements Exception {
   }
 }
 
-/// Helper class to handle all API errors
-class ApiExceptionHandler {
-  // Process any exception that can occur during API calls
-  static ApiException handleError(dynamic error) {
-    // If already an ApiException, return as is
-    if (error is ApiException) {
-      return error;
-    }
-    
-    // Handle standard exceptions
-    else if (error is SocketException) {
-      return const ApiException(
-        message: 'No internet connection',
-        code: 'no_connection',
-      );
-    }
-    else if (error is HttpException) {
-      return ApiException(
-        message: 'HTTP error: ${error.message}',
-        code: 'http_error',
-      );
-    }
-    else if (error is FormatException) {
-      return ApiException(
-        message: 'Invalid data format: ${error.message}',
-        code: 'format_error',
-      );
-    }
-    else if (error is TimeoutException) {
-      return const ApiException(
-        message: 'Connection timeout',
-        code: 'timeout',
-      );
-    }
-    // Default case for unknown errors
-    else {
-      return ApiException(
-        message: error.toString(),
-        code: 'unknown_error',
-      );
-    }
-  }
-}
+// ApiExceptionHandler functionality has been moved to ApiException.fromError
 
 /// Exception specific for timeout errors
 class TimeoutException implements Exception {
@@ -127,4 +126,4 @@ class TimeoutException implements Exception {
   const TimeoutException([this.message = 'Connection timed out']);
   @override
   String toString() => message;
-} 
+}

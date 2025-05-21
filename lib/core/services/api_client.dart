@@ -15,21 +15,21 @@ class ApiClient {
     Duration? timeout,
   }) : _client = client ?? http.Client(),
        _timeout = timeout ?? const Duration(seconds: 30);
-  
+
   /// Helper method to get language header
   Map<String, String> _getHeaders(String? language) {
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-    
+
     if (language != null) {
       headers['Accept-Language'] = _getLanguageCode(language);
     }
-    
+
     return headers;
   }
-  
+
   /// Convert app language to API language code
   String _getLanguageCode(String appLanguage) {
     switch (appLanguage.toLowerCase()) {
@@ -137,11 +137,11 @@ class ApiClient {
 
   /// Error handler to standardize exceptions
   ApiException _handleError(dynamic error) {
-    return ApiExceptionHandler.handleError(error);
+    return ApiException.fromError(error);
   }
 
   /// Close the http client when done
   void dispose() {
     _client.close();
   }
-} 
+}

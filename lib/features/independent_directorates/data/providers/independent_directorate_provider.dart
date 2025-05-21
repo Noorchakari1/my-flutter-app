@@ -16,7 +16,7 @@ class IndependentDirectorateNotifier extends StateNotifier<AsyncValue<List<Indep
     try {
       final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
       final response = await _directorateService.getIndependentDirectorates(
-        page: 1, 
+        page: 1,
         currentLanguage: currentLanguage
       );
       _currentPage = 1;
@@ -29,10 +29,10 @@ class IndependentDirectorateNotifier extends StateNotifier<AsyncValue<List<Indep
 
   Future<void> loadMore() async {
     if (!_hasMore || state is AsyncLoading) return;
-    
+
     final currentItems = state.value ?? [];
     state = const AsyncLoading<List<IndependentDirectorateItem>>();
-    
+
     try {
       _currentPage++;
       final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
@@ -41,7 +41,7 @@ class IndependentDirectorateNotifier extends StateNotifier<AsyncValue<List<Indep
         currentLanguage: currentLanguage
       );
       _hasMore = response.pagination.currentPage < response.pagination.totalPages;
-      
+
       state = AsyncData([...currentItems, ...response.items]);
     } catch (e, st) {
       _currentPage--; // Revert page increment on error
@@ -53,7 +53,7 @@ class IndependentDirectorateNotifier extends StateNotifier<AsyncValue<List<Indep
   void replaceItems(List<IndependentDirectorateItem> items) {
     // If we're already in an error state, keep it
     if (state is AsyncError) return;
-    
+
     // Otherwise replace the items
     state = AsyncData(items);
   }
@@ -62,7 +62,7 @@ class IndependentDirectorateNotifier extends StateNotifier<AsyncValue<List<Indep
     _currentPage = 1;
     _hasMore = true;
     state = const AsyncLoading();
-    
+
     try {
       final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
       final response = await _directorateService.getIndependentDirectorates(
@@ -75,15 +75,15 @@ class IndependentDirectorateNotifier extends StateNotifier<AsyncValue<List<Indep
       state = AsyncError(e, st);
     }
   }
-  
+
   // Search functionality - will try API search first, fallback to local search
   Future<void> searchDirectorates(String query) async {
     if (query.isEmpty) {
       return refresh();
     }
-    
+
     state = const AsyncLoading();
-    
+
     try {
       // Try API search first
       final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
@@ -97,7 +97,7 @@ class IndependentDirectorateNotifier extends StateNotifier<AsyncValue<List<Indep
       try {
         final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
         final currentState = await _directorateService.getIndependentDirectorates(currentLanguage: currentLanguage);
-        final searchResults = await _directorateService.searchIndependentDirectoratesLocally(query, currentState.items);
+        final searchResults = _directorateService.searchIndependentDirectoratesLocally(query, currentState.items);
         state = AsyncData(searchResults);
       } catch (e, st) {
         state = AsyncError(e, st);
@@ -124,15 +124,15 @@ final independentDirectorateSearchProvider = StateProvider<String>((ref) => '');
 // Provider for the search results
 final independentDirectorateSearchResultsProvider = FutureProvider<List<IndependentDirectorateItem>>((ref) {
   final searchQuery = ref.watch(independentDirectorateSearchProvider);
-  
+
   if (searchQuery.isEmpty) {
     // Return empty list if no search query
     return Future.value([]);
   }
-  
+
   final directorateService = ref.read(independentDirectorateServiceProvider);
   final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
-  
+
   // Try API search first, then fall back to local if needed
   return directorateService.searchIndependentDirectorates(searchQuery, currentLanguage: currentLanguage).then(
     (response) => response.items,
@@ -149,4 +149,4 @@ final independentDirectorateDetailProvider = FutureProvider.family<IndependentDi
   final directorateService = ref.read(independentDirectorateServiceProvider);
   final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
   return directorateService.getIndependentDirectorateDetail(directorateId, currentLanguage: currentLanguage);
-}); 
+});

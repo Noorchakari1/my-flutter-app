@@ -16,7 +16,7 @@ class ProvinceNotifier extends StateNotifier<AsyncValue<List<ProvinceItem>>> {
     try {
       final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
       final response = await _provinceService.getProvinces(
-        page: 1, 
+        page: 1,
         currentLanguage: currentLanguage
       );
       _currentPage = 1;
@@ -29,10 +29,10 @@ class ProvinceNotifier extends StateNotifier<AsyncValue<List<ProvinceItem>>> {
 
   Future<void> loadMore() async {
     if (!_hasMore || state is AsyncLoading) return;
-    
+
     final currentItems = state.value ?? [];
     state = const AsyncLoading<List<ProvinceItem>>();
-    
+
     try {
       _currentPage++;
       final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
@@ -41,7 +41,7 @@ class ProvinceNotifier extends StateNotifier<AsyncValue<List<ProvinceItem>>> {
         currentLanguage: currentLanguage
       );
       _hasMore = response.pagination.currentPage < response.pagination.totalPages;
-      
+
       state = AsyncData([...currentItems, ...response.items]);
     } catch (e, st) {
       _currentPage--; // Revert page increment on error
@@ -53,7 +53,7 @@ class ProvinceNotifier extends StateNotifier<AsyncValue<List<ProvinceItem>>> {
   void replaceItems(List<ProvinceItem> items) {
     // If we're already in an error state, keep it
     if (state is AsyncError) return;
-    
+
     // Otherwise replace the items
     state = AsyncData(items);
   }
@@ -62,7 +62,7 @@ class ProvinceNotifier extends StateNotifier<AsyncValue<List<ProvinceItem>>> {
     _currentPage = 1;
     _hasMore = true;
     state = const AsyncLoading();
-    
+
     try {
       final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
       final response = await _provinceService.getProvinces(
@@ -75,15 +75,15 @@ class ProvinceNotifier extends StateNotifier<AsyncValue<List<ProvinceItem>>> {
       state = AsyncError(e, st);
     }
   }
-  
+
   // Search functionality - will try API search first, fallback to local search
   Future<void> searchProvinces(String query) async {
     if (query.isEmpty) {
       return refresh();
     }
-    
+
     state = const AsyncLoading();
-    
+
     try {
       // Try API search first
       final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
@@ -97,7 +97,7 @@ class ProvinceNotifier extends StateNotifier<AsyncValue<List<ProvinceItem>>> {
       try {
         final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
         final currentState = await _provinceService.getProvinces(currentLanguage: currentLanguage);
-        final searchResults = await _provinceService.searchProvincesLocally(query, currentState.items);
+        final searchResults = _provinceService.searchProvincesLocally(query, currentState.items);
         state = AsyncData(searchResults);
       } catch (e, st) {
         state = AsyncError(e, st);
@@ -124,15 +124,15 @@ final provinceSearchProvider = StateProvider<String>((ref) => '');
 // Provider for the search results
 final provinceSearchResultsProvider = FutureProvider<List<ProvinceItem>>((ref) {
   final searchQuery = ref.watch(provinceSearchProvider);
-  
+
   if (searchQuery.isEmpty) {
     // Return empty list if no search query
     return Future.value([]);
   }
-  
+
   final provinceService = ref.read(provinceServiceProvider);
   final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
-  
+
   // Try API search first, then fall back to local if needed
   return provinceService.searchProvinces(searchQuery, currentLanguage: currentLanguage).then(
     (response) => response.items,
@@ -149,4 +149,4 @@ final provinceDetailProvider = FutureProvider.family<ProvinceItem, int>((ref, pr
   final provinceService = ref.read(provinceServiceProvider);
   final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
   return provinceService.getProvinceDetail(provinceId, currentLanguage: currentLanguage);
-}); 
+});
