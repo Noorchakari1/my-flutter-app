@@ -1,30 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/config/routes.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
 import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
-import '../widgets/app_header.dart';
-import '../widgets/custom_button.dart';
-import 'feedback_screen.dart';
-import 'service_button_screen.dart';
-import 'web_view_screen.dart';
+import '../../../language/presentation/screens/feedback_screen.dart';
+import '../../../language/presentation/screens/service_button_screen.dart';
+import '../../../language/presentation/screens/web_view_screen.dart';
+import '../../../language/presentation/widgets/app_header.dart';
+import '../../../language/presentation/widgets/custom_button.dart';
 
-class PashtoScreen extends StatefulWidget {
-  const PashtoScreen({super.key});
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<PashtoScreen> createState() => _PashtoScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _PashtoScreenState extends State<PashtoScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _page = 0;
 
+  // Helper function to get localized text
+  String _getText(String key) {
+    final language = ref.watch(themeNotifierProvider).currentLanguage;
+    Map<String, String> textMap;
+    switch (language) {
+      case 'pashto':
+        textMap = AppConstants.pashtoText;
+        break;
+      case 'persian':
+        textMap = AppConstants.persianText;
+        break;
+      default:
+        textMap = AppConstants.englishText;
+    }
+    return textMap[key] ?? key; // Return key if translation not found
+  }
+
   Widget _buildHomeContent() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final language = ref.watch(themeNotifierProvider).currentLanguage;
+
     return Column(
       children: [
         AppHeader(
-          title: AppConstants.pashtoText['headerTitle']!,
+          title: _getText('headerTitle'),
           logoPath: AppConstants.logoPath,
           logoHeight: AppConstants.headerImageHeight,
           logoColor: Colors.white,
@@ -41,73 +63,47 @@ class _PashtoScreenState extends State<PashtoScreen> {
               crossAxisSpacing: AppConstants.defaultPadding * 1.5,
               childAspectRatio: 1,
               children: [
-                // CustomButton(
-                //   title: AppConstants.pashtoText['aopWebsite']!,
-                //   iconData: Icons.web,
-                //   onPressed: () {
-                //     Navigator.of(context).push(MaterialPageRoute(
-                //       builder: (context) => WebViewScreen(
-                //         url: AppConstants.aopUrls['pashto']!,
-                //         language: 'pashto',
-                //       ),
-                //     ));
-                //   },
-                // ),
-                                CustomButton(
-                  title: 'خبرونه',
+                CustomButton(
+                  title: _getText('newsNav'),
                   iconData: Icons.newspaper,
                   onPressed: () {
                     Navigator.of(context).pushNamed(Routes.news);
                   },
                 ),
                 CustomButton(
-                  title: 'وزارتونه',
+                  title: _getText('ministries'),
                   iconData: Icons.account_balance,
                   onPressed: () {
                     Navigator.of(context).pushNamed(Routes.ministries);
                   },
                 ),
-                // CustomButton(
-                //   title: 'د دولتي ادارو لیست',
-                //   iconData: Icons.departure_board,
-                //   onPressed: () {
-                //     Navigator.of(context).push(MaterialPageRoute(
-                //       builder: (context) => WebViewScreen(
-                //         url: AppConstants.aopMinistryUrls['pashto']!,
-                //         language: 'pashto',
-                //       ),
-                //     ));
-                //   },
-                // ),
                 CustomButton(
-                  title: 'خپلواک ریاستونه',
+                  title: _getText('independentDirectorates'),
                   iconData: Icons.business,
                   onPressed: () {
                     Navigator.of(context).pushNamed(Routes.independentDirectorates);
                   },
                 ),
                 CustomButton(
-                  title: 'ولایتونه',
+                  title: _getText('provinces'),
                   iconData: Icons.location_city,
                   onPressed: () {
                     Navigator.of(context).pushNamed(Routes.provinces);
                   },
                 ),
                 CustomButton(
-                  title: 'د عامه خدمتونه',
-                  iconData: Icons.web,
+                  title: _getText('publicServices'),
+                  iconData: Icons.public,
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => ServiceButtonScreen(
-                        passportTitle:
-                            AppConstants.pashtoText['passportServices']!,
-                        passportURL: AppConstants.passportUrls['pashto']!,
-                        language: 'pashto',
+                        passportTitle: _getText('passportServices'),
+                        passportURL: AppConstants.passportUrls[language]!,
+                        language: language,
                       ),
                     ));
                   },
                 ),
-
               ],
             ),
           ),
@@ -117,9 +113,10 @@ class _PashtoScreenState extends State<PashtoScreen> {
   }
 
   Widget _buildWebContent() {
+    final language = ref.watch(themeNotifierProvider).currentLanguage;
     return WebViewScreen(
-      url: AppConstants.aopUrls['pashto']!,
-      language: 'pashto',
+      url: AppConstants.aopUrls[language]!,
+      language: language,
       initialPage: _page,
       showBottomNav: false,
       showAppBar: false,
@@ -127,15 +124,18 @@ class _PashtoScreenState extends State<PashtoScreen> {
   }
 
   Widget _buildFeedbackContent() {
+    final language = ref.watch(themeNotifierProvider).currentLanguage;
+    final isRTL = language == 'persian' || language == 'pashto';
+
     return FeedbackScreen(
-      appbarTitle: AppConstants.pashtoText['contactUs']!,
-      guidedText: AppConstants.pashtoText['feedbackGuide']!,
-      whatsAppTitle: AppConstants.pashtoText['whatsapp']!,
-      emailTitle: AppConstants.pashtoText['email']!,
-      txtDir: TextDirection.rtl,
-      formTitle: AppConstants.pashtoText['contactForm']!,
-      url: AppConstants.aopFormUrls['pashto']!,
-      language: 'pashto',
+      appbarTitle: _getText('contactUs'),
+      guidedText: _getText('feedbackGuide'),
+      whatsAppTitle: _getText('whatsapp'),
+      emailTitle: _getText('email'),
+      txtDir: isRTL ? TextDirection.rtl : TextDirection.ltr,
+      formTitle: _getText('contactForm'),
+      url: AppConstants.aopFormUrls[language]!,
+      language: language,
       showBottomNav: false,
     );
   }
@@ -148,11 +148,14 @@ class _PashtoScreenState extends State<PashtoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final language = ref.watch(themeNotifierProvider).currentLanguage;
+    final isRTL = language == 'persian' || language == 'pashto';
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _page == 0
           ? CustomAppBar(
-              title: AppConstants.pashtoText['welcome']!,
+              title: _getText('welcome'),
             )
           : null,
       body: IndexedStack(
@@ -172,18 +175,18 @@ class _PashtoScreenState extends State<PashtoScreen> {
         elevation: 8.0,
         iconSize: 24.0,
         height: 60.0,
-        items: const [
+        items: [
           BottomNavigationItem(
             icon: Icons.home,
-            label: 'کور',
+            label: _getText('home'),
           ),
           BottomNavigationItem(
             icon: Icons.web,
-            label: 'ویبسایټ',
+            label: _getText('websiteNav'),
           ),
           BottomNavigationItem(
             icon: Icons.feedback,
-            label: 'اړیکه',
+            label: _getText('contactNav'),
           ),
         ],
       ),

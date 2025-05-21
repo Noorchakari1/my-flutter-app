@@ -2,12 +2,10 @@ import 'package:aop_sites/features/news/presentation/screens/news_screen.dart';
 import 'package:aop_sites/features/news/presentation/screens/saved_news_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/independent_directorates/presentation/screens/independent_directorates_screen.dart';
-import '../../features/language/presentation/screens/english_screen.dart';
 import '../../features/language/presentation/screens/feedback_screen.dart';
 import '../../features/language/presentation/screens/language_screen.dart';
-import '../../features/language/presentation/screens/pashto_screen.dart';
-import '../../features/language/presentation/screens/persian_screen.dart';
 import '../../features/language/presentation/screens/service_button_screen.dart';
 import '../../features/language/presentation/screens/web_view_screen.dart';
 import '../../features/ministries/presentation/screens/ministries_screen.dart';
@@ -41,16 +39,10 @@ class Routes {
           builder: (_) => const LanguageScreen(),
         );
       case AppConstants.pashtoRoute:
-        return MaterialPageRoute(
-          builder: (_) => const PashtoScreen(),
-        );
       case AppConstants.persianRoute:
-        return MaterialPageRoute(
-          builder: (_) => const PersianScreen(),
-        );
       case AppConstants.englishRoute:
         return MaterialPageRoute(
-          builder: (_) => const EnglishScreen(),
+          builder: (_) => const HomeScreen(),
         );
       case news:
         return MaterialPageRoute(
@@ -136,4 +128,4 @@ class NotFoundPage extends StatelessWidget {
       ),
     );
   }
-} 
+}
