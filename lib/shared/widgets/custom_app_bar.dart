@@ -11,6 +11,7 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final bool showDrawer;
   final bool showThemeToggle;
   final bool showLanguageButton;
+  final List<Widget>? actions;
 
   const CustomAppBar({
     super.key,
@@ -19,20 +20,20 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.showDrawer = false,
     this.showThemeToggle = true,
     this.showLanguageButton = true,
+    this.actions,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeNotifierProvider);
     final isDarkMode = themeState.isDarkMode;
-    final currentLanguage = themeState.currentLanguage;
 
     return AppBar(
       elevation: 0,
       backgroundColor: AppConstants.primaryColor,
-      leading: showBackButton 
+      leading: showBackButton
         ? const BackButton(color: Colors.white)
-        : showDrawer 
+        : showDrawer
           ? null // Let Scaffold handle drawer icon
           : const SizedBox(),
       title: Text(
@@ -45,6 +46,10 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
       ),
       centerTitle: true,
       actions: [
+        // Add custom actions first if provided
+        if (actions != null) ...actions!,
+
+        // Default bookmark action
         IconButton(
           icon: const Icon(
             Icons.bookmark_added,
@@ -54,6 +59,8 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
             Navigator.pushNamed(context, '/saved_news');
           },
         ),
+
+        // Language button
         if (showLanguageButton)
           PopupMenuButton<String>(
             icon: const Icon(
@@ -61,11 +68,8 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
               color: Colors.white,
             ),
             tooltip: 'Change Language',
-            onSelected: (String language) async {
-              await LanguageService.setSelectedLanguage(language);
-              await ref.read(themeNotifierProvider.notifier).setLanguage(language);
-              
-              // Navigate to the appropriate route based on language
+            onSelected: (String language) {
+              // Store the route before async operations
               String route;
               switch (language) {
                 case 'pashto':
@@ -79,8 +83,13 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   route = AppConstants.englishRoute;
                   break;
               }
-              
+
+              // Navigate first, then update language settings
               Navigator.pushReplacementNamed(context, route);
+
+              // Update language settings after navigation
+              LanguageService.setSelectedLanguage(language);
+              ref.read(themeNotifierProvider.notifier).setLanguage(language);
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               PopupMenuItem<String>(
@@ -127,6 +136,8 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
               ),
             ],
           ),
+
+        // Theme toggle button
         if (showThemeToggle)
           IconButton(
             icon: Icon(
@@ -144,4 +155,4 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight * 0.8);
-} 
+}
