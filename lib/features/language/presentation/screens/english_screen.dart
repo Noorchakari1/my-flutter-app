@@ -130,7 +130,7 @@ class _EnglishScreenState extends State<EnglishScreen> {
   Widget _buildFeedbackContent() {
     return FeedbackScreen(
       appbarTitle: 'Contact Us',
-      guidedText: 'How would you like to contact us?',
+      guidedText: 'Please share your comments/complaints with us',
       whatsAppTitle: 'WhatsApp',
       emailTitle: 'Email',
       txtDir: TextDirection.ltr,

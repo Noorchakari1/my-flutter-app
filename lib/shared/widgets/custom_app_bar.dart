@@ -47,7 +47,7 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
       actions: [
         IconButton(
           icon: const Icon(
-            Icons.favorite_border,
+            Icons.bookmark_added,
             color: Colors.white,
           ),
           onPressed: () {
