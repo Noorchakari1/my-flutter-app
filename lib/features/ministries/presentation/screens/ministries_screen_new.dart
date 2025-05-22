@@ -252,6 +252,7 @@ class _MinistriesScreenNewState extends BaseListScreenState<MinistryItem, Minist
       showSubtitle: true,
       isGrid: false,
       borderRadius: 12,
+      showCircularIndicator: true, // Show the circular progress indicator
     );
   }
 

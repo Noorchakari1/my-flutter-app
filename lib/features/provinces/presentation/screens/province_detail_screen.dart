@@ -114,8 +114,8 @@ class _ProvinceDetailScreenState extends BaseDetailScreenState<ProvinceItem, Pro
   Widget buildLoadingState() {
     return CustomScrollView(
       controller: scrollController,
-      slivers: [
-        const SliverAppBar(
+      slivers: const [
+        SliverAppBar(
           expandedHeight: 300,
           pinned: true,
         ),
@@ -123,14 +123,7 @@ class _ProvinceDetailScreenState extends BaseDetailScreenState<ProvinceItem, Pro
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Add circular progress indicator in the center
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.only(top: 40, bottom: 30),
-                alignment: Alignment.center,
-                child: const CircularProgressIndicator(),
-              ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: LoadingIndicator(
                   itemCount: 3,
@@ -139,6 +132,7 @@ class _ProvinceDetailScreenState extends BaseDetailScreenState<ProvinceItem, Pro
                   showSubtitle: true,
                   isGrid: false,
                   borderRadius: 16,
+                  showCircularIndicator: true, // Use the integrated circular progress indicator
                 ),
               ),
             ],

@@ -16,6 +16,10 @@ class LoadingIndicator extends StatelessWidget {
   final double? gridCrossAxisSpacing;
   final double? gridMainAxisSpacing;
   final double? gridChildAspectRatio;
+  /// Whether to show a circular progress indicator in the center
+  final bool showCircularIndicator;
+  /// Color for the circular progress indicator
+  final Color? circularIndicatorColor;
 
   const LoadingIndicator({
     super.key,
@@ -32,16 +36,53 @@ class LoadingIndicator extends StatelessWidget {
     this.gridCrossAxisSpacing,
     this.gridMainAxisSpacing,
     this.gridChildAspectRatio,
+    this.showCircularIndicator = false,
+    this.circularIndicatorColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Base color and highlight color for shimmer effect
     final baseColor = isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300;
     final highlightColor = isDarkMode ? Colors.grey.shade700 : Colors.grey.shade100;
-    
+
+    // If we need to show both shimmer and circular indicator, wrap in a Stack
+    if (showCircularIndicator) {
+      return Stack(
+        children: [
+          Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: isGrid
+                ? _buildGridShimmer(context)
+                : _buildListShimmer(context),
+          ),
+          // Center the circular progress indicator with a semi-transparent background
+          Center(
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.black.withAlpha(77), // ~0.3 opacity (77/255)
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    circularIndicatorColor ?? Colors.white,
+                  ),
+                  strokeWidth: 3,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Otherwise, just return the shimmer effect
     return Shimmer.fromColors(
       baseColor: baseColor,
       highlightColor: highlightColor,

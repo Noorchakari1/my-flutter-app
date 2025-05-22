@@ -255,6 +255,7 @@ class _ProvincesScreenState extends BaseListScreenState<ProvinceItem, ProvincesS
       showSubtitle: true,
       isGrid: false,
       borderRadius: 12,
+      showCircularIndicator: true, // Show the circular progress indicator
     );
   }
 

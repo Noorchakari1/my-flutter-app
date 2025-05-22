@@ -582,6 +582,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       isGrid: false,
       borderRadius: 12,
       padding: EdgeInsets.all(12),
+      showCircularIndicator: true, // Show the circular progress indicator
     );
   }
 

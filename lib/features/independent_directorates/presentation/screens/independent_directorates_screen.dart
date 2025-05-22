@@ -255,6 +255,7 @@ class _IndependentDirectoratesScreenState extends BaseListScreenState<Independen
       showSubtitle: true,
       isGrid: false,
       borderRadius: 12,
+      showCircularIndicator: true, // Show the circular progress indicator
     );
   }
 
