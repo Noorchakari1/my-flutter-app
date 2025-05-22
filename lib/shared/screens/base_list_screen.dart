@@ -67,6 +67,9 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
       showBorder: false,
       backgroundColor: Colors.transparent,
       margin: EdgeInsets.zero,
+      textColor: Colors.white,
+      hintTextColor: Colors.white.withAlpha(179), // 0.7 opacity = 179/255
+      iconColor: Colors.white,
     );
   }
 

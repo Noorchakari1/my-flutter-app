@@ -15,6 +15,9 @@ class SearchBarWidget extends ConsumerStatefulWidget {
   final EdgeInsetsGeometry? margin;
   final double? height;
   final double? borderRadius;
+  final Color? textColor;
+  final Color? hintTextColor;
+  final Color? iconColor;
 
   const SearchBarWidget({
     super.key,
@@ -29,6 +32,9 @@ class SearchBarWidget extends ConsumerStatefulWidget {
     this.margin,
     this.height,
     this.borderRadius,
+    this.textColor,
+    this.hintTextColor,
+    this.iconColor,
   });
 
   @override
@@ -45,7 +51,7 @@ class _SearchBarWidgetState extends ConsumerState<SearchBarWidget> {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
     _focusNode = widget.focusNode ?? FocusNode();
-    
+
     _controller.addListener(() {
       setState(() {
         _showClearButton = _controller.text.isNotEmpty;
@@ -74,12 +80,12 @@ class _SearchBarWidgetState extends ConsumerState<SearchBarWidget> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final isRTL = LocalizationHelper.isRTL(ref);
-    
+
     return Container(
       height: widget.height ?? 48,
       margin: widget.margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: widget.backgroundColor ?? 
+        color: widget.backgroundColor ??
           (isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100),
         borderRadius: BorderRadius.circular(widget.borderRadius ?? 24),
         border: widget.showBorder ? Border.all(
@@ -96,23 +102,23 @@ class _SearchBarWidgetState extends ConsumerState<SearchBarWidget> {
           textInputAction: TextInputAction.search,
           textAlignVertical: TextAlignVertical.center,
           style: TextStyle(
-            color: isDarkMode ? Colors.white : Colors.black87,
+            color: widget.textColor ?? (isDarkMode ? Colors.white : Colors.black87),
             fontSize: 16,
           ),
           decoration: InputDecoration(
             hintText: widget.hintText,
             hintStyle: TextStyle(
-              color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+              color: widget.hintTextColor ?? (isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
               fontSize: 16,
             ),
             prefixIcon: Icon(
               Icons.search,
-              color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+              color: widget.iconColor ?? (isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
             ),
             suffixIcon: _showClearButton ? IconButton(
               icon: Icon(
                 Icons.clear,
-                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                color: widget.iconColor ?? (isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
               ),
               onPressed: _clearSearch,
             ) : null,

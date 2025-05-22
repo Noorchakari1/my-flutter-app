@@ -430,6 +430,12 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                         onPressed: _clearSearch,
                       ),
                     ),
+                  if (!_isSearchVisible)
+                    IconButton(
+                      icon: const Icon(Icons.search, color: Colors.white),
+                      tooltip: _getText(context, 'search'),
+                      onPressed: _toggleSearch,
+                    ),
                 ],
               ),
             ];
@@ -442,31 +448,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
             ),
             child: Column(
               children: [
-                // Prominent search button (only visible when search is not active)
-                if (!_isSearchVisible)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(13), // 0.05 opacity = 13/255
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: SearchBarWidget(
-                      hintText: _getText(context, 'searchNewsHint'),
-                      onSearch: (_) => _toggleSearch(),
-                      controller: TextEditingController(),
-                      autofocus: false,
-                      showBorder: true,
-                      backgroundColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
-                      margin: EdgeInsets.zero,
-                      height: 44,
-                    ),
-                  ),
                 // Search results indicator
                 if (_isSearchVisible && _searchQuery.isNotEmpty)
                   Container(
