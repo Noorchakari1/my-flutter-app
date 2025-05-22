@@ -4,6 +4,7 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/api_exception.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart'; // Import AppConstants
+import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/info_card.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
@@ -564,25 +565,11 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.newspaper,
-            size: 64,
-            color: AppConstants.primaryColor.withAlpha(179), // 0.7 opacity = 179/255
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _getText(context, 'noNews'),
-            style: const TextStyle(
-              fontSize: 16,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+    return EmptyStateWidget(
+      icon: Icons.newspaper,
+      message: _getText(context, 'noNews'),
+      subMessage: _getText(context, 'browseNews'),
+      iconColor: AppConstants.primaryColor.withAlpha(179),
     );
   }
 
@@ -619,35 +606,13 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
 
   // New method for empty search results with localized text
   Widget _buildEmptySearchResults() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: 64,
-            color: AppConstants.primaryColor.withAlpha(179), // 0.7 opacity = 179/255
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16),
-          ),
-          if (_searchQuery.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 24.0),
-              child: ElevatedButton(
-                onPressed: _clearSearch,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppConstants.primaryColor,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(_getText(context, 'clearSearchButton')),
-              ),
-            ),
-        ],
-      ),
+    return EmptyStateWidget(
+      icon: Icons.search_off,
+      message: _getText(context, 'emptySearchResult').replaceAll('{query}', _searchQuery),
+      subMessage: _getText(context, 'emptySearchSuggestion'),
+      actionLabel: _getText(context, 'clearSearchButton'),
+      onActionPressed: _clearSearch,
+      iconColor: AppConstants.primaryColor.withAlpha(179),
     );
   }
 }

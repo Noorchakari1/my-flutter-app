@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../news/data/providers/saved_news_provider.dart';
 import '../../data/models/news_model.dart';
 import 'news_detail_screen.dart';
@@ -61,45 +62,15 @@ class SavedNewsScreen extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.bookmark_border,
-            size: 80,
-            color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade400,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _getText(context, ref, 'noSavedNews'),
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: const Icon(Icons.newspaper),
-            label: Text(_getText(context, ref, 'browseNews')),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppConstants.primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return EmptyStateWidget(
+      icon: Icons.bookmark_border,
+      message: _getText(context, ref, 'noSavedNews'),
+      subMessage: _getText(context, ref, 'browseNews'),
+      actionLabel: _getText(context, ref, 'browseNews'),
+      onActionPressed: () {
+        Navigator.of(context).pop();
+      },
+      iconColor: AppConstants.primaryColor.withAlpha(179),
     );
   }
 

@@ -5,6 +5,7 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/localization_helper.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/screens/base_list_screen.dart';
+import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/info_card.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
@@ -218,40 +219,22 @@ class _ProvincesScreenState extends BaseListScreenState<ProvinceItem, ProvincesS
 
   @override
   Widget buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            _searchQuery.isNotEmpty ? Icons.search_off : Icons.location_city_outlined,
-            size: 64,
-            color: AppConstants.primaryColor.withAlpha(179), // ~0.7 opacity
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _searchQuery.isNotEmpty
-              ? LocalizationHelper.getText(ref, 'emptySearchResult').replaceAll('{query}', _searchQuery)
-              : LocalizationHelper.getText(ref, 'noProvinces'),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16),
-          ),
-          if (_searchQuery.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 24.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  searchController.clear();
-                  onSearchChanged('');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppConstants.primaryColor,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(LocalizationHelper.getText(ref, 'clearSearchButton')),
-              ),
-            ),
-        ],
-      ),
+    return EmptyStateWidget(
+      icon: _searchQuery.isNotEmpty ? Icons.search_off : Icons.location_city_outlined,
+      message: _searchQuery.isNotEmpty
+        ? LocalizationHelper.getText(ref, 'emptySearchResult').replaceAll('{query}', _searchQuery)
+        : LocalizationHelper.getText(ref, 'noProvinces'),
+      subMessage: _searchQuery.isNotEmpty
+        ? LocalizationHelper.getText(ref, 'emptySearchSuggestion')
+        : LocalizationHelper.getText(ref, 'provinceComingSoon'),
+      actionLabel: _searchQuery.isNotEmpty ? LocalizationHelper.getText(ref, 'clearSearchButton') : null,
+      onActionPressed: _searchQuery.isNotEmpty
+        ? () {
+            searchController.clear();
+            onSearchChanged('');
+          }
+        : null,
+      iconColor: AppConstants.primaryColor.withAlpha(179),
     );
   }
 
