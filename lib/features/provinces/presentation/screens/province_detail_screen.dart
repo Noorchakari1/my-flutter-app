@@ -4,40 +4,23 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../core/providers/theme_provider.dart';
-import '../../../../shared/constants/app_constants.dart';
+import '../../../../core/utils/localization_helper.dart';
+import '../../../../shared/screens/base_detail_screen.dart';
 import '../../data/models/province_model.dart';
 import '../../data/providers/province_provider.dart';
 
-class ProvinceDetailScreen extends ConsumerWidget {
-  final int provinceId;
+class ProvinceDetailScreen extends BaseDetailScreen<ProvinceItem> {
   final String language;
 
   const ProvinceDetailScreen({
     super.key,
-    required this.provinceId,
+    required super.itemId,
     required this.language,
   });
 
-  // Helper function to get localized text
-  String _getText(BuildContext context, WidgetRef ref, String key) {
-    final language = ref.watch(themeNotifierProvider).currentLanguage;
-    Map<String, String> textMap;
-    switch (language) {
-      case 'pashto':
-        textMap = AppConstants.pashtoText;
-        break;
-      case 'persian':
-        textMap = AppConstants.persianText;
-        break;
-      default:
-        textMap = AppConstants.englishText;
-    }
-    return textMap[key] ?? key; // Return key if translation not found
-  }
-
   // Launch website
-  Future<void> _launchURL(BuildContext context, WidgetRef ref, String? url) async {
+  @override
+  Future<void> launchURL(BuildContext context, String? url) async {
     if (url == null || url.isEmpty) return;
 
     try {
@@ -51,7 +34,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
       if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_getText(context, ref, 'cannotOpenWebsite').replaceAll('{url}', url))),
+            SnackBar(content: Text('Cannot open website: $url')),
           );
         }
       }
@@ -65,7 +48,8 @@ class ProvinceDetailScreen extends ConsumerWidget {
   }
 
   // Make a phone call
-  Future<void> _callProvince(BuildContext context, WidgetRef ref, String? phone) async {
+  @override
+  Future<void> makePhoneCall(BuildContext context, String? phone) async {
     if (phone == null || phone.isEmpty) return;
 
     try {
@@ -76,7 +60,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
       if (!await launchUrl(uri)) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_getText(context, ref, 'cannotMakeCall').replaceAll('{phone}', phone))),
+            SnackBar(content: Text('Cannot make call to: $phone')),
           );
         }
       }
@@ -87,6 +71,11 @@ class ProvinceDetailScreen extends ConsumerWidget {
         );
       }
     }
+  }
+
+  @override
+  Future<void> shareContent(BuildContext context, String title, String content) async {
+    // Not implemented as per user requirements
   }
 
   // Helper function to strip HTML tags from content
@@ -105,30 +94,18 @@ class ProvinceDetailScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  Widget buildBody(BuildContext context, WidgetRef ref, bool isDarkMode) {
+    final provinceDetailAsync = ref.watch(provinceDetailProvider(itemId));
 
-    // Use the provider from the provider file instead of the map parameter version
-    final provinceDetailAsync = ref.watch(provinceDetailProvider(provinceId));
-
-    // Get text direction based on language
-    final isRTL = language != 'english';
-    final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
-
-    return Directionality(
-      textDirection: textDirection,
-      child: Scaffold(
-        backgroundColor: isDarkMode ? Colors.black : Colors.grey.shade100,
-        body: provinceDetailAsync.when(
-          data: (province) => _buildProvinceDetail(context, ref, province, isDarkMode),
-          loading: () => _buildLoadingState(),
-          error: (error, stackTrace) => _buildErrorState(context, ref, error),
-        ),
-      ),
+    return provinceDetailAsync.when(
+      data: (province) => _buildProvinceDetail(context, ref, province, isDarkMode),
+      loading: () => buildLoadingState(),
+      error: (error, stackTrace) => buildErrorState(context, ref, error),
     );
   }
 
-  Widget _buildLoadingState() {
+  @override
+  Widget buildLoadingState() {
     return CustomScrollView(
       slivers: [
         const SliverAppBar(
@@ -190,7 +167,8 @@ class ProvinceDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
+  @override
+  Widget buildErrorState(BuildContext context, WidgetRef ref, dynamic error) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
@@ -226,7 +204,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              _getText(context, ref, 'provinceLoadError'),
+              LocalizationHelper.getText(ref, 'provinceLoadError'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -244,9 +222,9 @@ class ProvinceDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => ref.refresh(provinceDetailProvider(provinceId)),
+              onPressed: () => ref.refresh(provinceDetailProvider(itemId)),
               icon: const Icon(Icons.refresh),
-              label: Text(_getText(context, ref, 'tryAgain')),
+              label: Text(LocalizationHelper.getText(ref, 'tryAgain')),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -258,7 +236,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(_getText(context, ref, 'back')),
+              child: Text(LocalizationHelper.getText(ref, 'back')),
             ),
           ],
         ),
@@ -332,10 +310,10 @@ class ProvinceDetailScreen extends ConsumerWidget {
               ),
               onPressed: () {
                 if (province.link != null && province.link!.isNotEmpty) {
-                  _launchURL(context, ref, province.link);
+                  launchURL(context, province.link);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(_getText(context, ref, 'noWebsite'))),
+                    SnackBar(content: Text(LocalizationHelper.getText(ref, 'noWebsite'))),
                   );
                 }
               },
@@ -380,7 +358,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        province.title ?? _getText(context, ref, 'province'),
+                        province.title ?? LocalizationHelper.getText(ref, 'province'),
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -423,7 +401,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              _getText(context, ref, 'contactInfo'),
+                              LocalizationHelper.getText(ref, 'contactInfo'),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -437,7 +415,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
                         // Phone number
                         if (province.phone != null && province.phone!.isNotEmpty)
                           InkWell(
-                            onTap: () => _callProvince(context, ref, province.phone),
+                            onTap: () => makePhoneCall(context, province.phone),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
@@ -459,7 +437,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
                         // Website
                         if (province.link != null && province.link!.isNotEmpty)
                           InkWell(
-                            onTap: () => _launchURL(context, ref, province.link),
+                            onTap: () => launchURL(context, province.link),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
@@ -513,7 +491,7 @@ class ProvinceDetailScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              _getText(context, ref, 'aboutProvince'),
+                              LocalizationHelper.getText(ref, 'aboutProvince'),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -575,15 +553,15 @@ class ProvinceDetailScreen extends ConsumerWidget {
                       _buildActionButton(
                         context,
                         icon: Icons.phone,
-                        label: _getText(context, ref, 'phone'),
-                        onTap: () => _callProvince(context, ref, province.phone),
+                        label: LocalizationHelper.getText(ref, 'phone'),
+                        onTap: () => makePhoneCall(context, province.phone),
                         enabled: province.phone != null && province.phone!.isNotEmpty,
                       ),
                       _buildActionButton(
                         context,
                         icon: Icons.language,
-                        label: _getText(context, ref, 'viewOfficialWebsite'),
-                        onTap: () => _launchURL(context, ref, province.link),
+                        label: LocalizationHelper.getText(ref, 'viewOfficialWebsite'),
+                        onTap: () => launchURL(context, province.link),
                         enabled: province.link != null && province.link!.isNotEmpty,
                       ),
                       // Removed share button as per user requirements

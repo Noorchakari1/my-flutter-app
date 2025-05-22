@@ -6,18 +6,18 @@ import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/screens/base_detail_screen.dart';
 import '../../data/models/independent_directorate_model.dart';
 import '../../data/providers/independent_directorate_provider.dart';
 
-class IndependentDirectorateDetailScreen extends ConsumerWidget {
-  final int directorateId;
+class IndependentDirectorateDetailScreen extends BaseDetailScreen<IndependentDirectorateItem> {
   final String language;
 
   const IndependentDirectorateDetailScreen({
     super.key,
-    required this.directorateId,
+    required int directorateId,
     required this.language,
-  });
+  }) : super(itemId: directorateId);
 
   // Helper function to get localized text
   String _getText(BuildContext context, WidgetRef ref, String key) {
@@ -36,8 +36,9 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
     return textMap[key] ?? key; // Return key if translation not found
   }
 
-  // Launch website
-  Future<void> _launchURL(BuildContext context, WidgetRef ref, String? url) async {
+  /// Launch URL in browser
+  @override
+  Future<void> launchURL(BuildContext context, String? url) async {
     if (url == null || url.isEmpty) return;
 
     try {
@@ -51,7 +52,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
       if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_getText(context, ref, 'cannotOpenWebsite').replaceAll('{url}', url))),
+            SnackBar(content: Text('Cannot open website: $url')),
           );
         }
       }
@@ -64,8 +65,9 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
     }
   }
 
-  // Make a phone call
-  Future<void> _callDirectorate(BuildContext context, WidgetRef ref, String? phone) async {
+  /// Make phone call
+  @override
+  Future<void> makePhoneCall(BuildContext context, String? phone) async {
     if (phone == null || phone.isEmpty) return;
 
     try {
@@ -76,7 +78,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
       if (!await launchUrl(uri)) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_getText(context, ref, 'cannotMakeCall').replaceAll('{phone}', phone))),
+            SnackBar(content: Text('Cannot make call to: $phone')),
           );
         }
       }
@@ -87,6 +89,11 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
         );
       }
     }
+  }
+
+  @override
+  Future<void> shareContent(BuildContext context, String title, String content) async {
+    // Not implemented as per user requirements
   }
 
   // Helper function to strip HTML tags from content
@@ -105,30 +112,19 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
+  Widget buildBody(BuildContext context, WidgetRef ref, bool isDarkMode) {
     // Use the provider from the provider file instead of the map parameter version
-    final directorateDetailAsync = ref.watch(independentDirectorateDetailProvider(directorateId));
+    final directorateDetailAsync = ref.watch(independentDirectorateDetailProvider(itemId));
 
-    // Get text direction based on language
-    final isRTL = language != 'english';
-    final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
-
-    return Directionality(
-      textDirection: textDirection,
-      child: Scaffold(
-        backgroundColor: isDarkMode ? Colors.black : Colors.grey.shade100,
-        body: directorateDetailAsync.when(
-          data: (directorate) => _buildDirectorateDetail(context, ref, directorate, isDarkMode),
-          loading: () => _buildLoadingState(),
-          error: (error, stackTrace) => _buildErrorState(context, ref, error),
-        ),
-      ),
+    return directorateDetailAsync.when(
+      data: (directorate) => _buildDirectorateDetail(context, ref, directorate, isDarkMode),
+      loading: () => buildLoadingState(),
+      error: (error, stackTrace) => buildErrorState(context, ref, error),
     );
   }
 
-  Widget _buildLoadingState() {
+  @override
+  Widget buildLoadingState() {
     return CustomScrollView(
       slivers: [
         const SliverAppBar(
@@ -190,7 +186,8 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
+  @override
+  Widget buildErrorState(BuildContext context, WidgetRef ref, dynamic error) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
@@ -244,7 +241,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => ref.refresh(independentDirectorateDetailProvider(directorateId)),
+              onPressed: () => ref.refresh(independentDirectorateDetailProvider(itemId)),
               icon: const Icon(Icons.refresh),
               label: Text(_getText(context, ref, 'tryAgain')),
               style: ElevatedButton.styleFrom(
@@ -332,7 +329,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
               ),
               onPressed: () {
                 if (directorate.link != null && directorate.link!.isNotEmpty) {
-                  _launchURL(context, ref, directorate.link);
+                  launchURL(context, directorate.link);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(_getText(context, ref, 'noWebsite'))),
@@ -437,7 +434,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                         // Phone number
                         if (directorate.phone != null && directorate.phone!.isNotEmpty)
                           InkWell(
-                            onTap: () => _callDirectorate(context, ref, directorate.phone),
+                            onTap: () => makePhoneCall(context, directorate.phone),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
@@ -459,7 +456,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                         // Website
                         if (directorate.link != null && directorate.link!.isNotEmpty)
                           InkWell(
-                            onTap: () => _launchURL(context, ref, directorate.link),
+                            onTap: () => launchURL(context, directorate.link),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
@@ -576,14 +573,14 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                         context,
                         icon: Icons.phone,
                         label: _getText(context, ref, 'phone'),
-                        onTap: () => _callDirectorate(context, ref, directorate.phone),
+                        onTap: () => makePhoneCall(context, directorate.phone),
                         enabled: directorate.phone != null && directorate.phone!.isNotEmpty,
                       ),
                       _buildActionButton(
                         context,
                         icon: Icons.language,
                         label: _getText(context, ref, 'viewOfficialWebsite'),
-                        onTap: () => _launchURL(context, ref, directorate.link),
+                        onTap: () => launchURL(context, directorate.link),
                         enabled: directorate.link != null && directorate.link!.isNotEmpty,
                       ),
                       // Removed share button as per user requirements

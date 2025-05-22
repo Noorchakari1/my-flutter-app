@@ -170,7 +170,7 @@ class _ProvincesScreenState extends BaseListScreenState<ProvinceItem, ProvincesS
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ProvinceDetailScreen(
-              provinceId: province.id,
+              itemId: province.id,
               language: LocalizationHelper.getCurrentLanguage(ref),
             ),
           ),
