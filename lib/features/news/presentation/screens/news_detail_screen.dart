@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../../core/providers/theme_provider.dart';
+import '../../../../shared/constants/app_constants.dart';
 import '../../data/models/news_model.dart';
 import '../../data/providers/news_provider.dart';
 import '../../data/providers/saved_news_provider.dart';
-import 'package:share_plus/share_plus.dart';
-import '../../../../core/providers/theme_provider.dart';
-import '../../../../shared/constants/app_constants.dart';
 
 class NewsDetailScreen extends ConsumerWidget {
   final int newsId;

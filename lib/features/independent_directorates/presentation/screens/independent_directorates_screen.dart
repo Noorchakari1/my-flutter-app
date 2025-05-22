@@ -1,19 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_html/flutter_html.dart';
-
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/api_exception.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../data/models/independent_directorate_model.dart';
+import '../../data/providers/independent_directorate_provider.dart';
 import '../../data/services/independent_directorate_service.dart';
 import 'independent_directorate_detail_screen.dart';
-import '../../data/providers/independent_directorate_provider.dart';
 
 class IndependentDirectoratesScreen extends ConsumerStatefulWidget {
   const IndependentDirectoratesScreen({super.key});
@@ -242,46 +239,10 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
   }
 
   // Helper function to strip HTML tags from content
-  String _stripHtmlTags(String htmlString) {
-    // Basic HTML tag removal for search purposes
-    return htmlString
-        .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>')
-        .replaceAll('&quot;', '"')
-        .replaceAll('&#39;', "'");
-  }
 
   // Launch directorate website
-  Future<void> _launchURL(String? url) async {
-    if (url == null || url.isEmpty) return;
-
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      // Don't show snackbar for URL launch failures
-      if (mounted) {
-        setState(() {
-          _error = ApiException(
-            message: _getText(context, 'cannotOpenWebsite').replaceAll('{url}', url),
-            code: 'url_launch_failed',
-          );
-        });
-      }
-    }
-  }
 
   // Scroll to top
-  void _scrollToTop() {
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

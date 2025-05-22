@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../models/province_model.dart';
 import '../services/province_service.dart';
-import '../../../../core/providers/theme_provider.dart';
 
 class ProvinceNotifier extends StateNotifier<AsyncValue<List<ProvinceItem>>> {
   final ProvinceService _provinceService;

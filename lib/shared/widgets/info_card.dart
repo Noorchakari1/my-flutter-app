@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
-
 import '../../core/utils/localization_helper.dart';
-import '../../core/providers/theme_provider.dart';
 
 /// Reusable card widget for displaying information with image
 /// Modernized with enhanced visual design and subtle animations
@@ -198,7 +196,7 @@ class _InfoCardState extends ConsumerState<InfoCard> with SingleTickerProviderSt
           Text(
             widget.title,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white : Colors.black87,
               letterSpacing: 0.1,

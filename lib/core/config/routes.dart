@@ -9,7 +9,6 @@ import '../../features/language/presentation/screens/language_screen.dart';
 import '../../features/language/presentation/screens/service_button_screen.dart';
 import '../../features/language/presentation/screens/web_view_screen.dart';
 import '../../features/ministries/presentation/screens/ministries_screen_new.dart';
-import '../../features/ministries/presentation/screens/ministry_detail_screen_new.dart';
 import '../../features/provinces/presentation/screens/provinces_screen.dart';
 import '../../shared/constants/app_constants.dart';
 

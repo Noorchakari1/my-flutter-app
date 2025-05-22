@@ -1,17 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../data/models/news_model.dart';
-import '../../data/providers/news_provider.dart';
-import '../../data/services/news_service.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'news_detail_screen.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/api_exception.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart'; // Import AppConstants
 import '../../../../shared/widgets/error_display.dart';
+import '../../data/models/news_model.dart';
+import '../../data/providers/news_provider.dart';
+import '../../data/services/news_service.dart';
+import 'news_detail_screen.dart';
 
 class NewsScreen extends ConsumerStatefulWidget {
   const NewsScreen({super.key});
@@ -767,10 +766,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     );
   }
   
-  String _formatDate(String date) {
-    // Format date string if needed
-    return date;
-  }
 
   // New method for empty search results with localized text
   Widget _buildEmptySearchResults() {

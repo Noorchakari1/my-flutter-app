@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../models/independent_directorate_model.dart';
 import '../services/independent_directorate_service.dart';
-import '../../../../core/providers/theme_provider.dart';
 
 class IndependentDirectorateNotifier extends StateNotifier<AsyncValue<List<IndependentDirectorateItem>>> {
   final IndependentDirectorateService _directorateService;

@@ -1,10 +1,8 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
-
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
 import '../widgets/download_dialog.dart';

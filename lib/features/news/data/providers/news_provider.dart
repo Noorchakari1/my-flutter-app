@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../models/news_model.dart';
 import '../services/news_service.dart';
-import '../../../../core/providers/theme_provider.dart';
 
 class NewsNotifier extends StateNotifier<AsyncValue<List<NewsItem>>> {
   final NewsService _newsService;

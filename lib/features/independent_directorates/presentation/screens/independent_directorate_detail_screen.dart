@@ -1,14 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../data/models/independent_directorate_model.dart';
-import '../../data/services/independent_directorate_service.dart';
 import '../../data/providers/independent_directorate_provider.dart';
 
 class IndependentDirectorateDetailScreen extends ConsumerWidget {

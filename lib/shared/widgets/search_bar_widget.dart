@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../core/utils/localization_helper.dart';
-import '../../core/providers/theme_provider.dart';
-import '../constants/app_constants.dart';
 
 /// A reusable search bar widget that can be used across different screens
 class SearchBarWidget extends ConsumerStatefulWidget {

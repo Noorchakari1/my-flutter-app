@@ -8,13 +8,13 @@ class TypingText extends StatefulWidget {
   final Duration startDelay;
 
   const TypingText({
-    Key? key,
+    super.key,
     required this.text,
     this.style,
     this.textAlign,
     this.duration = const Duration(milliseconds: 1500),
     this.startDelay = Duration.zero,
-  }) : super(key: key);
+  });
 
   @override
   State<TypingText> createState() => _TypingTextState();

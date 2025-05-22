@@ -40,7 +40,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildHomeContent() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final language = ref.watch(themeNotifierProvider).currentLanguage;
 
     return Column(
@@ -148,8 +147,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final language = ref.watch(themeNotifierProvider).currentLanguage;
-    final isRTL = language == 'persian' || language == 'pashto';
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

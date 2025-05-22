@@ -26,7 +26,6 @@ class ServiceButtonScreen extends ConsumerStatefulWidget {
 }
 
 class _ServiceButtonScreenState extends ConsumerState<ServiceButtonScreen> {
-  final int _page = 0;
 
   @override
   Widget build(BuildContext context) {

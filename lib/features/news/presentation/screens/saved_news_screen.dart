@@ -1,11 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../../../../core/providers/theme_provider.dart';
+import '../../../../shared/constants/app_constants.dart';
 import '../../../news/data/providers/saved_news_provider.dart';
 import '../../data/models/news_model.dart';
 import 'news_detail_screen.dart';
-import '../../../../core/providers/theme_provider.dart';
-import '../../../../shared/constants/app_constants.dart';
 
 class SavedNewsScreen extends ConsumerWidget {
   const SavedNewsScreen({super.key});
@@ -30,7 +30,6 @@ class SavedNewsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final savedNews = ref.watch(savedNewsProvider);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     // Determine text direction based on current language
     final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';

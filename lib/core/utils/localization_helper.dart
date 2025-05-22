@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/theme_provider.dart';
 import '../../shared/constants/app_constants.dart';
+import '../providers/theme_provider.dart';
 
 /// Helper class for localization-related functionality
 class LocalizationHelper {
