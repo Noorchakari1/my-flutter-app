@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../core/config/routes.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
@@ -56,52 +55,87 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               horizontal: AppConstants.defaultPadding,
               vertical: AppConstants.defaultPadding * 2,
             ),
-            child: GridView.count(
-              crossAxisCount: 3,
-              mainAxisSpacing: AppConstants.defaultPadding * 1.5,
-              crossAxisSpacing: AppConstants.defaultPadding * 1.5,
-              childAspectRatio: 1,
+            child: Column(
               children: [
-                CustomButton(
-                  title: _getText('newsNav'),
-                  iconData: Icons.newspaper,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(Routes.news);
-                  },
-                ),
-                CustomButton(
-                  title: _getText('ministries'),
-                  iconData: Icons.account_balance,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(Routes.ministries);
-                  },
-                ),
-                CustomButton(
-                  title: _getText('independentDirectorates'),
-                  iconData: Icons.business,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(Routes.independentDirectorates);
-                  },
-                ),
-                CustomButton(
-                  title: _getText('provinces'),
-                  iconData: Icons.location_city,
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(Routes.provinces);
-                  },
-                ),
-                CustomButton(
-                  title: _getText('publicServices'),
-                  iconData: Icons.public,
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ServiceButtonScreen(
-                        passportTitle: _getText('passportServices'),
-                        passportURL: AppConstants.passportUrls[language]!,
-                        language: language,
+                // First section: News and Job Opportunities (2 items per row)
+                Container(
+                  margin: const EdgeInsets.only(bottom: AppConstants.defaultPadding * 1.5),
+                  height: 120, // Fixed height for the first row
+                  child: GridView.count(
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    mainAxisSpacing: AppConstants.defaultPadding * 1.5,
+                    crossAxisSpacing: AppConstants.defaultPadding * 1.5,
+                    childAspectRatio: 1.5,
+                    children: [
+                      CustomButton(
+                        title: _getText('newsNav'),
+                        iconData: Icons.newspaper,
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(Routes.news);
+                        },
                       ),
-                    ));
-                  },
+                      CustomButton(
+                        title: _getText('jobOpportunities'),
+                        iconData: Icons.work,
+                        onPressed: () {
+                          // Functionality will be implemented later
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(_getText('comingSoon')),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Second section: Remaining menu items (3 items per row)
+                Expanded(
+                  child: GridView.count(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: AppConstants.defaultPadding * 1.5,
+                    crossAxisSpacing: AppConstants.defaultPadding * 1.5,
+                    childAspectRatio: 1.0,
+                    children: [
+                      CustomButton(
+                        title: _getText('ministries'),
+                        iconData: Icons.account_balance,
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(Routes.ministries);
+                        },
+                      ),
+                      CustomButton(
+                        title: _getText('independentDirectorates'),
+                        iconData: Icons.business,
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(Routes.independentDirectorates);
+                        },
+                      ),
+                      CustomButton(
+                        title: _getText('provinces'),
+                        iconData: Icons.location_city,
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(Routes.provinces);
+                        },
+                      ),
+                      CustomButton(
+                        title: _getText('publicServices'),
+                        iconData: Icons.public,
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => ServiceButtonScreen(
+                              passportTitle: _getText('passportServices'),
+                              passportURL: AppConstants.passportUrls[language]!,
+                              language: language,
+                            ),
+                          ));
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
