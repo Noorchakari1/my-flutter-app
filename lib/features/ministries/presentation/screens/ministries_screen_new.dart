@@ -8,7 +8,7 @@ import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/screens/base_list_screen.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/info_card.dart';
-import '../../../../shared/widgets/loading_state.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../data/models/ministry_model.dart';
 import '../../data/providers/ministry_provider.dart';
 import 'ministry_detail_screen_new.dart';
@@ -262,7 +262,14 @@ class _MinistriesScreenNewState extends BaseListScreenState<MinistryItem, Minist
 
   @override
   Widget buildLoadingState() {
-    return const LoadingState(itemCount: 5);
+    return const LoadingIndicator(
+      itemCount: 5,
+      height: 110,
+      showImage: true,
+      showSubtitle: true,
+      isGrid: false,
+      borderRadius: 12,
+    );
   }
 
   @override

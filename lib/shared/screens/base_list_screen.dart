@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/localization_helper.dart';
 import '../../shared/constants/app_constants.dart';
+import '../../shared/widgets/loading_indicator.dart';
 import '../../shared/widgets/search_bar_widget.dart';
 
 /// Base class for list screens with common functionality

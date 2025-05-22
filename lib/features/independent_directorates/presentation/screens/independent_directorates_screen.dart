@@ -7,7 +7,7 @@ import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/screens/base_list_screen.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/info_card.dart';
-import '../../../../shared/widgets/loading_state.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../data/models/independent_directorate_model.dart';
 import '../../data/providers/independent_directorate_provider.dart';
 import '../../data/services/independent_directorate_service.dart';
@@ -265,7 +265,14 @@ class _IndependentDirectoratesScreenState extends BaseListScreenState<Independen
 
   @override
   Widget buildLoadingState() {
-    return const LoadingState(itemCount: 5);
+    return const LoadingIndicator(
+      itemCount: 5,
+      height: 110,
+      showImage: true,
+      showSubtitle: true,
+      isGrid: false,
+      borderRadius: 12,
+    );
   }
 
   @override

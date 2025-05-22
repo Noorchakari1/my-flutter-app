@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../data/models/news_model.dart';
 import '../../data/providers/news_provider.dart';
 import '../../data/providers/saved_news_provider.dart';
@@ -602,41 +603,15 @@ class NewsDetailScreen extends ConsumerWidget {
                 alignment: Alignment.center,
                 child: const CircularProgressIndicator(),
               ),
-              Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                      height: 150,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      height: 200,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      height: 100,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ],
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: LoadingIndicator(
+                  itemCount: 3,
+                  height: 150,
+                  showImage: false,
+                  showSubtitle: true,
+                  isGrid: false,
+                  borderRadius: 16,
                 ),
               ),
             ],

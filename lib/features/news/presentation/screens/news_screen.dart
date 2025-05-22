@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/api_exception.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart'; // Import AppConstants
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/info_card.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/search_bar_widget.dart';
 import '../../data/models/news_model.dart';
 import '../../data/providers/news_provider.dart';
@@ -587,34 +587,14 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   }
 
   Widget _buildLoadingShimmer() {
-    return ListView(
-      padding: const EdgeInsets.all(12),
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        // Add circular progress indicator at the top
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 30),
-          alignment: Alignment.center,
-          child: const CircularProgressIndicator(),
-        ),
-        // Regular news item shimmers
-        ...List.generate(
-          5,
-          (index) => Shimmer.fromColors(
-            baseColor: Colors.grey.shade300,
-            highlightColor: Colors.grey.shade100,
-            child: Container(
-              height: 110,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-      ],
+    return const LoadingIndicator(
+      itemCount: 5,
+      height: 110,
+      showImage: true,
+      showSubtitle: true,
+      isGrid: false,
+      borderRadius: 12,
+      padding: EdgeInsets.all(12),
     );
   }
 
