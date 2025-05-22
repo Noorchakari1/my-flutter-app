@@ -19,6 +19,11 @@ class IndependentDirectorateDetailScreen extends BaseDetailScreen<IndependentDir
     required this.language,
   }) : super(itemId: directorateId);
 
+  @override
+  BaseDetailScreenState<IndependentDirectorateItem, BaseDetailScreen<IndependentDirectorateItem>> createState() => _IndependentDirectorateDetailScreenState();
+}
+
+class _IndependentDirectorateDetailScreenState extends BaseDetailScreenState<IndependentDirectorateItem, IndependentDirectorateDetailScreen> {
   // Helper function to get localized text
   String _getText(BuildContext context, WidgetRef ref, String key) {
     final language = ref.watch(themeNotifierProvider).currentLanguage;
@@ -114,7 +119,7 @@ class IndependentDirectorateDetailScreen extends BaseDetailScreen<IndependentDir
   @override
   Widget buildBody(BuildContext context, WidgetRef ref, bool isDarkMode) {
     // Use the provider from the provider file instead of the map parameter version
-    final directorateDetailAsync = ref.watch(independentDirectorateDetailProvider(itemId));
+    final directorateDetailAsync = ref.watch(independentDirectorateDetailProvider(widget.itemId));
 
     return directorateDetailAsync.when(
       data: (directorate) => _buildDirectorateDetail(context, ref, directorate, isDarkMode),
@@ -126,6 +131,7 @@ class IndependentDirectorateDetailScreen extends BaseDetailScreen<IndependentDir
   @override
   Widget buildLoadingState() {
     return CustomScrollView(
+      controller: scrollController,
       slivers: [
         const SliverAppBar(
           expandedHeight: 300,
@@ -241,7 +247,7 @@ class IndependentDirectorateDetailScreen extends BaseDetailScreen<IndependentDir
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => ref.refresh(independentDirectorateDetailProvider(itemId)),
+              onPressed: () => ref.refresh(independentDirectorateDetailProvider(widget.itemId)),
               icon: const Icon(Icons.refresh),
               label: Text(_getText(context, ref, 'tryAgain')),
               style: ElevatedButton.styleFrom(
@@ -265,6 +271,7 @@ class IndependentDirectorateDetailScreen extends BaseDetailScreen<IndependentDir
 
   Widget _buildDirectorateDetail(BuildContext context, WidgetRef ref, IndependentDirectorateItem directorate, bool isDarkMode) {
     return CustomScrollView(
+      controller: scrollController,
       slivers: [
         // App bar with directorate image
         SliverAppBar(

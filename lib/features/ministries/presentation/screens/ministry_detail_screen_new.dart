@@ -15,6 +15,11 @@ class MinistryDetailScreen extends BaseDetailScreen<MinistryItem> {
     required super.itemId,
   });
 
+  @override
+  BaseDetailScreenState<MinistryItem, BaseDetailScreen<MinistryItem>> createState() => _MinistryDetailScreenState();
+}
+
+class _MinistryDetailScreenState extends BaseDetailScreenState<MinistryItem, MinistryDetailScreen> {
   /// Launch URL in browser
   @override
   Future<void> launchURL(BuildContext context, String? url) async {
@@ -72,7 +77,7 @@ class MinistryDetailScreen extends BaseDetailScreen<MinistryItem> {
 
   @override
   Widget buildBody(BuildContext context, WidgetRef ref, bool isDarkMode) {
-    final ministryDetailAsync = ref.watch(ministryDetailProvider(itemId));
+    final ministryDetailAsync = ref.watch(ministryDetailProvider(widget.itemId));
 
     return ministryDetailAsync.when(
       data: (ministry) => _buildMinistryDetail(context, ref, ministry, isDarkMode),
@@ -189,7 +194,7 @@ class MinistryDetailScreen extends BaseDetailScreen<MinistryItem> {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => ref.refresh(ministryDetailProvider(itemId)),
+              onPressed: () => ref.refresh(ministryDetailProvider(widget.itemId)),
               icon: const Icon(Icons.refresh),
               label: Text(LocalizationHelper.getText(ref, 'tryAgain')),
               style: ElevatedButton.styleFrom(
@@ -213,6 +218,7 @@ class MinistryDetailScreen extends BaseDetailScreen<MinistryItem> {
 
   Widget _buildMinistryDetail(BuildContext context, WidgetRef ref, MinistryItem ministry, bool isDarkMode) {
     return CustomScrollView(
+      controller: scrollController,
       slivers: [
         // اپ‌بار با تصویر وزارت‌خانه
         SliverAppBar(

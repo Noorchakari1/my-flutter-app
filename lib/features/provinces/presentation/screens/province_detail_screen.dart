@@ -18,6 +18,11 @@ class ProvinceDetailScreen extends BaseDetailScreen<ProvinceItem> {
     required this.language,
   });
 
+  @override
+  BaseDetailScreenState<ProvinceItem, BaseDetailScreen<ProvinceItem>> createState() => _ProvinceDetailScreenState();
+}
+
+class _ProvinceDetailScreenState extends BaseDetailScreenState<ProvinceItem, ProvinceDetailScreen> {
   // Launch website
   @override
   Future<void> launchURL(BuildContext context, String? url) async {
@@ -95,7 +100,7 @@ class ProvinceDetailScreen extends BaseDetailScreen<ProvinceItem> {
 
   @override
   Widget buildBody(BuildContext context, WidgetRef ref, bool isDarkMode) {
-    final provinceDetailAsync = ref.watch(provinceDetailProvider(itemId));
+    final provinceDetailAsync = ref.watch(provinceDetailProvider(widget.itemId));
 
     return provinceDetailAsync.when(
       data: (province) => _buildProvinceDetail(context, ref, province, isDarkMode),
@@ -107,6 +112,7 @@ class ProvinceDetailScreen extends BaseDetailScreen<ProvinceItem> {
   @override
   Widget buildLoadingState() {
     return CustomScrollView(
+      controller: scrollController,
       slivers: [
         const SliverAppBar(
           expandedHeight: 300,
@@ -222,7 +228,7 @@ class ProvinceDetailScreen extends BaseDetailScreen<ProvinceItem> {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => ref.refresh(provinceDetailProvider(itemId)),
+              onPressed: () => ref.refresh(provinceDetailProvider(widget.itemId)),
               icon: const Icon(Icons.refresh),
               label: Text(LocalizationHelper.getText(ref, 'tryAgain')),
               style: ElevatedButton.styleFrom(
@@ -246,6 +252,7 @@ class ProvinceDetailScreen extends BaseDetailScreen<ProvinceItem> {
 
   Widget _buildProvinceDetail(BuildContext context, WidgetRef ref, ProvinceItem province, bool isDarkMode) {
     return CustomScrollView(
+      controller: scrollController,
       slivers: [
         // App bar with province image
         SliverAppBar(
