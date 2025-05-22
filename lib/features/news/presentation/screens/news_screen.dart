@@ -7,6 +7,7 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart'; // Import AppConstants
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/info_card.dart';
+import '../../../../shared/widgets/search_bar_widget.dart';
 import '../../data/models/news_model.dart';
 import '../../data/providers/news_provider.dart';
 import '../../data/services/news_service.dart';
@@ -339,23 +340,15 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
             return [
               SliverAppBar(
                 title: _isSearchVisible
-                  ? TextField(
+                  ? SearchBarWidget(
+                      hintText: _getText(context, 'searchNewsHint'),
+                      onSearch: _performSearch,
+                      onClear: _clearSearch,
                       controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: _getText(context, 'searchNewsHint'), // Localized hint
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(
-                          color: Colors.white.withAlpha(179), // 0.7 opacity = 179/255
-                        ),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                      // No need to force textDirection here, as we're using Directionality parent
-                      onChanged: _performSearch,
                       autofocus: true,
-                      cursorColor: Colors.white,
+                      showBorder: false,
+                      backgroundColor: Colors.transparent,
+                      margin: EdgeInsets.zero,
                     )
                   : Text(
                       _getText(context, 'newsTitle'), // Localized title
@@ -463,36 +456,15 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                         ),
                       ],
                     ),
-                    child: InkWell(
-                      onTap: _toggleSearch,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.search,
-                              color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              _getText(context, 'searchNewsHint'), // Localized hint
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    child: SearchBarWidget(
+                      hintText: _getText(context, 'searchNewsHint'),
+                      onSearch: (_) => _toggleSearch(),
+                      controller: TextEditingController(),
+                      autofocus: false,
+                      showBorder: true,
+                      backgroundColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                      margin: EdgeInsets.zero,
+                      height: 44,
                     ),
                   ),
                 // Search results indicator

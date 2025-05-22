@@ -6,6 +6,7 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/info_card.dart';
+import '../../../../shared/widgets/search_bar_widget.dart';
 import '../../data/models/independent_directorate_model.dart';
 import '../../data/providers/independent_directorate_provider.dart';
 import '../../data/services/independent_directorate_service.dart';
@@ -400,33 +401,17 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
             onPressed: _toggleSearch,
           ),
           Expanded(
-            child: TextField(
+            child: SearchBarWidget(
+              hintText: _getText(context, 'searchDirectorates'),
+              onSearch: _performSearch,
+              onClear: _clearSearch,
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: _getText(context, 'searchDirectorates'),
-                border: InputBorder.none,
-                hintStyle: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).primaryColor,
-              ),
-              textDirection: TextDirection.rtl,
-              onChanged: _performSearch,
               autofocus: true,
+              showBorder: false,
+              backgroundColor: Colors.transparent,
+              margin: EdgeInsets.zero,
             ),
           ),
-          if (_searchController.text.isNotEmpty)
-            IconButton(
-              icon: Icon(
-                Icons.clear,
-                color: Theme.of(context).primaryColor,
-                size: 20,
-              ),
-              onPressed: _clearSearch,
-            ),
         ],
       ),
     );

@@ -6,6 +6,7 @@ import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/info_card.dart';
+import '../../../../shared/widgets/search_bar_widget.dart';
 import '../../data/models/province_model.dart';
 import '../../data/providers/province_provider.dart';
 import '../../data/services/province_service.dart';
@@ -397,33 +398,17 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
             onPressed: _toggleSearch,
           ),
           Expanded(
-            child: TextField(
+            child: SearchBarWidget(
+              hintText: _getText(context, 'searchProvinces'),
+              onSearch: _performSearch,
+              onClear: _clearSearch,
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: _getText(context, 'searchProvinces'),
-                border: InputBorder.none,
-                hintStyle: TextStyle(
-                  color: Theme.of(context).textTheme.bodyMedium?.color,
-                ),
-              ),
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-              ),
-              textDirection: TextDirection.rtl,
-              onChanged: _performSearch,
               autofocus: true,
+              showBorder: false,
+              backgroundColor: Colors.transparent,
+              margin: EdgeInsets.zero,
             ),
           ),
-          if (_searchController.text.isNotEmpty)
-            IconButton(
-              icon: Icon(
-                Icons.clear,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-                size: 20,
-              ),
-              onPressed: _clearSearch,
-            ),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/localization_helper.dart';
 import '../../shared/constants/app_constants.dart';
+import '../../shared/widgets/search_bar_widget.dart';
 
 /// Base class for list screens with common functionality
 abstract class BaseListScreen<T> extends ConsumerStatefulWidget {
@@ -57,16 +58,15 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
   }
 
   Widget buildSearchField() {
-    return TextField(
+    return SearchBarWidget(
+      hintText: getSearchHintText(),
+      onSearch: onSearchChanged,
+      onClear: () => onSearchChanged(''),
       controller: searchController,
       autofocus: true,
-      decoration: InputDecoration(
-        hintText: getSearchHintText(),
-        border: InputBorder.none,
-        hintStyle: const TextStyle(color: Colors.white70),
-      ),
-      style: const TextStyle(color: Colors.white),
-      onChanged: onSearchChanged,
+      showBorder: false,
+      backgroundColor: Colors.transparent,
+      margin: EdgeInsets.zero,
     );
   }
 
