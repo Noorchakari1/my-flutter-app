@@ -349,6 +349,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       showBorder: false,
                       backgroundColor: Colors.transparent,
                       margin: EdgeInsets.zero,
+                      textColor: Colors.white,
+                      hintTextColor: Colors.white.withAlpha(179), // 0.7 opacity = 179/255
+                      iconColor: Colors.white,
                     )
                   : Text(
                       _getText(context, 'newsTitle'), // Localized title
