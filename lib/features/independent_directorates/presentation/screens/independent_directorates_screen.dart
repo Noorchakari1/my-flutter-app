@@ -1,12 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/api_exception.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/error_display.dart';
+import '../../../../shared/widgets/info_card.dart';
 import '../../data/models/independent_directorate_model.dart';
 import '../../data/providers/independent_directorate_provider.dart';
 import '../../data/services/independent_directorate_service.dart';
@@ -434,9 +433,13 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
   }
 
   Widget _buildDirectorateCard(IndependentDirectorateItem directorate) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
 
-    return GestureDetector(
+    return InfoCard(
+      title: directorate.title ?? _getText(context, 'directorate'),
+      subtitle: directorate.phone,
+      imageUrl: directorate.image,
+      isRTL: isRTL,
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -447,145 +450,6 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
           ),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(13),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-              ),
-              child: directorate.image != null && directorate.image!.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: directorate.image!,
-                    height: 110,
-                    width: 110,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: Container(
-                        color: Colors.white,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey.shade200,
-                      child: const Icon(
-                        Icons.business,
-                        size: 32,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  )
-                : Container(
-                    height: 110,
-                    width: 110,
-                    color: Colors.grey.shade200,
-                    child: const Icon(
-                      Icons.business,
-                      size: 32,
-                      color: Colors.grey,
-                    ),
-                  ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      directorate.title ?? _getText(context, 'directorate'),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        height: 1.3,
-                      ),
-                      textDirection: TextDirection.rtl,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 12),
-                    // Show website link or phone if available
-                    Row(
-                      children: [
-                        if (directorate.phone != null && directorate.phone!.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: isDarkMode
-                                  ? Colors.blue.withAlpha(51)
-                                  : Colors.blue.withAlpha(26),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.phone,
-                                  size: 14,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  directorate.phone!,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(width: 8),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                _getText(context, 'viewDetails'),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 12,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

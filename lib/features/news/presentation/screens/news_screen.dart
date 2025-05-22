@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
@@ -7,6 +6,7 @@ import '../../../../core/services/api_exception.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../shared/constants/app_constants.dart'; // Import AppConstants
 import '../../../../shared/widgets/error_display.dart';
+import '../../../../shared/widgets/info_card.dart';
 import '../../data/models/news_model.dart';
 import '../../data/providers/news_provider.dart';
 import '../../data/services/news_service.dart';
@@ -663,9 +663,13 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   }
 
   Widget _buildNewsCard(NewsItem newsItem, int index) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
 
-    return GestureDetector(
+    return InfoCard(
+      title: newsItem.title ?? _getText(context, 'noTitle'),
+      subtitle: newsItem.date ?? _getText(context, 'noDate'),
+      imageUrl: newsItem.image,
+      isRTL: isRTL,
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -673,96 +677,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           ),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(13), // 0.05 opacity = 13/255
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.horizontal(
-                right: ref.watch(themeNotifierProvider).currentLanguage != 'english'
-                    ? const Radius.circular(12)
-                    : Radius.zero,
-                left: ref.watch(themeNotifierProvider).currentLanguage == 'english'
-                    ? const Radius.circular(12)
-                    : Radius.zero,
-              ),
-              child: newsItem.image != null && newsItem.image!.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: newsItem.image!,
-                    height: 110,
-                    width: 110,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: Container(
-                        color: Colors.white,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey.shade200,
-                      child: const Icon(
-                        Icons.error_outline,
-                        size: 24,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  )
-                : Container(
-                    height: 110,
-                    width: 110,
-                    color: Colors.grey.shade200,
-                    child: const Icon(
-                      Icons.image_not_supported_outlined,
-                      size: 32,
-                      color: Colors.grey,
-                    ),
-                  ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      newsItem.title ?? _getText(context, 'noTitle'),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      newsItem.date ?? _getText(context, 'noDate'),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
