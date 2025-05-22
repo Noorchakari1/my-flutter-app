@@ -316,7 +316,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
                 Icon(
                   Icons.search_off,
                   size: 64,
-                  color: AppConstants.primaryColor.withOpacity(0.7),
+                  color: AppConstants.primaryColor.withAlpha(179),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -384,7 +384,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -454,7 +454,7 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(13),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -528,8 +528,8 @@ class _IndependentDirectoratesScreenState extends ConsumerState<IndependentDirec
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: isDarkMode
-                                  ? Colors.blue.withOpacity(0.2)
-                                  : Colors.blue.withOpacity(0.1),
+                                  ? Colors.blue.withAlpha(51)
+                                  : Colors.blue.withAlpha(26),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(

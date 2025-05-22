@@ -31,22 +31,22 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
   int _currentPage = 1;
   bool _hasMoreData = true;
   dynamic _error;
-  
+
   // Search related variables
   final TextEditingController _searchController = TextEditingController();
   bool _isSearchVisible = false;
   String _searchQuery = '';
-  
+
   // Scroll to top button visibility
   bool _showScrollToTop = false;
-  
+
   @override
   void initState() {
     super.initState();
     // Initialize TabController with the number of category keys
     _tabController = TabController(length: _categoryKeys.length, vsync: this);
     _scrollController.addListener(_scrollListener);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadFirstPage();
     });
@@ -60,7 +60,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     _searchController.dispose();
     super.dispose();
   }
-  
+
   // Helper function to get localized text
   String _getText(BuildContext context, String key) {
     final language = ref.watch(themeNotifierProvider).currentLanguage;
@@ -77,18 +77,18 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     }
     return textMap[key] ?? key; // Return key if translation not found
   }
-  
+
   void _scrollListener() {
     if (!_scrollController.hasClients) return;
-    
+
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    
+
     // Show scroll to top button when user has scrolled down enough
     setState(() {
       _showScrollToTop = currentScroll > 300; // Show button after scrolling 300px
     });
-    
+
     // Load more when we reach 70% of the list
     if (maxScroll - currentScroll <= maxScroll * 0.3 && !_isLoadingMore && _hasMoreData) {
       _loadNextPage();
@@ -108,24 +108,24 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       });
       return;
     }
-    
+
     setState(() {
       _isLoadingMore = true;
       _currentPage = 1;
       _hasMoreData = true;
       _error = null;
     });
-    
+
     try {
       // Get current language from theme provider
       final themeState = ref.read(themeNotifierProvider);
       final currentLanguage = themeState.currentLanguage;
-      
+
       final response = await ref.read(newsServiceProvider).getNews(
         page: _currentPage,
         currentLanguage: currentLanguage,
       );
-      
+
       if (mounted) {
         setState(() {
           ref.read(newsNotifierProvider.notifier).replaceItems(response.items);
@@ -142,10 +142,10 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       }
     }
   }
-  
+
   Future<void> _loadNextPage() async {
     if (_isLoadingMore || !_hasMoreData) return;
-    
+
     // Check connectivity before loading more
     final isConnected = await ref.read(connectivityServiceProvider).checkConnectivity();
     if (!isConnected) {
@@ -159,25 +159,25 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       });
       return;
     }
-    
+
     setState(() {
       _isLoadingMore = true;
       _error = null; // Clear any previous errors
     });
-    
+
     try {
       _currentPage++;
       // Get current language from theme provider
       final themeState = ref.read(themeNotifierProvider);
       final currentLanguage = themeState.currentLanguage;
-      
+
       final response = await ref.read(newsServiceProvider).getNews(
         page: _currentPage,
         currentLanguage: currentLanguage,
       );
-      
+
       final currentNews = ref.read(newsNotifierProvider).value ?? [];
-      
+
       if (mounted) {
         setState(() {
           ref.read(newsNotifierProvider.notifier)
@@ -215,14 +215,14 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       }
     });
   }
-  
+
   // Perform search
   void _performSearch(String query) {
     setState(() {
       _searchQuery = query;
     });
   }
-  
+
   // Clear search
   void _clearSearch() {
     setState(() {
@@ -230,32 +230,32 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       _searchQuery = '';
     });
   }
-  
+
   // Filter news based on search query
   List<NewsItem> _filterNews(List<NewsItem> news, String query) {
     if (query.isEmpty) return news;
-    
+
     final lowercaseQuery = query.toLowerCase();
-    return news.where((item) => 
+    return news.where((item) =>
       (item.title != null && item.title!.toLowerCase().contains(lowercaseQuery))
     ).toList();
   }
-  
+
   // Sort news by date (newest first)
   List<NewsItem> _sortNewsByDate(List<NewsItem> news) {
     // Make a copy to avoid modifying the original list
     final sortedNews = List<NewsItem>.from(news);
-    
+
     // Sort the news by date, putting newest first
     sortedNews.sort((a, b) {
       if (a.date == null) return 1; // null dates go to the end
       if (b.date == null) return -1; // null dates go to the end
-      
+
       // Compare dates (assuming format is sortable, typically ISO format)
       // Reverse comparison to get descending order (newest first)
       return b.date!.compareTo(a.date!); // Handle potential null dates
     });
-    
+
     return sortedNews;
   }
 
@@ -275,11 +275,11 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     final newsState = ref.watch(newsNotifierProvider);
     final isConnected = ref.watch(isConnectedProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Determine text direction based on current language
     final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
     final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
-    
+
     // If we have a specific error from our loading attempts, show that first
     if (_error != null) {
       return Directionality(
@@ -297,7 +297,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
         ),
       );
     }
-    
+
     // Show no connection message if disconnected
     if (!isConnected) {
       return Directionality(
@@ -318,12 +318,12 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
         ),
       );
     }
-    
+
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
         // Add floating action button for scroll to top
-        floatingActionButton: _showScrollToTop 
+        floatingActionButton: _showScrollToTop
             ? FloatingActionButton(
                 onPressed: _scrollToTop,
                 mini: true,
@@ -338,14 +338,14 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               SliverAppBar(
-                title: _isSearchVisible 
+                title: _isSearchVisible
                   ? TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: _getText(context, 'searchNewsHint'), // Localized hint
                         border: InputBorder.none,
                         hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withAlpha(179), // 0.7 opacity = 179/255
                         ),
                       ),
                       style: const TextStyle(
@@ -379,7 +379,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                   : Container(
                       margin: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withAlpha(51), // 0.2 opacity = 51/255
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
@@ -399,7 +399,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       color: AppConstants.primaryColor,
                       border: Border(
                         bottom: BorderSide(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withAlpha(26), // 0.1 opacity = 26/255
                           width: 1.0,
                         ),
                       ),
@@ -410,7 +410,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       padding: EdgeInsets.zero,
                       labelPadding: const EdgeInsets.symmetric(horizontal: 16),
                       labelColor: Colors.white,
-                      unselectedLabelColor: Colors.white.withOpacity(0.6),
+                      unselectedLabelColor: Colors.white.withAlpha(153), // 0.6 opacity = 153/255
                       indicatorColor: Colors.white,
                       indicatorWeight: 3,
                       indicatorSize: TabBarIndicatorSize.label,
@@ -428,7 +428,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                     Container(
                       margin: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withAlpha(51), // 0.2 opacity = 51/255
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
@@ -443,8 +443,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           },
           body: Container(
             decoration: BoxDecoration(
-              color: isDarkMode 
-                  ? Theme.of(context).scaffoldBackgroundColor 
+              color: isDarkMode
+                  ? Theme.of(context).scaffoldBackgroundColor
                   : Colors.grey.shade100,
             ),
             child: Column(
@@ -457,7 +457,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       color: isDarkMode ? Colors.grey.shade900 : Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withAlpha(13), // 0.05 opacity = 13/255
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -531,24 +531,24 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       return newsState.when(
                         data: (news) {
                           // Apply search filter if search query exists
-                          final displayedNews = _searchQuery.isNotEmpty 
+                          final displayedNews = _searchQuery.isNotEmpty
                               ? _filterNews(news, _searchQuery)
                               : news;
-                              
+
                           if (displayedNews.isEmpty) {
                             return _searchQuery.isNotEmpty
                                 ? _buildEmptySearchResults()
                                 : _buildEmptyState();
                           }
-                          
+
                           // Sort all news by date (newest first)
                           final sortedNews = _sortNewsByDate(displayedNews);
-                          
+
                           // For "Latest News" tab, show only latest 10 news (unless searching)
                           // Use the key for comparison
                           if (_categoryKeys[tabIndex] == 'newsTabsLatest' && _searchQuery.isEmpty) {
                             final latestNews = sortedNews.take(10).toList();
-                            
+
                             return RefreshIndicator(
                               onRefresh: _refreshData,
                               child: ListView.builder(
@@ -560,9 +560,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                                   return _buildNewsCard(newsItem, index);
                                 },
                               ),
-                            ); 
+                            );
                           }
-                          
+
                           return RefreshIndicator(
                             onRefresh: _refreshData,
                             child: ListView.builder(
@@ -575,7 +575,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                                 if (index == sortedNews.length && _searchQuery.isEmpty) {
                                   return _buildLoadingMoreIndicator();
                                 }
-                                
+
                                 final newsItem = sortedNews[index];
                                 return _buildNewsCard(newsItem, index);
                               },
@@ -615,7 +615,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           Icon(
             Icons.newspaper,
             size: 64,
-            color: AppConstants.primaryColor.withOpacity(0.7),
+            color: AppConstants.primaryColor.withAlpha(179), // 0.7 opacity = 179/255
           ),
           const SizedBox(height: 16),
           Text(
@@ -664,7 +664,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
 
   Widget _buildNewsCard(NewsItem newsItem, int index) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
@@ -680,7 +680,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(13), // 0.05 opacity = 13/255
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -691,14 +691,14 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           children: [
             ClipRRect(
               borderRadius: BorderRadius.horizontal(
-                right: ref.watch(themeNotifierProvider).currentLanguage != 'english' 
-                    ? const Radius.circular(12) 
+                right: ref.watch(themeNotifierProvider).currentLanguage != 'english'
+                    ? const Radius.circular(12)
                     : Radius.zero,
-                left: ref.watch(themeNotifierProvider).currentLanguage == 'english' 
-                    ? const Radius.circular(12) 
+                left: ref.watch(themeNotifierProvider).currentLanguage == 'english'
+                    ? const Radius.circular(12)
                     : Radius.zero,
               ),
-              child: newsItem.image != null && newsItem.image!.isNotEmpty 
+              child: newsItem.image != null && newsItem.image!.isNotEmpty
                 ? CachedNetworkImage(
                     imageUrl: newsItem.image!,
                     height: 110,
@@ -765,7 +765,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       ),
     );
   }
-  
+
 
   // New method for empty search results with localized text
   Widget _buildEmptySearchResults() {
@@ -776,7 +776,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
           Icon(
             Icons.search_off,
             size: 64,
-            color: AppConstants.primaryColor.withOpacity(0.7),
+            color: AppConstants.primaryColor.withAlpha(179), // 0.7 opacity = 179/255
           ),
           const SizedBox(height: 16),
           Text(
@@ -800,4 +800,4 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       ),
     );
   }
-} 
+}

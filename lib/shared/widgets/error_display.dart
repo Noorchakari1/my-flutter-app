@@ -32,7 +32,7 @@ class ErrorDisplay extends StatelessWidget {
             Icon(
               errorIcon,
               size: compact ? 48 : 64,
-              color: AppConstants.primaryColor.withOpacity(0.7),
+              color: AppConstants.primaryColor.withAlpha(179), // 0.7 opacity = 179/255
             ),
             const SizedBox(height: 16),
             Text(
@@ -110,7 +110,7 @@ class ErrorDisplay extends StatelessWidget {
     if (error is ApiException) {
       final apiError = error as ApiException;
       final errorCode = apiError.code;
-      
+
       if (errorCode == 'no_connection') {
         return Icons.signal_wifi_off;
       } else if (errorCode == 'timeout') {
@@ -121,7 +121,7 @@ class ErrorDisplay extends StatelessWidget {
         return Icons.lock;
       }
     }
-    
+
     // Default error icon
     return Icons.error_outline;
   }
@@ -129,7 +129,7 @@ class ErrorDisplay extends StatelessWidget {
   /// Get localized retry button text
   String _getRetryText(BuildContext context) {
     final language = Localizations.localeOf(context).languageCode;
-    
+
     switch (language) {
       case 'fa': // Persian
         return AppConstants.persianText['tryAgain'] ?? 'تلاش مجدد';
@@ -144,7 +144,7 @@ class ErrorDisplay extends StatelessWidget {
   /// Get localized home button text
   String _getHomeButtonText(BuildContext context) {
     final language = Localizations.localeOf(context).languageCode;
-    
+
     switch (language) {
       case 'fa': // Persian
         return AppConstants.persianText['backToHome'] ?? 'بازگشت به صفحه اصلی';
@@ -176,4 +176,4 @@ class ListItemErrorDisplay extends StatelessWidget {
       compact: true,
     );
   }
-} 
+}

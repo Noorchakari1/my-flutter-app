@@ -313,7 +313,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
                 Icon(
                   Icons.search_off,
                   size: 64,
-                  color: AppConstants.primaryColor.withOpacity(0.7),
+                  color: AppConstants.primaryColor.withAlpha(179), // 0.7 opacity = 179/255
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -381,7 +381,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13), // 0.05 opacity = 13/255
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -451,7 +451,7 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(13), // 0.05 opacity = 13/255
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -525,8 +525,8 @@ class _ProvincesScreenState extends ConsumerState<ProvincesScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: isDarkMode
-                                  ? Colors.blue.withOpacity(0.2)
-                                  : Colors.blue.withOpacity(0.1),
+                                  ? Colors.blue.withAlpha(51) // 0.2 opacity = 51/255
+                                  : Colors.blue.withAlpha(26), // 0.1 opacity = 26/255
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(

@@ -34,8 +34,8 @@ class AppHeader extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isDarkMode
-                ? Colors.black.withOpacity(0.3)
-                : AppConstants.shadowColor.withOpacity(0.2),
+                ? Colors.black.withAlpha(77)
+                : AppConstants.shadowColor.withAlpha(51),
             blurRadius: 15,
             spreadRadius: 2,
             offset: const Offset(0, 3),

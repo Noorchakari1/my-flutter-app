@@ -30,7 +30,7 @@ class SavedNewsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final savedNews = ref.watch(savedNewsProvider);
-    
+
     // Determine text direction based on current language
     final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
     final textDirection = isRTL ? TextDirection.rtl : TextDirection.ltr;
@@ -62,7 +62,7 @@ class SavedNewsScreen extends ConsumerWidget {
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -116,7 +116,7 @@ class SavedNewsScreen extends ConsumerWidget {
 
   Widget _buildNewsCard(BuildContext context, WidgetRef ref, NewsDetail news) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Dismissible(
       key: Key('saved-news-${news.id}'),
       direction: DismissDirection.endToStart,
@@ -150,7 +150,7 @@ class SavedNewsScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(13), // 0.05 opacity = 13/255
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -338,4 +338,4 @@ class SavedNewsScreen extends ConsumerWidget {
       ),
     );
   }
-} 
+}

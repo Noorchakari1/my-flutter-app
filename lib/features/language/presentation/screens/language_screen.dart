@@ -8,7 +8,7 @@ import '../widgets/language_button.dart';
 
 class LanguageScreen extends ConsumerStatefulWidget {
   final bool showBackButton;
-  
+
   const LanguageScreen({
     super.key,
     this.showBackButton = false,
@@ -54,10 +54,12 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
   Future<void> _handleLanguageSelection(String route, String language) async {
     await LanguageService.setSelectedLanguage(language);
     if (!mounted) return;
-    
+
     // Update theme notifier with new language
     await ref.read(themeNotifierProvider.notifier).setLanguage(language);
-    
+
+    if (!mounted) return;
+
     if (widget.showBackButton) {
       Navigator.pop(context);
     }
@@ -67,7 +69,7 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
   @override
   Widget build(BuildContext context) {
     final isDarkMode = ref.watch(themeNotifierProvider).isDarkMode;
-    
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar:  CustomAppBar(
@@ -89,9 +91,9 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: isDarkMode 
-                      ? Colors.black.withOpacity(0.3)
-                      : AppConstants.shadowColor.withOpacity(0.2),
+                    color: isDarkMode
+                      ? Colors.black.withAlpha(77)
+                      : AppConstants.shadowColor.withAlpha(51),
                     blurRadius: 15,
                     spreadRadius: 2,
                     offset: const Offset(0, 3),
@@ -191,4 +193,4 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> with SingleTick
       ),
     );
   }
-} 
+}

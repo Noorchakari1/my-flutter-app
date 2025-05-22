@@ -18,14 +18,14 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
   bool hasMoreData = true;
   int currentPage = 1;
   dynamic error;
-  
+
   @override
   void initState() {
     super.initState();
     scrollController.addListener(_scrollListener);
     loadInitialData();
   }
-  
+
   @override
   void dispose() {
     scrollController.removeListener(_scrollListener);
@@ -33,19 +33,19 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
     searchController.dispose();
     super.dispose();
   }
-  
+
   void _scrollListener() {
     setState(() {
       showScrollToTop = scrollController.offset > 500;
     });
-    
+
     if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200 &&
         !isLoadingMore &&
         hasMoreData) {
       loadMoreData();
     }
   }
-  
+
   void toggleSearch() {
     setState(() {
       isSearchVisible = !isSearchVisible;
@@ -55,7 +55,7 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
       }
     });
   }
-  
+
   Widget buildSearchField() {
     return TextField(
       controller: searchController,
@@ -69,7 +69,7 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
       onChanged: onSearchChanged,
     );
   }
-  
+
   void scrollToTop() {
     scrollController.animateTo(
       0,
@@ -77,7 +77,7 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
       curve: Curves.easeInOut,
     );
   }
-  
+
   /// Abstract methods to be implemented by subclasses
   Future<void> loadInitialData();
   Future<void> loadMoreData();
@@ -89,11 +89,11 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
   Widget buildEmptyState();
   Widget buildErrorState(dynamic error);
   Widget buildLoadingState();
-  
+
   @override
   Widget build(BuildContext context) {
     final isRTL = LocalizationHelper.isRTL(ref);
-    
+
     return Directionality(
       textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
       child: Scaffold(
@@ -114,14 +114,14 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
         floatingActionButton: showScrollToTop
           ? FloatingActionButton(
               backgroundColor: AppConstants.primaryColor,
-              child: const Icon(Icons.arrow_upward, color: Colors.white),
               onPressed: scrollToTop,
+              child: const Icon(Icons.arrow_upward, color: Colors.white),
             )
           : null,
       ),
     );
   }
-  
+
   /// Build the body of the screen
   Widget buildBody();
 }

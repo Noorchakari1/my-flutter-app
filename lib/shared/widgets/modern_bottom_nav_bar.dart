@@ -36,7 +36,7 @@ class ModernBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final defaultSelectedColor = theme.colorScheme.primary;
-    final defaultUnselectedColor = theme.colorScheme.onSurface.withOpacity(0.6);
+    final defaultUnselectedColor = theme.colorScheme.onSurface.withAlpha(153); // 0.6 opacity = 153/255
     final defaultBackgroundColor = theme.colorScheme.surface;
 
     return Container(
@@ -45,7 +45,7 @@ class ModernBottomNavBar extends StatelessWidget {
         color: backgroundColor ?? defaultBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha(26), // 0.1 opacity = 26/255
             blurRadius: elevation,
             offset: const Offset(0, -1),
           ),

@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/providers/theme_provider.dart';
 import '../models/ministry_model.dart';
 import '../services/ministry_service.dart';
-import '../../../../core/providers/theme_provider.dart';
 
 class MinistryNotifier extends StateNotifier<AsyncValue<List<MinistryItem>>> {
   final MinistryService _ministryService;

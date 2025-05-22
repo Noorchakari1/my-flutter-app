@@ -202,7 +202,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withAlpha(26),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -311,7 +311,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withAlpha(179),
                       ],
                       stops: const [0.7, 1.0],
                     ),
@@ -325,7 +325,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withAlpha(102), // ~0.4 opacity
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.language, size: 20),
@@ -344,7 +344,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
           leading: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withAlpha(102), // ~0.4 opacity
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -370,7 +370,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withAlpha(13), // ~0.05 opacity
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -405,7 +405,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withAlpha(13), // ~0.05 opacity
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         ),
@@ -495,7 +495,7 @@ class IndependentDirectorateDetailScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withAlpha(13), // ~0.05 opacity
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         ),

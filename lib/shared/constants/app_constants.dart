@@ -53,7 +53,7 @@ class AppConstants {
     color: primaryColor,
     boxShadow: [
       BoxShadow(
-        color: shadowColor.withOpacity(0.2),
+        color: shadowColor.withAlpha(51), // 0.2 opacity = 51/255
         blurRadius: 8,
         offset: const Offset(0, 4),
       ),

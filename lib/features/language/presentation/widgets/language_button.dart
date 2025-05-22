@@ -37,7 +37,7 @@ class _LanguageButtonState extends State<LanguageButton> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) {
@@ -55,9 +55,9 @@ class _LanguageButtonState extends State<LanguageButton> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: isDarkMode 
-                  ? Colors.black.withOpacity(0.3)
-                  : AppConstants.shadowColor.withOpacity(0.1),
+                color: isDarkMode
+                  ? Colors.black.withAlpha(76) // 0.3 opacity = 76/255
+                  : AppConstants.shadowColor.withAlpha(26), // 0.1 opacity = 26/255
                 blurRadius: 10,
                 spreadRadius: _isPressed ? 1 : 2,
                 offset: Offset(0, _isPressed ? 2 : 4),
@@ -82,9 +82,9 @@ class _LanguageButtonState extends State<LanguageButton> {
                         color: isDarkMode ? const Color(0xFF3A3A3A) : Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: isDarkMode 
-                              ? Colors.black.withOpacity(0.3)
-                              : Colors.black.withOpacity(0.1),
+                            color: isDarkMode
+                              ? Colors.black.withAlpha(76) // 0.3 opacity = 76/255
+                              : Colors.black.withAlpha(26), // 0.1 opacity = 26/255
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -99,7 +99,7 @@ class _LanguageButtonState extends State<LanguageButton> {
                       ),
                     ),
                   ),
-                  
+
                   // Select language button at bottom
                   Container(
                     width: double.infinity,
@@ -139,4 +139,4 @@ class _LanguageButtonState extends State<LanguageButton> {
       ),
     );
   }
-} 
+}

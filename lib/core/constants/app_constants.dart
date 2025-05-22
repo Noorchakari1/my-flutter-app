@@ -89,7 +89,7 @@ class AppConstants {
     ),
     boxShadow: [
       BoxShadow(
-        color: shadowColor.withOpacity(0.1),
+        color: shadowColor.withAlpha(26),
         blurRadius: 10,
         spreadRadius: 0,
         offset: const Offset(0, 2),
