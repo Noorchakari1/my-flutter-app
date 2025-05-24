@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/services/ssl_cache_manager.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../data/models/news_model.dart';
@@ -255,23 +256,34 @@ class NewsDetailScreen extends ConsumerWidget {
               CachedNetworkImage(
                 imageUrl: newsDetail.image!,
                 fit: BoxFit.cover,
+                cacheManager: SslCacheManager.instance,
                 placeholder: (context, url) => Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Container(color: Colors.white),
+                  baseColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300,
+                  highlightColor: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade100,
+                  child: Container(
+                    color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300,
+                  ),
                 ),
                 errorWidget: (context, url, error) => Container(
-                  color: Colors.grey.shade200,
-                  child: const Center(
-                    child: Icon(Icons.error_outline, size: 48, color: Colors.grey),
+                  color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                  child: Center(
+                    child: Icon(
+                      Icons.image_not_supported_outlined,
+                      size: 48,
+                      color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade400,
+                    ),
                   ),
                 ),
               )
             else
               Container(
-                color: Colors.grey.shade200,
-                child: const Center(
-                  child: Icon(Icons.image_not_supported_outlined, size: 48, color: Colors.grey),
+                color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                child: Center(
+                  child: Icon(
+                    Icons.image_not_supported_outlined,
+                    size: 48,
+                    color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade400,
+                  ),
                 ),
               ),
             // Gradient overlay
