@@ -9,6 +9,7 @@ import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_display.dart';
 import '../../../../shared/widgets/info_card.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
+import '../../../../shared/widgets/scroll_to_top_button.dart';
 import '../../../../shared/widgets/search_bar_widget.dart';
 import '../../data/models/news_model.dart';
 import '../../data/providers/news_provider.dart';
@@ -325,18 +326,15 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
-        // Add floating action button for scroll to top
-        floatingActionButton: _showScrollToTop
-            ? FloatingActionButton(
-                onPressed: _scrollToTop,
-                mini: true,
-                backgroundColor: Theme.of(context).primaryColor,
-                child: const Icon(
-                  Icons.arrow_upward,
-                  color: Colors.white,
-                ),
-              )
-            : null,
+        // Add scroll to top button using the shared widget
+        floatingActionButton: ScrollToTopButton(
+          onPressed: _scrollToTop,
+          visible: _showScrollToTop,
+          backgroundColor: AppConstants.primaryColor,
+          iconColor: Colors.white,
+          size: ScrollToTopButton.standardSize,
+          elevation: 4,
+        ),
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
@@ -374,21 +372,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
                       onPressed: _toggleSearch,
                     )
-                  : Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(51), // 0.2 opacity = 51/255
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ),
+                  : null, // Let Flutter handle the default back button automatically
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(50),
                   child: Container(

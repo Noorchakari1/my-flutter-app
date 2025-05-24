@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/localization_helper.dart';
 import '../../shared/constants/app_constants.dart';
+import '../../shared/widgets/scroll_to_top_button.dart';
 import '../../shared/widgets/search_bar_widget.dart';
 
 /// Base class for list screens with common functionality
@@ -114,13 +115,13 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
           ],
         ),
         body: buildBody(),
-        floatingActionButton: showScrollToTop
-          ? FloatingActionButton(
-              backgroundColor: AppConstants.primaryColor,
-              onPressed: scrollToTop,
-              child: const Icon(Icons.arrow_upward, color: Colors.white),
-            )
-          : null,
+        floatingActionButton: ScrollToTopButton(
+          onPressed: scrollToTop,
+          visible: showScrollToTop,
+          backgroundColor: AppConstants.primaryColor,
+          iconColor: Colors.white,
+          size: ScrollToTopButton.standardSize,
+        ),
       ),
     );
   }

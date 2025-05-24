@@ -69,6 +69,7 @@ abstract class BaseDetailScreenState<T, W extends BaseDetailScreen<T>> extends C
                 onPressed: scrollToTop,
                 backgroundColor: Theme.of(context).primaryColor,
                 iconColor: Colors.white,
+                size: ScrollToTopButton.standardSize,
               ),
             ),
           ],

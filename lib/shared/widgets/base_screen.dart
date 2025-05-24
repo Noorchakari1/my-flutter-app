@@ -123,6 +123,7 @@ class _BaseScreenState extends ConsumerState<BaseScreen> {
               onPressed: _scrollToTop,
               backgroundColor: theme.primaryColor,
               iconColor: Colors.white,
+              size: ScrollToTopButton.standardSize,
             ),
           ),
         ],
