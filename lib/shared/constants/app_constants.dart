@@ -120,6 +120,7 @@ class AppConstants {
     'contactForm': 'فورم تماس',
     'langGuide': 'لطفاً زبان خود را انتخاب نمایید',
     'loading': 'در حال بارگذاری...',
+    'changingLanguage': 'در حال تغییر زبان...',
     // News Screen Texts
     'newsTitle': 'اخبار',
     'newsTabsAll': 'همه',
@@ -230,6 +231,7 @@ class AppConstants {
     'contactForm': 'د اړیکې فورم',
     'langGuide': 'مهرباني وکړئ خپله ژبه غوره کړئ',
     'loading': 'بارېږي...',
+    'changingLanguage': 'ژبه بدلېږي...',
     // News Screen Texts
     'newsTitle': 'خبرونه',
     'newsTabsAll': 'ټول',
@@ -340,6 +342,7 @@ class AppConstants {
     'contactForm': 'Contact Form',
     'langGuide': 'Please select your language',
     'loading': 'Loading...',
+    'changingLanguage': 'Changing language...',
     // News Screen Texts
     'newsTitle': 'News',
     'newsTabsAll': 'All',

@@ -96,18 +96,19 @@ class _NavigationLoadingOverlayState extends State<NavigationLoadingOverlay>
     return AnimatedBuilder(
       animation: Listenable.merge([_pulseController, _fadeController]),
       builder: (context, child) {
-        return Positioned.fill(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
-            child: Container(
-              color: widget.backgroundColor ??
-                (isDarkMode
-                  ? Colors.black.withAlpha(128) // ~0.5 opacity
-                  : Colors.black.withAlpha(102)), // ~0.4 opacity
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Center(
-                  child: Container(
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: widget.backgroundColor ??
+              (isDarkMode
+                ? Colors.black.withAlpha(128) // ~0.5 opacity
+                : Colors.black.withAlpha(102)), // ~0.4 opacity
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Center(
+                child: Container(
                     padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
                       // Modern glassmorphism effect
@@ -202,10 +203,9 @@ class _NavigationLoadingOverlayState extends State<NavigationLoadingOverlay>
                 ),
               ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
   }
 
 

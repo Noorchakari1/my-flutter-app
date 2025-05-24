@@ -1,4 +1,3 @@
-import 'package:aop_sites/core/utils/navigation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,6 +22,22 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.showLanguageButton = true,
     this.actions,
   });
+
+  /// Helper method to get localized text based on current language
+  String _getLocalizedText(String key, String currentLanguage) {
+    Map<String, String> textMap;
+    switch (currentLanguage) {
+      case 'pashto':
+        textMap = AppConstants.pashtoText;
+        break;
+      case 'persian':
+        textMap = AppConstants.persianText;
+        break;
+      default:
+        textMap = AppConstants.englishText;
+    }
+    return textMap[key] ?? key;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,7 +84,7 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
               color: Colors.white,
             ),
             tooltip: 'Change Language',
-            onSelected: (String language) {
+            onSelected: (String language) async {
               // Store the route before async operations
               String route;
               switch (language) {
@@ -85,26 +100,57 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   break;
               }
 
-              // Navigate first, then update language settings
-              Navigator.pushReplacementNamed(context, route);
+              try {
+                // Get current language for dialog text
+                final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
+                final loadingMessage = _getLocalizedText('changingLanguage', currentLanguage);
 
-              // Update language settings after navigation
-              LanguageService.setSelectedLanguage(language);
-              ref.read(themeNotifierProvider.notifier).setLanguage(language);
+                // Show loading dialog
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: Center(
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: 16),
+                              Text(
+                                loadingMessage,
+                                style: const TextStyle(fontSize: 16),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
 
-              // Navigate with loading
-              NavigationHelper.replaceWithLoading(
-                context,
-                destination: const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                ),
-                loadingMessage: 'Changing language...',
-              ).then((_) {
-                // Navigate to the actual route after loading
+                // Update language settings
+                await LanguageService.setSelectedLanguage(language);
+                ref.read(themeNotifierProvider.notifier).setLanguage(language);
+
+                // Wait a moment for the settings to apply
+                await Future.delayed(const Duration(milliseconds: 500));
+
+                // Close loading dialog and navigate
                 if (context.mounted) {
+                  Navigator.of(context).pop(); // Close loading dialog
                   Navigator.pushReplacementNamed(context, route);
                 }
-              });
+              } catch (e) {
+                // Close loading dialog on error
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               PopupMenuItem<String>(
