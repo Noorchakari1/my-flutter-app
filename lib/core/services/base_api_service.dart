@@ -1,3 +1,4 @@
+import '../config/ssl_config.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
 
@@ -7,7 +8,10 @@ abstract class BaseApiService<T, R> {
   final ApiClient _apiClient;
 
   BaseApiService({ApiClient? apiClient})
-      : _apiClient = apiClient ?? ApiClient(baseUrl: baseUrl);
+      : _apiClient = apiClient ?? ApiClient(
+          baseUrl: baseUrl,
+          allowSelfSignedCertificates: SslConfig.shouldAllowSelfSignedCertificates(),
+        );
 
   /// Map app language to API language code
   String getLanguageHeader(String appLanguage) {

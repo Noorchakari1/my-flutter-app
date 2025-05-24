@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../core/services/ssl_cache_manager.dart';
 
 /// A reusable widget for displaying cached network images with loading and error states
 class CachedImageWidget extends StatelessWidget {
@@ -30,15 +31,15 @@ class CachedImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Default background color based on theme
-    final bgColor = backgroundColor ?? 
+    final bgColor = backgroundColor ??
       (isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200);
-    
+
     // Default shimmer colors
     final baseColor = isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300;
     final highlightColor = isDarkMode ? Colors.grey.shade700 : Colors.grey.shade100;
-    
+
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.zero,
       child: CachedNetworkImage(
@@ -46,6 +47,7 @@ class CachedImageWidget extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        cacheManager: SslCacheManager.instance,
         placeholder: (context, url) => loadingWidget ?? (
           showShimmerOnLoading
               ? Shimmer.fromColors(

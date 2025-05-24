@@ -1,6 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
+
+import '../config/ssl_config.dart';
 import 'api_exception.dart';
 
 /// Base API client with standardized error handling
@@ -8,13 +13,33 @@ class ApiClient {
   final String baseUrl;
   final http.Client _client;
   final Duration _timeout;
+  final bool allowSelfSignedCertificates;
 
   ApiClient({
     required this.baseUrl,
     http.Client? client,
     Duration? timeout,
-  }) : _client = client ?? http.Client(),
+    this.allowSelfSignedCertificates = false,
+  }) : _client = client ?? _createHttpClient(allowSelfSignedCertificates),
        _timeout = timeout ?? const Duration(seconds: 30);
+
+  /// Creates an HTTP client with SSL configuration
+  static http.Client _createHttpClient(bool allowSelfSignedCertificates) {
+    if (!allowSelfSignedCertificates) {
+      return http.Client();
+    }
+
+    // Create HttpClient with custom SSL configuration
+    final httpClient = HttpClient();
+
+    // Configure SSL context to allow self-signed certificates
+    httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) {
+      // Check if the host is in our trusted domains list
+      return SslConfig.isTrustedDomain(host);
+    };
+
+    return IOClient(httpClient);
+  }
 
   /// Helper method to get language header
   Map<String, String> _getHeaders(String? language) {

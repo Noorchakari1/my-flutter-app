@@ -3,10 +3,16 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/services/api_exception.dart';
+import '../../../../core/services/ssl_http_client.dart';
 import '../models/news_model.dart';
 
 class NewsService {
   static const String baseUrl = 'https://aop.gov.af/api/v1';
+  final http.Client _httpClient;
+
+  NewsService({http.Client? httpClient})
+      : _httpClient = httpClient ?? SslHttpClient.instance;
 
   // Map app language to API language code
   String getLanguageHeader(String appLanguage) {
@@ -29,23 +35,23 @@ class NewsService {
       final headers = {
         'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
       };
-      
-      final response = await http.get(
+
+      final response = await _httpClient.get(
         Uri.parse('$baseUrl/news?page=$page'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         return NewsResponse.fromJson(data);
       } else {
-        throw Exception('Failed to load news: ${response.statusCode}');
+        throw ApiException.fromResponse(response);
       }
     } catch (e) {
-      throw Exception('Failed to load news: $e');
+      throw ApiException.fromError(e);
     }
   }
-  
+
   // New method for searching news
   Future<NewsResponse> searchNews(String query, {int page = 1, String? currentLanguage}) async {
     try {
@@ -54,27 +60,27 @@ class NewsService {
       final headers = {
         'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
       };
-      
-      final response = await http.get(
+
+      final response = await _httpClient.get(
         Uri.parse('$baseUrl/news?search=$encodedQuery&page=$page'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         return NewsResponse.fromJson(data);
       } else {
-        throw Exception('Failed to search news: ${response.statusCode}');
+        throw ApiException.fromResponse(response);
       }
     } catch (e) {
-      throw Exception('Failed to search news: $e');
+      throw ApiException.fromError(e);
     }
   }
-  
+
   // If API doesn't support search, here's a local search implementation
   Future<List<NewsItem>> searchNewsLocally(String query, List<NewsItem> newsItems) async {
     final lowercaseQuery = query.toLowerCase();
-    return newsItems.where((news) => 
+    return newsItems.where((news) =>
       (news.title != null && news.title!.toLowerCase().contains(lowercaseQuery)) ||
       (news.type != null && news.type!.toLowerCase().contains(lowercaseQuery))
     ).toList();
@@ -86,20 +92,20 @@ class NewsService {
       final headers = {
         'Accept-Language': getLanguageHeader(currentLanguage ?? 'pashto')
       };
-      
-      final response = await http.get(
+
+      final response = await _httpClient.get(
         Uri.parse('$baseUrl/news/$id'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         return NewsDetail.fromJson(data);
       } else {
-        throw Exception('Failed to load news detail: ${response.statusCode}');
+        throw ApiException.fromResponse(response);
       }
     } catch (e) {
-      throw Exception('Failed to load news detail: $e');
+      throw ApiException.fromError(e);
     }
   }
 }
@@ -107,4 +113,4 @@ class NewsService {
 // Create a provider for the NewsService
 final newsServiceProvider = Provider<NewsService>((ref) {
   return NewsService();
-}); 
+});

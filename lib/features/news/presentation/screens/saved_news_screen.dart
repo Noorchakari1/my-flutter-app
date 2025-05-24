@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/services/ssl_cache_manager.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../news/data/providers/saved_news_provider.dart';
@@ -151,6 +152,7 @@ class SavedNewsScreen extends ConsumerWidget {
                     height: 150,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    cacheManager: SslCacheManager.instance,
                     placeholder: (context, url) => Container(
                       height: 150,
                       width: double.infinity,

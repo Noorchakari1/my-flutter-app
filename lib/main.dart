@@ -12,11 +12,11 @@ import 'shared/widgets/network_error_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize services
   await LanguageService.init();
   await ThemeService.init();
-  
+
   // Run app with error handling
   runApp(
     const ProviderScope(
@@ -32,11 +32,11 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Initialize connectivity service (will start listening for connectivity changes)
     ref.watch(connectivityServiceProvider);
-    
+
     final themeState = ref.watch(themeNotifierProvider);
-    final isRTL = themeState.currentLanguage == 'persian' || 
+    final isRTL = themeState.currentLanguage == 'persian' ||
                   themeState.currentLanguage == 'pashto';
-    
+
     return MaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../core/services/loading_manager.dart';
+import '../../core/services/ssl_cache_manager.dart';
 import '../../core/utils/localization_helper.dart';
 
 /// Reusable card widget for displaying information with image
@@ -228,6 +229,7 @@ class _InfoCardState extends ConsumerState<InfoCard> with TickerProviderStateMix
       child: CachedNetworkImage(
         imageUrl: widget.imageUrl!,
         fit: BoxFit.cover,
+        cacheManager: SslCacheManager.instance,
         placeholder: (context, url) => Shimmer.fromColors(
           baseColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300,
           highlightColor: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade100,

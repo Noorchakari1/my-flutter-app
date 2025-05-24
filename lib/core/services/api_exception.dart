@@ -40,6 +40,18 @@ class ApiException implements Exception {
         code: 'http_error',
       );
     }
+    else if (error is HandshakeException) {
+      return const ApiException(
+        message: 'SSL certificate verification failed. This may be due to network security settings.',
+        code: 'ssl_error',
+      );
+    }
+    else if (error is TlsException) {
+      return const ApiException(
+        message: 'TLS/SSL connection error. Please check your network connection.',
+        code: 'tls_error',
+      );
+    }
     else if (error is FormatException) {
       return ApiException(
         message: 'Invalid data format: ${error.message}',
