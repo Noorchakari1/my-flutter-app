@@ -35,7 +35,7 @@ class _InfoCardState extends ConsumerState<InfoCard> with TickerProviderStateMix
   late AnimationController _controller;
   late AnimationController _loadingController;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _pulseAnimation;
+
   late Animation<double> _fadeAnimation;
   bool _isPressed = false;
   bool _isLoading = false;
@@ -57,13 +57,7 @@ class _InfoCardState extends ConsumerState<InfoCard> with TickerProviderStateMix
       duration: const Duration(milliseconds: 1200),
     );
 
-    // Pulsing animation for the loading indicator
-    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _loadingController,
-        curve: Curves.easeInOut,
-      ),
-    );
+
 
     // Fade animation for smooth appearance
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -337,8 +331,6 @@ class _InfoCardState extends ConsumerState<InfoCard> with TickerProviderStateMix
 
   Widget _buildLoadingOverlay() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
 
     return AnimatedBuilder(
       animation: _loadingController,
@@ -374,51 +366,7 @@ class _InfoCardState extends ConsumerState<InfoCard> with TickerProviderStateMix
                 ),
                 child: FadeTransition(
                   opacity: _fadeAnimation,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? Colors.grey.shade900.withAlpha(230) // ~0.9 opacity
-                            : Colors.white.withAlpha(230), // ~0.9 opacity
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primaryColor.withAlpha(51), // ~0.2 opacity
-                            blurRadius: 20,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 8),
-                          ),
-                          BoxShadow(
-                            color: isDarkMode
-                                ? Colors.black.withAlpha(77) // ~0.3 opacity
-                                : Colors.black.withAlpha(26), // ~0.1 opacity
-                            blurRadius: 10,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                        border: Border.all(
-                          color: primaryColor.withAlpha(51), // ~0.2 opacity
-                          width: 1,
-                        ),
-                      ),
-                      child: ScaleTransition(
-                        scale: _pulseAnimation,
-                        child: SizedBox(
-                          width: 32,
-                          height: 32,
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                            strokeWidth: 3,
-                            backgroundColor: isDarkMode
-                                ? Colors.grey.shade700.withAlpha(77) // ~0.3 opacity
-                                : Colors.grey.shade300.withAlpha(77), // ~0.3 opacity
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: Container(), // Empty container - just the glassmorphism effect
                 ),
               ),
             ),
