@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/config/routes.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/utils/navigation_helper.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
 import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
@@ -72,7 +73,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         title: _getText('newsNav'),
                         iconData: Icons.newspaper,
                         onPressed: () {
-                          Navigator.of(context).pushNamed(Routes.news);
+                          NavigationHelper.navigateToRouteWithLoading(
+                            context,
+                            routeName: Routes.news,
+                            loadingMessage: _getText('loading'),
+                          );
                         },
                       ),
                       CustomButton(
@@ -104,34 +109,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         title: _getText('ministries'),
                         iconData: Icons.account_balance,
                         onPressed: () {
-                          Navigator.of(context).pushNamed(Routes.ministries);
+                          NavigationHelper.navigateToRouteWithLoading(
+                            context,
+                            routeName: Routes.ministries,
+                            loadingMessage: _getText('loading'),
+                          );
                         },
                       ),
                       CustomButton(
                         title: _getText('independentDirectorates'),
                         iconData: Icons.business,
                         onPressed: () {
-                          Navigator.of(context).pushNamed(Routes.independentDirectorates);
+                          NavigationHelper.navigateToRouteWithLoading(
+                            context,
+                            routeName: Routes.independentDirectorates,
+                            loadingMessage: _getText('loading'),
+                          );
                         },
                       ),
                       CustomButton(
                         title: _getText('provinces'),
                         iconData: Icons.location_city,
                         onPressed: () {
-                          Navigator.of(context).pushNamed(Routes.provinces);
+                          NavigationHelper.navigateToRouteWithLoading(
+                            context,
+                            routeName: Routes.provinces,
+                            loadingMessage: _getText('loading'),
+                          );
                         },
                       ),
                       CustomButton(
                         title: _getText('publicServices'),
                         iconData: Icons.public,
                         onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => ServiceButtonScreen(
+                          NavigationHelper.navigateWithLoading(
+                            context,
+                            destination: ServiceButtonScreen(
                               passportTitle: _getText('passportServices'),
                               passportURL: AppConstants.passportUrls[language]!,
                               language: language,
                             ),
-                          ));
+                            loadingMessage: _getText('loading'),
+                          );
                         },
                       ),
                     ],

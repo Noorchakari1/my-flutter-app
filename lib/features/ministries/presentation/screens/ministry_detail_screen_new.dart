@@ -108,7 +108,6 @@ class _MinistryDetailScreenState extends BaseDetailScreenState<MinistryItem, Min
                   showSubtitle: true,
                   isGrid: false,
                   borderRadius: 16,
-                  showCircularIndicator: true, // Use the integrated circular progress indicator
                 ),
               ),
             ],

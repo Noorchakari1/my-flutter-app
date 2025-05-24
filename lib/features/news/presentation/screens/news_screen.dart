@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/api_exception.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/utils/navigation_helper.dart';
 import '../../../../shared/constants/app_constants.dart'; // Import AppConstants
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_display.dart';
@@ -582,7 +583,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       isGrid: false,
       borderRadius: 12,
       padding: EdgeInsets.all(12),
-      showCircularIndicator: true, // Show the circular progress indicator
     );
   }
 
@@ -595,10 +595,10 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
       imageUrl: newsItem.image,
       isRTL: isRTL,
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => NewsDetailScreen(newsId: newsItem.id),
-          ),
+        NavigationHelper.navigateWithLoading(
+          context,
+          destination: NewsDetailScreen(newsId: newsItem.id),
+          loadingMessage: _getText(context, 'loading'),
         );
       },
     );

@@ -1,3 +1,4 @@
+import 'package:aop_sites/core/utils/navigation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -90,6 +91,20 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
               // Update language settings after navigation
               LanguageService.setSelectedLanguage(language);
               ref.read(themeNotifierProvider.notifier).setLanguage(language);
+
+              // Navigate with loading
+              NavigationHelper.replaceWithLoading(
+                context,
+                destination: const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                ),
+                loadingMessage: 'Changing language...',
+              ).then((_) {
+                // Navigate to the actual route after loading
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, route);
+                }
+              });
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               PopupMenuItem<String>(

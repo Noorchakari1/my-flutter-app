@@ -1,7 +1,9 @@
+import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../core/services/loading_manager.dart';
 import '../../core/utils/localization_helper.dart';
 
 /// Reusable card widget for displaying information with image
@@ -13,6 +15,7 @@ class InfoCard extends ConsumerStatefulWidget {
   final String? imageUrl;
   final VoidCallback onTap;
   final bool? isRTL; // Optional now - will be auto-detected if not provided
+  final bool showLoadingOnTap; // Whether to show loading indicator when tapped
 
   const InfoCard({
     super.key,
@@ -21,16 +24,21 @@ class InfoCard extends ConsumerStatefulWidget {
     this.imageUrl,
     required this.onTap,
     this.isRTL,
+    this.showLoadingOnTap = true, // Default to true for better UX
   });
 
   @override
   ConsumerState<InfoCard> createState() => _InfoCardState();
 }
 
-class _InfoCardState extends ConsumerState<InfoCard> with SingleTickerProviderStateMixin {
+class _InfoCardState extends ConsumerState<InfoCard> with TickerProviderStateMixin {
   late AnimationController _controller;
+  late AnimationController _loadingController;
   late Animation<double> _scaleAnimation;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _fadeAnimation;
   bool _isPressed = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -42,12 +50,68 @@ class _InfoCardState extends ConsumerState<InfoCard> with SingleTickerProviderSt
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+
+    // Loading animation controller for sophisticated loading effects
+    _loadingController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+
+    // Pulsing animation for the loading indicator
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _loadingController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Fade animation for smooth appearance
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _loadingController,
+        curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
+      ),
+    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _loadingController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleTap() async {
+    if (!widget.showLoadingOnTap) {
+      widget.onTap();
+      return;
+    }
+
+    // Check if global loading is already active
+    final loadingManager = LoadingManager.instance;
+    if (loadingManager.isGlobalLoading) {
+      // If global loading is active, just execute the tap without showing overlay
+      widget.onTap();
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    // Start the loading animation with repeat
+    _loadingController.repeat(reverse: true);
+
+    // Add a small delay to show the loading state
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    widget.onTap();
+
+    // Reset loading state after a short delay
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (mounted) {
+      _loadingController.stop();
+      _loadingController.reset();
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -81,16 +145,16 @@ class _InfoCardState extends ConsumerState<InfoCard> with SingleTickerProviderSt
           );
         },
         child: GestureDetector(
-          onTap: widget.onTap,
-          onTapDown: (_) {
+          onTap: _isLoading ? null : _handleTap,
+          onTapDown: _isLoading ? null : (_) {
             setState(() => _isPressed = true);
             _controller.forward();
           },
-          onTapUp: (_) {
+          onTapUp: _isLoading ? null : (_) {
             setState(() => _isPressed = false);
             _controller.reverse();
           },
-          onTapCancel: () {
+          onTapCancel: _isLoading ? null : () {
             setState(() => _isPressed = false);
             _controller.reverse();
           },
@@ -124,15 +188,21 @@ class _InfoCardState extends ConsumerState<InfoCard> with SingleTickerProviderSt
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Row(
-                // No need to set textDirection here as it's handled by the parent Directionality widget
+              child: Stack(
                 children: [
-                  if (widget.imageUrl != null)
-                    _buildImage(isDarkMode, primaryColor, isRTL),
-                  Expanded(
-                    child: _buildContent(isDarkMode, theme, isRTL),
+                  Row(
+                    // No need to set textDirection here as it's handled by the parent Directionality widget
+                    children: [
+                      if (widget.imageUrl != null)
+                        _buildImage(isDarkMode, primaryColor, isRTL),
+                      Expanded(
+                        child: _buildContent(isDarkMode, theme, isRTL),
+                      ),
+                      _buildArrow(isDarkMode, primaryColor, isRTL),
+                    ],
                   ),
-                  _buildArrow(isDarkMode, primaryColor, isRTL),
+                  if (_isLoading)
+                    _buildLoadingOverlay(),
                 ],
               ),
             ),
@@ -262,6 +332,99 @@ class _InfoCardState extends ConsumerState<InfoCard> with SingleTickerProviderSt
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLoadingOverlay() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final primaryColor = theme.primaryColor;
+
+    return AnimatedBuilder(
+      animation: _loadingController,
+      builder: (context, child) {
+        return Positioned.fill(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  // Modern glassmorphism effect
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDarkMode
+                        ? [
+                            Colors.black.withAlpha(128), // ~0.5 opacity
+                            Colors.black.withAlpha(102), // ~0.4 opacity
+                          ]
+                        : [
+                            Colors.white.withAlpha(128), // ~0.5 opacity
+                            Colors.black.withAlpha(77),  // ~0.3 opacity
+                          ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDarkMode
+                        ? Colors.white.withAlpha(26) // ~0.1 opacity
+                        : Colors.white.withAlpha(51), // ~0.2 opacity
+                    width: 0.5,
+                  ),
+                ),
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: isDarkMode
+                            ? Colors.grey.shade900.withAlpha(230) // ~0.9 opacity
+                            : Colors.white.withAlpha(230), // ~0.9 opacity
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColor.withAlpha(51), // ~0.2 opacity
+                            blurRadius: 20,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 8),
+                          ),
+                          BoxShadow(
+                            color: isDarkMode
+                                ? Colors.black.withAlpha(77) // ~0.3 opacity
+                                : Colors.black.withAlpha(26), // ~0.1 opacity
+                            blurRadius: 10,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: primaryColor.withAlpha(51), // ~0.2 opacity
+                          width: 1,
+                        ),
+                      ),
+                      child: ScaleTransition(
+                        scale: _pulseAnimation,
+                        child: SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                            strokeWidth: 3,
+                            backgroundColor: isDarkMode
+                                ? Colors.grey.shade700.withAlpha(77) // ~0.3 opacity
+                                : Colors.grey.shade300.withAlpha(77), // ~0.3 opacity
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

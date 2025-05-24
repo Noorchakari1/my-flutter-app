@@ -119,6 +119,7 @@ class AppConstants {
     'email': 'ایمیل',
     'contactForm': 'فورم تماس',
     'langGuide': 'لطفاً زبان خود را انتخاب نمایید',
+    'loading': 'در حال بارگذاری...',
     // News Screen Texts
     'newsTitle': 'اخبار',
     'newsTabsAll': 'همه',
@@ -228,6 +229,7 @@ class AppConstants {
     'email': 'بریښنالیک',
     'contactForm': 'د اړیکې فورم',
     'langGuide': 'مهرباني وکړئ خپله ژبه غوره کړئ',
+    'loading': 'بارېږي...',
     // News Screen Texts
     'newsTitle': 'خبرونه',
     'newsTabsAll': 'ټول',
@@ -337,6 +339,7 @@ class AppConstants {
     'email': 'Email',
     'contactForm': 'Contact Form',
     'langGuide': 'Please select your language',
+    'loading': 'Loading...',
     // News Screen Texts
     'newsTitle': 'News',
     'newsTabsAll': 'All',

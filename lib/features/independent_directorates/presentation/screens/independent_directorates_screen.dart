@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/api_exception.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/localization_helper.dart';
+import '../../../../core/utils/navigation_helper.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/screens/base_list_screen.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
@@ -168,13 +169,13 @@ class _IndependentDirectoratesScreenState extends BaseListScreenState<Independen
       imageUrl: directorate.image,
       isRTL: isRTL,
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => IndependentDirectorateDetailScreen(
-              directorateId: directorate.id,
-              language: LocalizationHelper.getCurrentLanguage(ref),
-            ),
+        NavigationHelper.navigateWithLoading(
+          context,
+          destination: IndependentDirectorateDetailScreen(
+            directorateId: directorate.id,
+            language: LocalizationHelper.getCurrentLanguage(ref),
           ),
+          loadingMessage: LocalizationHelper.getText(ref, 'loading'),
         );
       },
     );
@@ -255,7 +256,6 @@ class _IndependentDirectoratesScreenState extends BaseListScreenState<Independen
       showSubtitle: true,
       isGrid: false,
       borderRadius: 12,
-      showCircularIndicator: true, // Show the circular progress indicator
     );
   }
 

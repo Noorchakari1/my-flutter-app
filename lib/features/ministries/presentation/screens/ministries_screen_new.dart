@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/api_exception.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/localization_helper.dart';
+import '../../../../core/utils/navigation_helper.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/screens/base_list_screen.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
@@ -158,10 +159,10 @@ class _MinistriesScreenNewState extends BaseListScreenState<MinistryItem, Minist
       imageUrl: ministry.image,
       isRTL: isRTL,
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => MinistryDetailScreen(itemId: ministry.id),
-          ),
+        NavigationHelper.navigateWithLoading(
+          context,
+          destination: MinistryDetailScreen(itemId: ministry.id),
+          loadingMessage: LocalizationHelper.getText(ref, 'loading'),
         );
       },
     );
@@ -252,7 +253,6 @@ class _MinistriesScreenNewState extends BaseListScreenState<MinistryItem, Minist
       showSubtitle: true,
       isGrid: false,
       borderRadius: 12,
-      showCircularIndicator: true, // Show the circular progress indicator
     );
   }
 
