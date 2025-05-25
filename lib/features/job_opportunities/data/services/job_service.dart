@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/config/ssl_config.dart';
+import '../../../../core/config/url_config.dart';
 import '../../../../core/services/api_client.dart';
 import '../../../../core/services/api_exception.dart';
 import '../models/job_model.dart';
 
 /// Service for handling job opportunities-related API requests
 class JobService {
-  static const String baseUrl = 'http://172.16.15.229/api';
+  static final String baseUrl = UrlConfig.apiBaseUrl;
   final ApiClient _apiClient;
 
   JobService({ApiClient? apiClient})

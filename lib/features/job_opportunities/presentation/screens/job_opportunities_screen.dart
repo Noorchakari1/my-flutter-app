@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/config/url_config.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/localization_helper.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/screens/base_list_screen.dart';
+import '../../../../shared/widgets/cached_image_widget.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
@@ -138,34 +140,67 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+              // Ministry Logo
+              if (job.ministry?.logoPath != null && job.ministry!.logoPath!.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(right: 12),
+                  child: CachedImageWidget(
+                    imageUrl: UrlConfig.buildLogoUrl(job.ministry!.logoPath),
+                    width: 50,
+                    height: 50,
+                    borderRadius: BorderRadius.circular(8),
+                    fit: BoxFit.cover,
+                    errorWidget: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.business,
+                        color: Colors.grey.shade400,
+                        size: 24,
                       ),
                     ),
                   ),
-                  if (_buildJobStatusChip(job) != null)
-                    _buildJobStatusChip(job)!,
-                ],
-              ),
-              if (subtitle.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
                 ),
-              ],
+              // Job Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (_buildJobStatusChip(job) != null)
+                          _buildJobStatusChip(job)!,
+                      ],
+                    ),
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
         ),

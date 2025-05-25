@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/config/url_config.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/localization_helper.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/widgets/cached_image_widget.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../data/models/job_model.dart';
@@ -109,9 +112,15 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
     final title = job.getTitle(currentLanguage) ?? LocalizationHelper.getText(ref, 'jobOpportunity');
     final description = job.getDescription(currentLanguage);
 
-    return CustomScrollView(
-      controller: scrollController,
-      slivers: [
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(jobDetailProvider(widget.jobUuid));
+        // Wait for the provider to complete the refresh
+        await ref.read(jobDetailProvider(widget.jobUuid).future);
+      },
+      child: CustomScrollView(
+        controller: scrollController,
+        slivers: [
         // App Bar
         SliverAppBar(
           expandedHeight: 200,
@@ -137,12 +146,37 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
                   ],
                 ),
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.work,
-                  size: 80,
-                  color: Colors.white,
-                ),
+              child: Center(
+                child: job.ministry?.logoPath != null && job.ministry!.logoPath!.isNotEmpty
+                    ? Container(
+                        padding: const EdgeInsets.all(16),
+                        child: CachedImageWidget(
+                          imageUrl: UrlConfig.buildLogoUrl(job.ministry!.logoPath),
+                          width: 80,
+                          height: 80,
+                          borderRadius: BorderRadius.circular(12),
+                          fit: BoxFit.contain,
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          errorWidget: Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.work,
+                              size: 40,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      )
+                    : const Icon(
+                        Icons.work,
+                        size: 80,
+                        color: Colors.white,
+                      ),
               ),
             ),
           ),
@@ -161,8 +195,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
                 const SizedBox(height: 16),
 
                 // Job Description
-                if (description != null && description.isNotEmpty)
-                  _buildDescriptionCard(description, ref, isDarkMode),
+                _buildDescriptionCard(description, ref, isDarkMode),
 
                 const SizedBox(height: 16),
 
@@ -175,6 +208,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
           ),
         ),
       ],
+      ),
     );
   }
 
@@ -291,7 +325,78 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
     );
   }
 
-  Widget _buildDescriptionCard(String description, WidgetRef ref, bool isDarkMode) {
+  Widget _buildMinistryInfoRow(JobMinistry ministry, WidgetRef ref) {
+    final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
+    final ministryName = ministry.getTitle(currentLanguage) ?? 'N/A';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          // Ministry Logo
+          if (ministry.logoPath != null && ministry.logoPath!.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(right: 12),
+              child: CachedImageWidget(
+                imageUrl: UrlConfig.buildLogoUrl(ministry.logoPath),
+                width: 40,
+                height: 40,
+                borderRadius: BorderRadius.circular(8),
+                fit: BoxFit.cover,
+                errorWidget: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.account_balance,
+                    color: AppConstants.primaryColor,
+                    size: 20,
+                  ),
+                ),
+              ),
+            )
+          else
+            Container(
+              margin: const EdgeInsets.only(right: 12),
+              child: Icon(
+                Icons.account_balance,
+                size: 20,
+                color: AppConstants.primaryColor,
+              ),
+            ),
+          // Ministry Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  LocalizationHelper.getText(ref, 'ministry'),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  ministryName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDescriptionCard(String? description, WidgetRef ref, bool isDarkMode) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -308,33 +413,72 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            Html(
-              data: description,
-              style: {
-                "body": Style(
-                  margin: Margins.zero,
-                  padding: HtmlPaddings.zero,
-                ),
-                "table": Style(
+            if (description != null && description.isNotEmpty)
+              Html(
+                data: description,
+                style: {
+                  "body": Style(
+                    margin: Margins.zero,
+                    padding: HtmlPaddings.zero,
+                  ),
+                  "table": Style(
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  "td": Style(
+                    border: Border.all(color: Colors.grey.shade300),
+                    padding: HtmlPaddings.all(8),
+                  ),
+                  "th": Style(
+                    border: Border.all(color: Colors.grey.shade300),
+                    padding: HtmlPaddings.all(8),
+                    backgroundColor: Colors.grey.shade100,
+                    fontWeight: FontWeight.bold,
+                  ),
+                },
+                onLinkTap: (url, attributes, element) {
+                  if (url != null) {
+                    _launchURL(url);
+                  }
+                },
+              )
+            else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
-                "td": Style(
-                  border: Border.all(color: Colors.grey.shade300),
-                  padding: HtmlPaddings.all(8),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.description_outlined,
+                      size: 48,
+                      color: Colors.grey.shade400,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      LocalizationHelper.getText(ref, 'noDescriptionAvailable'),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Debug Info: description = "$description"',
+                      style: TextStyle(
+                        color: Colors.red.shade600,
+                        fontSize: 12,
+                        fontFamily: 'monospace',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-                "th": Style(
-                  border: Border.all(color: Colors.grey.shade300),
-                  padding: HtmlPaddings.all(8),
-                  backgroundColor: Colors.grey.shade100,
-                  fontWeight: FontWeight.bold,
-                ),
-              },
-              onLinkTap: (url, attributes, element) {
-                if (url != null) {
-                  _launchURL(url);
-                }
-              },
-            ),
+              ),
           ],
         ),
       ),
@@ -407,9 +551,17 @@ ${LocalizationHelper.getText(ref, 'deadline')}: $solarHijriEndDate
 ${LocalizationHelper.getText(ref, 'sharedFromApp')}
 ''';
 
-    // TODO: Implement share functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Share: $shareText')),
-    );
+    try {
+      await Share.share(shareText.trim());
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(LocalizationHelper.getText(ref, 'shareError')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
