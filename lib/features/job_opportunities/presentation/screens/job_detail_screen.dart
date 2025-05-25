@@ -196,31 +196,33 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
             ),
             const SizedBox(height: 16),
 
+            // Add ministry information first if available
+            if (job.ministry != null) ...[
+              _buildInfoRow(
+                LocalizationHelper.getText(ref, 'ministry'),
+                job.ministry!.getTitle(ref.read(themeNotifierProvider).currentLanguage) ?? 'N/A',
+                Icons.account_balance,
+              ),
+            ],
+
             if (job.type != null)
               _buildInfoRow(
                 LocalizationHelper.getText(ref, 'jobType'),
-                job.type!,
+                job.getLocalizedType(ref) ?? job.type!,
                 Icons.work_outline,
               ),
 
-            if (job.status != null)
-              _buildInfoRow(
-                LocalizationHelper.getText(ref, 'status'),
-                job.status!,
-                Icons.info_outline,
-              ),
-
-            if (job.formattedAnnouncementDate != null)
+            if (job.getFormattedAnnouncementDate(ref) != null)
               _buildInfoRow(
                 LocalizationHelper.getText(ref, 'announcementDate'),
-                job.formattedAnnouncementDate!,
+                job.getFormattedAnnouncementDate(ref)!,
                 Icons.calendar_today,
               ),
 
-            if (job.formattedEndDate != null)
+            if (job.getFormattedEndDate(ref) != null)
               _buildInfoRow(
                 LocalizationHelper.getText(ref, 'deadline'),
-                job.formattedEndDate!,
+                job.getFormattedEndDate(ref)!,
                 Icons.schedule,
                 isDeadline: true,
                 isExpired: !job.isActive,
@@ -392,13 +394,15 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
   Future<void> _shareJob(JobItem job, WidgetRef ref) async {
     final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
     final title = job.getTitle(currentLanguage) ?? LocalizationHelper.getText(ref, 'jobOpportunity');
+    final ministryName = job.ministry?.getTitle(currentLanguage);
+    final localizedType = job.getLocalizedType(ref) ?? job.type ?? 'N/A';
+    final solarHijriEndDate = job.getFormattedEndDate(ref) ?? 'N/A';
 
     final shareText = '''
 $title
 
-${LocalizationHelper.getText(ref, 'jobType')}: ${job.type ?? 'N/A'}
-${LocalizationHelper.getText(ref, 'deadline')}: ${job.formattedEndDate ?? 'N/A'}
-${LocalizationHelper.getText(ref, 'status')}: ${job.status ?? 'N/A'}
+${ministryName != null ? '$ministryName\n' : ''}${LocalizationHelper.getText(ref, 'jobType')}: $localizedType
+${LocalizationHelper.getText(ref, 'deadline')}: $solarHijriEndDate
 
 ${LocalizationHelper.getText(ref, 'sharedFromApp')}
 ''';

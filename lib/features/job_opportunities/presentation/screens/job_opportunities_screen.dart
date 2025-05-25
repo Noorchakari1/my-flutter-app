@@ -175,13 +175,26 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
 
   String _buildJobSubtitle(JobItem job) {
     final parts = <String>[];
+    final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
 
-    if (job.type != null) {
-      parts.add(job.type!);
+    // Add ministry name first if available
+    if (job.ministry != null) {
+      final ministryName = job.ministry!.getTitle(currentLanguage);
+      if (ministryName != null && ministryName.isNotEmpty) {
+        parts.add(ministryName);
+      }
     }
 
-    if (job.formattedEndDate != null) {
-      parts.add('${LocalizationHelper.getText(ref, 'deadline')}: ${job.formattedEndDate}');
+    if (job.type != null) {
+      final localizedType = job.getLocalizedType(ref);
+      if (localizedType != null && localizedType.isNotEmpty) {
+        parts.add(localizedType);
+      }
+    }
+
+    final solarHijriEndDate = job.getFormattedEndDate(ref);
+    if (solarHijriEndDate != null) {
+      parts.add(solarHijriEndDate);
     }
 
     return parts.join(' • ');

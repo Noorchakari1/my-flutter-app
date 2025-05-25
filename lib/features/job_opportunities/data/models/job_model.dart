@@ -1,3 +1,5 @@
+import '../../../../core/utils/solar_hijri_calendar.dart';
+
 class JobMinistry {
   final int id;
   final String? titleDr;
@@ -191,7 +193,24 @@ class JobItem {
     }
   }
 
-  /// Get formatted announcement date
+  /// Get formatted announcement date in Solar Hijri format
+  String? getFormattedAnnouncementDate(ref) {
+    if (announcementDate == null) return null;
+    return SolarHijriCalendar.formatGregorianDateToSolarHijri(announcementDate, ref);
+  }
+
+  /// Get formatted end date in Solar Hijri format
+  String? getFormattedEndDate(ref) {
+    if (endDate == null) return null;
+    return SolarHijriCalendar.formatGregorianDateToSolarHijri(endDate, ref);
+  }
+
+  /// Get localized contract type
+  String? getLocalizedType(ref) {
+    return SolarHijriCalendar.getLocalizedContractType(type, ref);
+  }
+
+  /// Legacy formatted announcement date (for backward compatibility)
   String? get formattedAnnouncementDate {
     if (announcementDate == null) return null;
     try {
@@ -202,7 +221,7 @@ class JobItem {
     }
   }
 
-  /// Get formatted end date
+  /// Legacy formatted end date (for backward compatibility)
   String? get formattedEndDate {
     if (endDate == null) return null;
     try {

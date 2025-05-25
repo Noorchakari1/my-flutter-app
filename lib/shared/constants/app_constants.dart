@@ -222,6 +222,25 @@ class AppConstants {
     'backToHome': 'بازگشت به صفحه اصلی',
     'offline': 'شما آفلاین هستید',
     'checkConnection': 'لطفا اتصال اینترنت خود را بررسی کنید',
+    // Contract Types
+    'permanent': 'دائمی',
+    'temporary': 'موقت',
+    'contract': 'قراردادی',
+    'partTime': 'پاره وقت',
+    'fullTime': 'تمام وقت',
+    // Solar Hijri Months
+    'hamal': 'حمل',
+    'sawr': 'ثور',
+    'jawza': 'جوزا',
+    'saratan': 'سرطان',
+    'asad': 'اسد',
+    'sunbula': 'سنبله',
+    'mizan': 'میزان',
+    'aqrab': 'عقرب',
+    'qaws': 'قوس',
+    'jadi': 'جدی',
+    'dalw': 'دلو',
+    'hut': 'حوت',
   };
 
   // Pashto Text
@@ -350,6 +369,25 @@ class AppConstants {
     'backToHome': 'اصلي پاڼې ته ستنېدل',
     'offline': 'تاسو آفلاین یاست',
     'checkConnection': 'مهرباني وکړئ خپله انټرنیټ اړیکه وګورئ',
+    // Contract Types
+    'permanent': 'دایمي',
+    'temporary': 'لنډمهاله',
+    'contract': 'تړونیز',
+    'partTime': 'د یوې برخې وخت',
+    'fullTime': 'بشپړ وخت',
+    // Solar Hijri Months
+    'hamal': 'وری',
+    'sawr': 'غویی',
+    'jawza': 'غبرګولی',
+    'saratan': 'چنګاښ',
+    'asad': 'زمری',
+    'sunbula': 'وږی',
+    'mizan': 'تله',
+    'aqrab': 'لړم',
+    'qaws': 'لیندۍ',
+    'jadi': 'مرغومی',
+    'dalw': 'سلواغه',
+    'hut': 'کب',
   };
 
   // English Text
@@ -478,5 +516,24 @@ class AppConstants {
     'backToHome': 'Back to Home',
     'offline': 'You are offline',
     'checkConnection': 'Please check your internet connection',
+    // Contract Types
+    'permanent': 'Permanent',
+    'temporary': 'Temporary',
+    'contract': 'Contract',
+    'partTime': 'Part Time',
+    'fullTime': 'Full Time',
+    // Solar Hijri Months
+    'hamal': 'Hamal',
+    'sawr': 'Sawr',
+    'jawza': 'Jawza',
+    'saratan': 'Saratan',
+    'asad': 'Asad',
+    'sunbula': 'Sunbula',
+    'mizan': 'Mizan',
+    'aqrab': 'Aqrab',
+    'qaws': 'Qaws',
+    'jadi': 'Jadi',
+    'dalw': 'Dalw',
+    'hut': 'Hut',
   };
 }

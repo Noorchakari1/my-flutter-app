@@ -96,10 +96,14 @@ class JobService {
       final type = job.type?.toLowerCase() ?? '';
       final status = job.status?.toLowerCase() ?? '';
 
+      // Include ministry name in search
+      final ministryName = job.ministry?.getTitle(currentLanguage)?.toLowerCase() ?? '';
+
       return title.contains(lowerQuery) ||
              description.contains(lowerQuery) ||
              type.contains(lowerQuery) ||
-             status.contains(lowerQuery);
+             status.contains(lowerQuery) ||
+             ministryName.contains(lowerQuery);
     }).toList();
   }
 
