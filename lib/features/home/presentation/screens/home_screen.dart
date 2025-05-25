@@ -84,13 +84,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         title: _getText('jobOpportunities'),
                         iconData: Icons.work,
                         onPressed: () {
-                          // Functionality will be implemented later
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(_getText('comingSoon')),
-                              duration: const Duration(seconds: 2),
-                            ),
+                          NavigationHelper.navigateToRouteWithLoading(
+                            context,
+                            routeName: Routes.jobOpportunities,
+                            loadingMessage: _getText('loading'),
                           );
+
                         },
                       ),
                     ],

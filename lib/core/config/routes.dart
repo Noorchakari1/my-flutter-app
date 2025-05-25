@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/independent_directorates/presentation/screens/independent_directorates_screen.dart';
+import '../../features/job_opportunities/presentation/screens/job_opportunities_screen.dart';
 import '../../features/language/presentation/screens/feedback_screen.dart';
 import '../../features/language/presentation/screens/language_screen.dart';
 import '../../features/language/presentation/screens/service_button_screen.dart';
@@ -30,6 +31,7 @@ class Routes {
   static const String ministries = '/ministries';
   static const String independentDirectorates = '/independent-directorates';
   static const String provinces = '/provinces';
+  static const String jobOpportunities = '/job-opportunities';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -63,6 +65,10 @@ class Routes {
       case provinces:
         return MaterialPageRoute(
           builder: (_) => const ProvincesScreen(),
+        );
+      case jobOpportunities:
+        return MaterialPageRoute(
+          builder: (_) => const JobOpportunitiesScreen(),
         );
       case AppConstants.webViewRoute:
         final args = settings.arguments as Map<String, dynamic>;
