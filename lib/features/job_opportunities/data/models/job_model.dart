@@ -231,6 +231,108 @@ class JobItem {
       return endDate;
     }
   }
+
+  /// Check if the apply link is an email address
+  bool get isApplyLinkEmail {
+    if (applyLink == null || applyLink!.isEmpty) return false;
+    
+    // Basic email regex pattern
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+      caseSensitive: false,
+    );
+    
+    // Remove mailto: prefix if present
+    final cleanLink = applyLink!.toLowerCase().startsWith('mailto:') 
+        ? applyLink!.substring(7) 
+        : applyLink!;
+    
+    return emailRegex.hasMatch(cleanLink);
+  }
+
+  /// Check if the apply link is a web URL
+  bool get isApplyLinkWebUrl {
+    if (applyLink == null || applyLink!.isEmpty) return false;
+    
+    final lowerLink = applyLink!.toLowerCase();
+    return lowerLink.startsWith('http://') || 
+           lowerLink.startsWith('https://') || 
+           lowerLink.startsWith('www.');
+  }
+
+  /// Get the apply link type for UI display
+  ApplyLinkType get applyLinkType {
+    if (applyLink == null || applyLink!.trim().isEmpty) {
+      return ApplyLinkType.none;
+    }
+    
+    final trimmedLink = applyLink!.trim();
+    
+    // Check for email pattern
+    if (trimmedLink.contains('@') || trimmedLink.toLowerCase().startsWith('mailto:')) {
+      return ApplyLinkType.email;
+    }
+    
+    // Check for web URL patterns
+    if (trimmedLink.toLowerCase().startsWith('http://') || 
+        trimmedLink.toLowerCase().startsWith('https://') || 
+        trimmedLink.toLowerCase().startsWith('www.') ||
+        trimmedLink.contains('.')) {
+      return ApplyLinkType.webUrl;
+    }
+    
+    // If it's not clearly an email or web URL, treat as web URL by default
+    return ApplyLinkType.webUrl;
+  }
+
+  /// Get formatted apply link for launching
+  String? get formattedApplyLink {
+    if (applyLink == null || applyLink!.trim().isEmpty) return null;
+    
+    final trimmedLink = applyLink!.trim();
+    
+    switch (applyLinkType) {
+      case ApplyLinkType.email:
+        // Ensure mailto: prefix for email
+        if (!trimmedLink.toLowerCase().startsWith('mailto:')) {
+          return 'mailto:$trimmedLink';
+        }
+        return trimmedLink;
+      
+      case ApplyLinkType.webUrl:
+        // Handle different URL formats
+        final lowerLink = trimmedLink.toLowerCase();
+        
+        // Already has protocol
+        if (lowerLink.startsWith('http://') || lowerLink.startsWith('https://')) {
+          return trimmedLink;
+        }
+        
+        // Starts with www
+        if (lowerLink.startsWith('www.')) {
+          return 'https://$trimmedLink';
+        }
+        
+        // Plain domain or other format - add https
+        return 'https://$trimmedLink';
+      
+      case ApplyLinkType.none:
+        return null;
+    }
+  }
+
+  /// Check if the job has a valid apply link
+  bool get hasValidApplyLink {
+    // More lenient check - any non-empty string is considered valid
+    return applyLink != null && applyLink!.trim().isNotEmpty;
+  }
+}
+
+/// Enum for different types of apply links
+enum ApplyLinkType {
+  none,
+  email,
+  webUrl,
 }
 
 class JobResponse {

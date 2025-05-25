@@ -13,6 +13,7 @@ import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../data/models/job_model.dart';
 import '../../data/providers/job_provider.dart';
+import '../../data/services/job_apply_service.dart';
 
 class JobDetailScreen extends ConsumerStatefulWidget {
   final String jobUuid;
@@ -111,6 +112,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
     final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
     final title = job.getTitle(currentLanguage) ?? LocalizationHelper.getText(ref, 'jobOpportunity');
     final description = job.getDescription(currentLanguage);
+    
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -486,15 +488,24 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
   }
 
   Widget _buildActionButtons(JobItem job, WidgetRef ref, BuildContext context) {
-    return Column(
-      children: [
-        if (job.applyLink != null && job.applyLink!.isNotEmpty)
-          SizedBox(
-            width: double.infinity,
+    // Debug information
+    print('DEBUG: applyLink = "${job.applyLink}"');
+    print('DEBUG: hasValidApplyLink = ${job.hasValidApplyLink}');
+    print('DEBUG: applyLinkType = ${job.applyLinkType}');
+    
+    // Check if we have apply link to determine layout
+    final hasApplyLink = job.applyLink != null && job.applyLink!.trim().isNotEmpty;
+    
+    if (hasApplyLink) {
+      // Show both buttons side by side
+      return Row(
+        children: [
+          // Apply Button
+          Expanded(
             child: ElevatedButton.icon(
-              onPressed: () => _launchURL(job.applyLink!),
-              icon: const Icon(Icons.open_in_new),
-              label: Text(LocalizationHelper.getText(ref, 'applyNow')),
+              onPressed: () => _handleApplyToJob(job, context, ref),
+              icon: Icon(JobApplyService.getApplyButtonIcon(job.applyLinkType)),
+              label: Text(_getApplyButtonText(job, ref)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppConstants.primaryColor,
                 foregroundColor: Colors.white,
@@ -506,28 +517,248 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
             ),
           ),
 
-        const SizedBox(height: 12),
+          const SizedBox(width: 12),
 
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () => _shareJob(job, ref),
-            icon: const Icon(Icons.share),
-            label: Text(LocalizationHelper.getText(ref, 'share')),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppConstants.primaryColor,
-              side: const BorderSide(color: AppConstants.primaryColor),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          // Share Button
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => _shareJob(job, ref),
+              icon: const Icon(Icons.share),
+              label: Text(LocalizationHelper.getText(ref, 'share')),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppConstants.primaryColor,
+                side: const BorderSide(color: AppConstants.primaryColor),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    } else {
+      // Show test buttons and share button when no apply link
+      return Column(
+        children: [
+          // Test URL Launcher Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                final result = await JobApplyService.testUrlLauncher();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('URL Launcher Test: ${result ? 'SUCCESS' : 'FAILED'}'),
+                      backgroundColor: result ? Colors.green : Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.web),
+              label: const Text('Test URL Launcher'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 8),
+          
+          // Test Email Launcher Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                final result = await JobApplyService.testEmailLauncher();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Email Launcher Test: ${result ? 'SUCCESS' : 'FAILED'}'),
+                      backgroundColor: result ? Colors.green : Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.email),
+              label: const Text('Test Email Launcher'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Share Button (full width)
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _shareJob(job, ref),
+              icon: const Icon(Icons.share),
+              label: Text(LocalizationHelper.getText(ref, 'share')),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppConstants.primaryColor,
+                side: const BorderSide(color: AppConstants.primaryColor),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+                 ],
+       );
+    }
   }
 
+  /// Handle applying to a job with enhanced functionality
+  Future<void> _handleApplyToJob(JobItem job, BuildContext context, WidgetRef ref) async {
+    try {
+      // Show loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text('Opening ${job.applyLinkType == ApplyLinkType.email ? 'email client' : 'browser'}...'),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      final result = await JobApplyService.applyToJob(job);
+      
+      if (mounted) {
+        // Clear any existing snackbars
+        ScaffoldMessenger.of(context).clearSnackBars();
+        
+        if (result.success) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(_getLocalizedSuccessMessage(result.linkType, ref)),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else {
+          // Show detailed error message with debug info
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_getLocalizedErrorMessage(result.linkType, ref)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Debug: ${result.message}',
+                    style: const TextStyle(fontSize: 12, color: Colors.white70),
+                  ),
+                  Text(
+                    'Link: "${job.applyLink}"',
+                    style: const TextStyle(fontSize: 12, color: Colors.white70),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: LocalizationHelper.getText(ref, 'retry'),
+                textColor: Colors.white,
+                onPressed: () => _handleApplyToJob(job, context, ref),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${LocalizationHelper.getText(ref, 'generalError')}: ${e.toString()}'),
+                const SizedBox(height: 4),
+                Text(
+                  'Original link: "${job.applyLink}"',
+                  style: const TextStyle(fontSize: 12, color: Colors.white70),
+                ),
+                Text(
+                  'Formatted link: "${job.formattedApplyLink}"',
+                  style: const TextStyle(fontSize: 12, color: Colors.white70),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Get localized apply button text based on link type
+  String _getApplyButtonText(JobItem job, WidgetRef ref) {
+    switch (job.applyLinkType) {
+      case ApplyLinkType.email:
+        return LocalizationHelper.getText(ref, 'applyViaEmail');
+      case ApplyLinkType.webUrl:
+        return LocalizationHelper.getText(ref, 'applyOnline');
+      case ApplyLinkType.none:
+        return LocalizationHelper.getText(ref, 'applyNow');
+    }
+  }
+
+  /// Get localized success message based on link type
+  String _getLocalizedSuccessMessage(ApplyLinkType linkType, WidgetRef ref) {
+    switch (linkType) {
+      case ApplyLinkType.email:
+        return LocalizationHelper.getText(ref, 'emailClientOpened');
+      case ApplyLinkType.webUrl:
+        return LocalizationHelper.getText(ref, 'browserOpened');
+      case ApplyLinkType.none:
+        return LocalizationHelper.getText(ref, 'linkOpened');
+    }
+  }
+
+  /// Get localized error message based on link type
+  String _getLocalizedErrorMessage(ApplyLinkType linkType, WidgetRef ref) {
+    switch (linkType) {
+      case ApplyLinkType.email:
+        return LocalizationHelper.getText(ref, 'emailClientError');
+      case ApplyLinkType.webUrl:
+        return LocalizationHelper.getText(ref, 'browserError');
+      case ApplyLinkType.none:
+        return LocalizationHelper.getText(ref, 'linkError');
+    }
+  }
+
+  /// Legacy method for backward compatibility
   Future<void> _launchURL(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
