@@ -473,7 +473,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
             child: ElevatedButton.icon(
               onPressed: () async {
                 final result = await JobApplyService.testUrlLauncher();
-                if (mounted) {
+                if (mounted && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('URL Launcher Test: ${result ? 'SUCCESS' : 'FAILED'}'),
@@ -503,7 +503,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
             child: ElevatedButton.icon(
               onPressed: () async {
                 final result = await JobApplyService.testEmailLauncher();
-                if (mounted) {
+                if (mounted && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Email Launcher Test: ${result ? 'SUCCESS' : 'FAILED'}'),
@@ -575,7 +575,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
 
       final result = await JobApplyService.applyToJob(job);
       
-      if (mounted) {
+      if (mounted && context.mounted) {
         // Clear any existing snackbars
         ScaffoldMessenger.of(context).clearSnackBars();
         
@@ -620,7 +620,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
         }
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -711,7 +711,7 @@ ${LocalizationHelper.getText(ref, 'sharedFromApp')}
     try {
       await Share.share(shareText.trim());
     } catch (e) {
-      if (mounted) {
+      if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(LocalizationHelper.getText(ref, 'shareError')),

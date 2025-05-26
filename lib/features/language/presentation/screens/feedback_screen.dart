@@ -144,7 +144,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
                       try {
                         // Try to launch WhatsApp app first
-                        bool launched = await launchUrl(
+                        final bool launched = await launchUrl(
                           whatsappUrl,
                           mode: LaunchMode.externalApplication,
                         );
