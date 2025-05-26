@@ -873,6 +873,26 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
 
     final solarHijriEndDate = job.getFormattedEndDate(ref);
 
+    // Get job status to determine expiration date color
+    final jobStatus = _getJobStatus(job);
+    Color expirationDateColor;
+    
+    switch (jobStatus) {
+      case 'new':
+        expirationDateColor = Colors.green.shade600;
+        break;
+      case 'expired':
+        expirationDateColor = Colors.red.shade600;
+        break;
+      case 'expiring':
+        expirationDateColor = Colors.orange.shade600;
+        break;
+      default:
+        expirationDateColor = job.isActive
+            ? Colors.green.shade600
+            : Colors.red.shade600;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -892,9 +912,7 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
             solarHijriEndDate,
             style: TextStyle(
               fontSize: 14,
-              color: job.isActive
-                  ? Colors.green.shade600
-                  : Colors.red.shade600,
+              color: expirationDateColor,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,
@@ -1031,6 +1049,45 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
       'expired': expiredJobs,
     };
   }
+
+  // Determine job status based on dates
+  String _getJobStatus(JobItem job) {
+    final now = DateTime.now();
+    
+    // First check if job is expired based on end date
+    if (job.endDate != null) {
+      try {
+        final endDate = DateTime.parse(job.endDate!);
+        if (endDate.isBefore(now)) {
+          return 'expired';
+        }
+      } catch (e) {
+        // If end date parsing fails, continue with other checks
+      }
+    }
+
+    // For active jobs, categorize based on announcement date
+    if (job.announcementDate != null) {
+      try {
+        final announcementDate = DateTime.parse(job.announcementDate!);
+        final daysSinceAnnouncement = now.difference(announcementDate).inDays;
+
+        if (daysSinceAnnouncement <= 7) {
+          return 'new';
+        } else {
+          return 'expiring';
+        }
+      } catch (e) {
+        // If announcement date parsing fails, consider it as new
+        return 'new';
+      }
+    }
+
+    // If no announcement date, consider it as new
+    return 'new';
+  }
+
+
 
 
 
