@@ -7,7 +7,7 @@ import '../models/job_model.dart';
 
 /// Service for handling job opportunities-related API requests
 class JobService {
-  static final String baseUrl = UrlConfig.apiBaseUrl;
+  static const String baseUrl = UrlConfig.apiBaseUrl;
   final ApiClient _apiClient;
 
   JobService({ApiClient? apiClient})

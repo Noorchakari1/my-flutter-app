@@ -327,76 +327,6 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
     );
   }
 
-  Widget _buildMinistryInfoRow(JobMinistry ministry, WidgetRef ref) {
-    final currentLanguage = ref.read(themeNotifierProvider).currentLanguage;
-    final ministryName = ministry.getTitle(currentLanguage) ?? 'N/A';
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          // Ministry Logo
-          if (ministry.logoPath != null && ministry.logoPath!.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(right: 12),
-              child: CachedImageWidget(
-                imageUrl: UrlConfig.buildLogoUrl(ministry.logoPath),
-                width: 40,
-                height: 40,
-                borderRadius: BorderRadius.circular(8),
-                fit: BoxFit.cover,
-                errorWidget: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.account_balance,
-                    color: AppConstants.primaryColor,
-                    size: 20,
-                  ),
-                ),
-              ),
-            )
-          else
-            Container(
-              margin: const EdgeInsets.only(right: 12),
-              child: Icon(
-                Icons.account_balance,
-                size: 20,
-                color: AppConstants.primaryColor,
-              ),
-            ),
-          // Ministry Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  LocalizationHelper.getText(ref, 'ministry'),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  ministryName,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildDescriptionCard(String? description, WidgetRef ref, bool isDarkMode) {
     return Card(
@@ -488,11 +418,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
   }
 
   Widget _buildActionButtons(JobItem job, WidgetRef ref, BuildContext context) {
-    // Debug information
-    print('DEBUG: applyLink = "${job.applyLink}"');
-    print('DEBUG: hasValidApplyLink = ${job.hasValidApplyLink}');
-    print('DEBUG: applyLinkType = ${job.applyLinkType}');
-    
+
     // Check if we have apply link to determine layout
     final hasApplyLink = job.applyLink != null && job.applyLink!.trim().isNotEmpty;
     

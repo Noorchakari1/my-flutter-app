@@ -6,13 +6,9 @@ import '../models/job_model.dart';
 class JobApplyService {
   /// Apply to a job based on the apply link type
   static Future<JobApplyResult> applyToJob(JobItem job) async {
-    print('=== JobApplyService Debug ===');
-    print('Original applyLink: "${job.applyLink}"');
-    print('hasValidApplyLink: ${job.hasValidApplyLink}');
-    print('applyLinkType: ${job.applyLinkType}');
     
     if (!job.hasValidApplyLink) {
-      return JobApplyResult(
+      return const JobApplyResult(
         success: false,
         message: 'No valid apply link available',
         linkType: ApplyLinkType.none,
@@ -20,7 +16,6 @@ class JobApplyService {
     }
 
     final formattedLink = job.formattedApplyLink;
-    print('Formatted link: "$formattedLink"');
     
     if (formattedLink == null) {
       return JobApplyResult(
@@ -32,18 +27,10 @@ class JobApplyService {
 
     try {
       final uri = Uri.parse(formattedLink);
-      print('Parsed URI: $uri');
-      print('URI scheme: ${uri.scheme}');
-      print('URI host: ${uri.host}');
-      
       // Get the appropriate launch mode
       final launchMode = _getLaunchMode(job.applyLinkType);
-      print('Launch mode: $launchMode');
-      
       // Check if the URL can be launched
       final canLaunch = await canLaunchUrl(uri);
-      print('Can launch URL: $canLaunch');
-      
       if (!canLaunch) {
         // Try alternative launch methods for different link types
         return await _tryAlternativeLaunch(job, formattedLink);
@@ -51,8 +38,6 @@ class JobApplyService {
 
       // Launch the URL with appropriate mode based on link type
       final launched = await launchUrl(uri, mode: launchMode);
-      print('Launch result: $launched');
-
       if (launched) {
         return JobApplyResult(
           success: true,
@@ -63,7 +48,6 @@ class JobApplyService {
         return await _tryAlternativeLaunch(job, formattedLink);
       }
     } catch (e) {
-      print('Launch error: $e');
       return JobApplyResult(
         success: false,
         message: 'Failed to open ${_getLinkTypeDisplayName(job.applyLinkType)}: ${e.toString()}',
@@ -74,8 +58,6 @@ class JobApplyService {
 
   /// Try alternative launch methods when primary method fails
   static Future<JobApplyResult> _tryAlternativeLaunch(JobItem job, String formattedLink) async {
-    print('Trying alternative launch methods...');
-    
     try {
       final uri = Uri.parse(formattedLink);
       
@@ -88,10 +70,8 @@ class JobApplyService {
       
       for (final mode in launchModes) {
         try {
-          print('Trying launch mode: $mode');
           final launched = await launchUrl(uri, mode: mode);
           if (launched) {
-            print('Successfully launched with mode: $mode');
             return JobApplyResult(
               success: true,
               message: _getSuccessMessage(job.applyLinkType),
@@ -99,7 +79,6 @@ class JobApplyService {
             );
           }
         } catch (e) {
-          print('Failed with mode $mode: $e');
           continue;
         }
       }
@@ -205,20 +184,16 @@ class JobApplyService {
     try {
       // Test with a simple web URL
       final testUri = Uri.parse('https://www.google.com');
-      print('Testing URL launcher with: $testUri');
       
       final canLaunch = await canLaunchUrl(testUri);
-      print('Can launch test URL: $canLaunch');
       
       if (canLaunch) {
         final launched = await launchUrl(testUri, mode: LaunchMode.externalApplication);
-        print('Test launch result: $launched');
         return launched;
       }
       
       return false;
     } catch (e) {
-      print('Test URL launcher error: $e');
       return false;
     }
   }
@@ -228,20 +203,16 @@ class JobApplyService {
     try {
       // Test with a simple email
       final testUri = Uri.parse('mailto:test@example.com');
-      print('Testing email launcher with: $testUri');
       
       final canLaunch = await canLaunchUrl(testUri);
-      print('Can launch test email: $canLaunch');
       
       if (canLaunch) {
         final launched = await launchUrl(testUri, mode: LaunchMode.externalApplication);
-        print('Test email launch result: $launched');
         return launched;
       }
       
       return false;
     } catch (e) {
-      print('Test email launcher error: $e');
       return false;
     }
   }
