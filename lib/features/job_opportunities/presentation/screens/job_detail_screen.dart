@@ -127,15 +127,18 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
         SliverAppBar(
           expandedHeight: 200,
           pinned: true,
+          centerTitle: true,
           backgroundColor: isDarkMode ? Colors.black : AppConstants.primaryColor,
           elevation: 0,
           flexibleSpace: FlexibleSpaceBar(
+            centerTitle: true,
             title: Text(
               title,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
             background: Container(
               decoration: BoxDecoration(
