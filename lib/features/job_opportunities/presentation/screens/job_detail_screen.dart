@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:html/dom.dart' as html_dom;
+import 'package:html/parser.dart' as html_parser;
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -349,65 +351,29 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
             ),
             const SizedBox(height: 12),
             if (description != null && description.isNotEmpty)
-              Html(
-                data: description,
-                style: {
-                  "body": Style(
-                    margin: Margins.zero,
-                    padding: HtmlPaddings.zero,
-                  ),
-                  "table": Style(
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  "td": Style(
-                    border: Border.all(color: Colors.grey.shade300),
-                    padding: HtmlPaddings.all(8),
-                  ),
-                  "th": Style(
-                    border: Border.all(color: Colors.grey.shade300),
-                    padding: HtmlPaddings.all(8),
-                    backgroundColor: Colors.grey.shade100,
-                    fontWeight: FontWeight.bold,
-                  ),
-                },
-                onLinkTap: (url, attributes, element) {
-                  if (url != null) {
-                    _launchURL(url);
-                  }
-                },
-              )
+              _buildParsedContent(description, ref, isDarkMode)
             else
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300),
                 ),
                 child: Column(
                   children: [
                     Icon(
                       Icons.description_outlined,
                       size: 48,
-                      color: Colors.grey.shade400,
+                      color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade400,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       LocalizationHelper.getText(ref, 'noDescriptionAvailable'),
                       style: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                         fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Debug Info: description = "$description"',
-                      style: TextStyle(
-                        color: Colors.red.shade600,
-                        fontSize: 12,
-                        fontFamily: 'monospace',
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -418,6 +384,273 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildParsedContent(String htmlContent, WidgetRef ref, bool isDarkMode) {
+    final document = html_parser.parse(htmlContent);
+    final tables = document.querySelectorAll('table');
+    
+    if (tables.isEmpty) {
+      // No tables found, render as HTML
+      return _buildHtmlContent(htmlContent, isDarkMode);
+    }
+    
+    // Extract content and build hybrid layout
+    return _buildHybridContent(document, tables, ref, isDarkMode);
+  }
+
+  Widget _buildHtmlContent(String htmlContent, bool isDarkMode) {
+    return Html(
+      data: htmlContent,
+      style: {
+        "body": Style(
+          margin: Margins.zero,
+          padding: HtmlPaddings.zero,
+          fontSize: FontSize(14),
+          lineHeight: const LineHeight(1.5),
+        ),
+        "p": Style(
+          margin: Margins.only(bottom: 12),
+          fontSize: FontSize(14),
+          lineHeight: const LineHeight(1.5),
+        ),
+        "div": Style(
+          margin: Margins.only(bottom: 8),
+        ),
+        "ul, ol": Style(
+          margin: Margins.only(left: 16, bottom: 12),
+        ),
+        "li": Style(
+          margin: Margins.only(bottom: 4),
+          fontSize: FontSize(14),
+        ),
+        "h1, h2, h3, h4, h5, h6": Style(
+          fontWeight: FontWeight.bold,
+          margin: Margins.only(top: 16, bottom: 8),
+        ),
+        "strong, b": Style(
+          fontWeight: FontWeight.bold,
+        ),
+        "em, i": Style(
+          fontStyle: FontStyle.italic,
+        ),
+      },
+      onLinkTap: (url, attributes, element) {
+        if (url != null) {
+          _launchURL(url);
+        }
+      },
+    );
+  }
+
+  Widget _buildHybridContent(html_dom.Document document, List<html_dom.Element> tables, WidgetRef ref, bool isDarkMode) {
+    final List<Widget> contentWidgets = [];
+    
+    // Get all content before the first table
+    final beforeTableContent = _getContentBeforeElement(document.body!, tables.first);
+    if (beforeTableContent.isNotEmpty) {
+      contentWidgets.add(_buildHtmlContent(beforeTableContent, isDarkMode));
+      contentWidgets.add(const SizedBox(height: 16));
+    }
+    
+    // Process each table and content between tables
+    for (int i = 0; i < tables.length; i++) {
+      final table = tables[i];
+      
+      // Add the table widget
+      contentWidgets.add(_buildCustomTable(table, isDarkMode, ref));
+      
+      if (i < tables.length - 1) {
+        // Get content between this table and the next
+        final betweenContent = _getContentBetweenElements(document.body!, table, tables[i + 1]);
+        if (betweenContent.isNotEmpty) {
+          contentWidgets.add(const SizedBox(height: 16));
+          contentWidgets.add(_buildHtmlContent(betweenContent, isDarkMode));
+          contentWidgets.add(const SizedBox(height: 16));
+        } else {
+          contentWidgets.add(const SizedBox(height: 16));
+        }
+      }
+    }
+    
+    // Get content after the last table
+    final afterTableContent = _getContentAfterElement(document.body!, tables.last);
+    if (afterTableContent.isNotEmpty) {
+      contentWidgets.add(const SizedBox(height: 16));
+      contentWidgets.add(_buildHtmlContent(afterTableContent, isDarkMode));
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: contentWidgets,
+    );
+  }
+
+  Widget _buildCustomTable(html_dom.Element tableElement, bool isDarkMode, WidgetRef ref) {
+    final rows = tableElement.querySelectorAll('tr');
+    if (rows.isEmpty) return const SizedBox.shrink();
+    
+    // Extract table data
+    final List<List<String>> tableData = [];
+    bool hasHeader = false;
+    
+    for (int i = 0; i < rows.length; i++) {
+      final row = rows[i];
+      final cells = row.querySelectorAll('td, th');
+      
+      if (cells.isNotEmpty) {
+        // Check if this row contains header cells
+        if (i == 0 && row.querySelectorAll('th').isNotEmpty) {
+          hasHeader = true;
+        }
+        
+        final List<String> rowData = cells.map((cell) => cell.text.trim()).toList();
+        tableData.add(rowData);
+      }
+    }
+    
+    if (tableData.isEmpty) return const SizedBox.shrink();
+    
+    // Determine text direction based on language
+    final isRTL = LocalizationHelper.isRTL(ref);
+    
+    // Reverse column order for RTL languages to maintain logical reading order
+    final processedTableData = isRTL 
+        ? tableData.map((row) => row.reversed.toList()).toList()
+        : tableData;
+    
+    return Directionality(
+      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
+            width: 1,
+          ),
+          // Add subtle gradient for RTL tables
+          gradient: isRTL ? LinearGradient(
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
+            colors: [
+              (isDarkMode ? Colors.grey.shade800 : Colors.grey.shade50).withValues(alpha: 0.1),
+              Colors.transparent,
+            ],
+          ) : null,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              headingRowHeight: hasHeader ? 56 : 0,
+              dataRowMinHeight: 48,
+              dataRowMaxHeight: 48,
+              horizontalMargin: 16,
+              columnSpacing: 20,
+              headingRowColor: WidgetStateProperty.all(
+                isDarkMode ? Colors.grey.shade800 : Colors.grey.shade50,
+              ),
+              border: TableBorder.all(
+                color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
+                width: 1,
+              ),
+              columns: _buildTableColumns(processedTableData.first, hasHeader, isDarkMode, isRTL),
+              rows: _buildTableRows(
+                hasHeader ? processedTableData.skip(1).toList() : processedTableData,
+                isDarkMode,
+                isRTL,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<DataColumn> _buildTableColumns(List<String> headerData, bool hasHeader, bool isDarkMode, bool isRTL) {
+    return headerData.asMap().entries.map((entry) {
+      return DataColumn(
+        label: Expanded(
+          child: Text(
+            hasHeader ? entry.value : (isRTL ? 'ستون ${entry.key + 1}' : 'Column ${entry.key + 1}'),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: isDarkMode ? Colors.white : Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+            textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  List<DataRow> _buildTableRows(List<List<String>> rowsData, bool isDarkMode, bool isRTL) {
+    return rowsData.asMap().entries.map((rowEntry) {
+      return DataRow(
+        color: WidgetStateProperty.resolveWith<Color?>(
+          (Set<WidgetState> states) {
+            if (rowEntry.key.isEven) {
+              return isDarkMode 
+                ? Colors.grey.shade900.withValues(alpha: 0.3)
+                : Colors.grey.shade50.withValues(alpha: 0.5);
+            }
+            return null;
+          },
+        ),
+        cells: rowEntry.value.map((cellData) {
+          return DataCell(
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Text(
+                cellData.isNotEmpty ? cellData : '-',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+                textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    }).toList();
+  }
+
+  String _getContentBeforeElement(html_dom.Element parent, html_dom.Element target) {
+    final children = parent.children;
+    final targetIndex = children.indexOf(target);
+    if (targetIndex <= 0) return '';
+    
+    final beforeElements = children.take(targetIndex);
+    return beforeElements.map((e) => e.outerHtml).join('');
+  }
+
+  String _getContentBetweenElements(html_dom.Element parent, html_dom.Element start, html_dom.Element end) {
+    final children = parent.children;
+    final startIndex = children.indexOf(start);
+    final endIndex = children.indexOf(end);
+    
+    if (startIndex == -1 || endIndex == -1 || endIndex <= startIndex + 1) return '';
+    
+    final betweenElements = children.skip(startIndex + 1).take(endIndex - startIndex - 1);
+    return betweenElements.map((e) => e.outerHtml).join('');
+  }
+
+  String _getContentAfterElement(html_dom.Element parent, html_dom.Element target) {
+    final children = parent.children;
+    final targetIndex = children.indexOf(target);
+    if (targetIndex == -1 || targetIndex >= children.length - 1) return '';
+    
+    final afterElements = children.skip(targetIndex + 1);
+    return afterElements.map((e) => e.outerHtml).join('');
   }
 
   Widget _buildActionButtons(JobItem job, WidgetRef ref, BuildContext context) {
