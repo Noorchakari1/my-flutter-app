@@ -411,6 +411,7 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
   void _showDepartmentFilterBottomSheet(Map<String, String> departments) {
     final isRTL = ref.read(themeNotifierProvider).currentLanguage != 'english';
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final jobsAsync = ref.read(jobNotifierProvider);
 
     showModalBottomSheet(
       context: context,
@@ -487,16 +488,21 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       children: [
                         // All departments option
-                        _buildDepartmentOption(
-                          null,
-                          _getText(context, 'allDepartments'),
-                          isDarkMode,
-                          departments.length,
+                        jobsAsync.when(
+                          data: (jobs) => _buildDepartmentOption(
+                            null,
+                            _getText(context, 'allDepartments'),
+                            isDarkMode,
+                            jobs.length,
+                            activeCount: jobs.where((job) => job.isActive).length,
+                            expiredCount: jobs.where((job) => !job.isActive).length,
+                          ),
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
                         ),
                         const Divider(height: 1),
                         // Individual departments
                         ...departments.entries.map((entry) {
-                          final jobsAsync = ref.read(jobNotifierProvider);
                           return jobsAsync.when(
                             data: (jobs) {
                               final departmentJobs = jobs.where((job) =>
