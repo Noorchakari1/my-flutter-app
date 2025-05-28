@@ -11,6 +11,7 @@ import '../../features/language/presentation/screens/service_button_screen.dart'
 import '../../features/language/presentation/screens/web_view_screen.dart';
 import '../../features/ministries/presentation/screens/ministries_screen_new.dart';
 import '../../features/provinces/presentation/screens/provinces_screen.dart';
+import '../../features/qibla/presentation/screens/qibla_screen.dart';
 import '../../shared/constants/app_constants.dart';
 
 /// Application routes configuration
@@ -32,6 +33,7 @@ class Routes {
   static const String independentDirectorates = '/independent-directorates';
   static const String provinces = '/provinces';
   static const String jobOpportunities = '/job-opportunities';
+  static const String qibla = '/qibla';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -69,6 +71,10 @@ class Routes {
       case jobOpportunities:
         return MaterialPageRoute(
           builder: (_) => const JobOpportunitiesScreen(),
+        );
+      case qibla:
+        return MaterialPageRoute(
+          builder: (_) => const QiblaScreen(),
         );
       case AppConstants.webViewRoute:
         final args = settings.arguments as Map<String, dynamic>;

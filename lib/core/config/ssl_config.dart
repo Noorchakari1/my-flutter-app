@@ -10,6 +10,7 @@ class SslConfig {
     'aop.gov.af',
     'passport.moi.gov.af',
     'moi.gov.af',
+    'arcsa.aop.gov.af',
     'gov.af',
   ];
 

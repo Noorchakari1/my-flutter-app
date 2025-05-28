@@ -7,7 +7,7 @@ class UrlConfig {
 
   /// Base URL for the API and resources
   /// This can be changed to point to different environments
-  static const String baseUrl = 'http://172.16.15.229';
+  static const String baseUrl = 'https://arcsa.aop.gov.af';
   
   /// API base URL
   static const String apiBaseUrl = '$baseUrl/api';

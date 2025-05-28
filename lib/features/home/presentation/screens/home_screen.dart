@@ -152,6 +152,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           );
                         },
                       ),
+                      CustomButton(
+                        title: _getText('qiblaCompass'),
+                        iconData: Icons.explore,
+                        onPressed: () {
+                          NavigationHelper.navigateToRouteWithLoading(
+                            context,
+                            routeName: Routes.qibla,
+                            loadingMessage: _getText('loading'),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
