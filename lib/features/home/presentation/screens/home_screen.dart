@@ -163,6 +163,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           );
                         },
                       ),
+                      CustomButton(
+                        title: _getText('weather'),
+                        iconData: Icons.cloud,
+                        onPressed: () {
+                          NavigationHelper.navigateToRouteWithLoading(
+                            context,
+                            routeName: Routes.weather,
+                            loadingMessage: _getText('loading'),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
