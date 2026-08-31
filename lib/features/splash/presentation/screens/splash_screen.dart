@@ -17,14 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _checkLanguage();
-  } 
-
-
-
-  
-
-
-
+  }
 
   Future<void> _checkLanguage() async {
     await Future.delayed(const Duration(seconds: 2)); // Show splash for 2 seconds
