@@ -20,6 +20,10 @@ class QiblaModel {
     required this.isCompassAvailable,
   });
 
+
+
+  
+
   /// Kaaba coordinates (Mecca, Saudi Arabia)
   static const double kaabaLatitude = 21.4225;
   static const double kaabaLongitude = 39.8262;
