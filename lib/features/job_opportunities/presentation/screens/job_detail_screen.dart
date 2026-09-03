@@ -86,7 +86,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
                 child: FloatingActionButton(
                   mini: true,
                   onPressed: showScrollToTop ? scrollToTop : null,
-                  backgroundColor: AppConstants.primaryColor,
+                  backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                   child: const Icon(Icons.keyboard_arrow_up, color: Colors.white),
                 ),
               ),
@@ -669,7 +669,7 @@ class _JobDetailScreenState extends ConsumerState<JobDetailScreen> {
               icon: Icon(JobApplyService.getApplyButtonIcon(job.applyLinkType)),
               label: Text(_getApplyButtonText(job, ref)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppConstants.primaryColor,
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(

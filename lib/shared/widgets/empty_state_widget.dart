@@ -120,7 +120,7 @@ class EmptyStateWidget extends ConsumerWidget {
           ElevatedButton(
             onPressed: onActionPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppConstants.primaryColor,
+              backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               elevation: 2,

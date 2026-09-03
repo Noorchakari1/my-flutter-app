@@ -105,7 +105,7 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
           title: isSearchVisible
             ? buildSearchField()
             : Text(getScreenTitle()),
-          backgroundColor: AppConstants.primaryColor,
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: true,
           actions: [
             IconButton(
@@ -118,8 +118,8 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
         floatingActionButton: ScrollToTopButton(
           onPressed: scrollToTop,
           visible: showScrollToTop,
-          backgroundColor: AppConstants.primaryColor,
-          iconColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          iconColor: Theme.of(context).colorScheme.onPrimary,
           size: ScrollToTopButton.standardSize,
         ),
       ),

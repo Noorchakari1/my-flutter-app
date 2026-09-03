@@ -50,7 +50,7 @@ class ErrorDisplay extends StatelessWidget {
                 icon: const Icon(Icons.refresh),
                 label: Text(_getRetryText(context)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppConstants.primaryColor,
+                  backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

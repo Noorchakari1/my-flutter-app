@@ -18,18 +18,30 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
+    final isGolden = theme.colorScheme.primary == const Color(0xFFB08D57);
 
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Material(
-        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        elevation: 4,
+    return Material(
+      color: isGolden ? const Color(0xFF15130F) : isDarkMode ? const Color(0xFF211E34) : Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isGolden ? const Color(0xFFB08D57).withAlpha(110) : isDarkMode ? Colors.white12 : theme.colorScheme.primary.withAlpha(18),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(isDarkMode ? 20 : 13),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(8), // Reduced padding
+            padding: const EdgeInsets.all(12),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -44,8 +56,8 @@ class CustomButton extends StatelessWidget {
                         fit: BoxFit.contain,
                         child: Icon(
                           iconData ?? Icons.error,
-                          color: isDarkMode ? Colors.white : theme.primaryColor,
-                          size: 18, // Reduced icon size
+                          color: isGolden ? const Color(0xFFB08D57) : isDarkMode ? Colors.white : theme.primaryColor,
+                          size: 28,
                         ),
                       ),
                 ),
@@ -60,8 +72,8 @@ class CustomButton extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black87,
-                        fontSize: 12, // Reduced font size
+                        color: isGolden ? const Color(0xFFF7F1E3) : isDarkMode ? Colors.white : Colors.black87,
+                        fontSize: 13,
                       ),
                     ),
                   ),

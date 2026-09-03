@@ -133,7 +133,7 @@ class WeatherDetails extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withAlpha(128), // 0.5 opacity
+        color: theme.colorScheme.surfaceContainerHighest.withAlpha(128), // 0.5 opacity
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -176,7 +176,7 @@ class WeatherDetails extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withAlpha(128), // 0.5 opacity
+        color: theme.colorScheme.surfaceContainerHighest.withAlpha(128), // 0.5 opacity
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -184,7 +184,7 @@ class WeatherDetails extends ConsumerWidget {
           Expanded(
             child: Column(
               children: [
-                Icon(
+                const Icon(
                   Icons.wb_sunny,
                   color: Colors.orange,
                   size: 24,
@@ -213,7 +213,7 @@ class WeatherDetails extends ConsumerWidget {
           Expanded(
             child: Column(
               children: [
-                Icon(
+                const Icon(
                   Icons.wb_twilight,
                   color: Colors.deepOrange,
                   size: 24,
@@ -261,7 +261,7 @@ class WeatherDetails extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceVariant.withAlpha(128), // 0.5 opacity
+            color: theme.colorScheme.surfaceContainerHighest.withAlpha(128), // 0.5 opacity
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(

@@ -12,50 +12,56 @@ class ThemeNotifier extends _$ThemeNotifier {
   ThemeState build() {
     _loadInitialState();
     return const ThemeState(
-      isDarkMode: false,
+      themeVariant: 'light',
       currentLanguage: 'english',
     );
   }
 
   Future<void> _loadInitialState() async {
-    final isDarkMode = await ThemeService.isDarkMode();
+    final themeVariant = await ThemeService.themeVariant();
     final language = await LanguageService.getSelectedLanguage() ?? 'english';
     state = ThemeState(
-      isDarkMode: isDarkMode,
+      themeVariant: themeVariant,
       currentLanguage: language,
     );
   }
 
   Future<void> toggleTheme() async {
-    final newIsDarkMode = !state.isDarkMode;
-    await ThemeService.setDarkMode(newIsDarkMode);
-    state = state.copyWith(isDarkMode: newIsDarkMode);
+    await setThemeVariant(state.isDarkMode ? 'light' : 'dark');
+  }
+
+  Future<void> setThemeVariant(String variant) async {
+    await ThemeService.setThemeVariant(variant);
+    state = state.copyWith(themeVariant: variant);
   }
 
   Future<void> setLanguage(String language) async {
     state = state.copyWith(currentLanguage: language);
   }
 
-  ThemeData get theme => ThemeService.getTheme(state.isDarkMode, state.currentLanguage);
+  ThemeData get theme => ThemeService.getTheme(state.themeVariant, state.currentLanguage);
 }
 
 @immutable
 class ThemeState {
-  final bool isDarkMode;
+  final String themeVariant;
   final String currentLanguage;
 
+  bool get isDarkMode => themeVariant == 'dark' || themeVariant == 'golden';
+  bool get isGolden => themeVariant == 'golden';
+
   const ThemeState({
-    required this.isDarkMode,
+    required this.themeVariant,
     required this.currentLanguage,
   });
 
   ThemeState copyWith({
-    bool? isDarkMode,
+    String? themeVariant,
     String? currentLanguage,
   }) {
     return ThemeState(
-      isDarkMode: isDarkMode ?? this.isDarkMode,
+      themeVariant: themeVariant ?? this.themeVariant,
       currentLanguage: currentLanguage ?? this.currentLanguage,
     );
   }
-} 
+}

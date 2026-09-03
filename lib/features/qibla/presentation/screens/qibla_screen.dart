@@ -136,7 +136,7 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
                   icon: const Icon(Icons.tune),
                   label: Text(getText('calibrateCompass')),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.primaryColor,
+                    backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(

@@ -50,7 +50,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             Navigator.pop(context);
           }
         },
-        backgroundColor: AppConstants.primaryColor,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white.withAlpha(179),
         elevation: 8.0,

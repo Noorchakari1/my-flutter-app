@@ -240,9 +240,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: ModernBottomNavBar(
         currentIndex: _page,
         onTap: _onNavItemTapped,
-        backgroundColor: AppConstants.primaryColor,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white.withAlpha(179),
+        backgroundColor: ref.watch(themeNotifierProvider).isGolden ? const Color(0xFF15120E) : Theme.of(context).colorScheme.primary,
+        selectedItemColor: ref.watch(themeNotifierProvider).isGolden ? const Color(0xFFB08D57) : Colors.white,
+        unselectedItemColor: ref.watch(themeNotifierProvider).isGolden ? const Color(0xFFF7F1E3).withAlpha(170) : Colors.white.withAlpha(179),
         elevation: 8.0,
         iconSize: 24.0,
         height: 60.0,

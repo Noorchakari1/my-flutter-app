@@ -230,7 +230,7 @@ class WeatherCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withAlpha(128), // 0.5 opacity
+        color: theme.colorScheme.surfaceContainerHighest.withAlpha(128), // 0.5 opacity
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
