@@ -101,7 +101,7 @@ class ApiClient {
       });
 
       // Handle response
-      return _handleResponse(response, converter);
+      return await _handleResponse(response, converter);
     } catch (error) {
       // Convert to ApiException and rethrow
       throw _handleError(error);

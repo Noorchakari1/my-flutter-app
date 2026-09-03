@@ -188,7 +188,7 @@ class NewsDetailScreen extends ConsumerWidget {
                         // Share both title and description
                         final title = newsDetail.title ?? _getText(context, ref, 'newsItem');
                         final description = _stripHtmlTags(newsDetail.description ?? '');
-                        Share.share('$title\n\n$description\n\n${_getText(context, ref, 'viewFullNews')}');
+                        SharePlus.instance.share(ShareParams(text: '$title\n\n$description\n\n${_getText(context, ref, 'viewFullNews')}'));
                       },
                     ),
                     // Use a Consumer to rebuild when savedNewsProvider changes
@@ -317,7 +317,7 @@ class NewsDetailScreen extends ConsumerWidget {
             // Share both title and description
             final title = newsDetail.title ?? _getText(context, ref, 'newsItem');
             final description = _stripHtmlTags(newsDetail.description ?? '');
-            Share.share('$title\n\n$description\n\n${_getText(context, ref, 'viewFullNews')}');
+            SharePlus.instance.share(ShareParams(text: '$title\n\n$description\n\n${_getText(context, ref, 'viewFullNews')}'));
           },
         ),
         // Add bookmark button to app bar

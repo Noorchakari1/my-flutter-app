@@ -945,7 +945,7 @@ ${LocalizationHelper.getText(ref, 'sharedFromApp')}
 ''';
 
     try {
-      await Share.share(shareText.trim());
+      await SharePlus.instance.share(ShareParams(text: shareText.trim()));
     } catch (e) {
       if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
