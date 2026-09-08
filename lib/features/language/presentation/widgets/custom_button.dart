@@ -28,10 +28,11 @@ class CustomButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isGolden
-                ? const Color(0xFFB08D57).withAlpha(110)
+                ? const Color(0xFFB08D57).withAlpha(190)
                 : isDarkMode
-                    ? Colors.white12
+                    ? Colors.white30
                     : const Color(0xFFE1E6F2),
+            width: 1.1,
           ),
           boxShadow: [
             BoxShadow(
@@ -49,8 +50,8 @@ class CustomButton extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  flex: 3,
+                SizedBox(
+                  height: 52,
                   child: flagAsset != null
                       ? Image.asset(flagAsset!, fit: BoxFit.contain)
                       : Container(
@@ -72,9 +73,9 @@ class CustomButton extends StatelessWidget {
                           ),
                         ),
                 ),
-                const SizedBox(height: 6),
-                Expanded(
-                  flex: 1,
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 34,
                   child: Center(
                     child: Text(
                       title,

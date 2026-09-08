@@ -56,7 +56,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // First section: News and Job Opportunities (2 items per row)
                 Container(
                   margin: const EdgeInsets.only(bottom: 14),
-                  height: 112,
+                  // The previous height was shorter than the grid tiles,
+                  // clipping the lower edge of the News and Jobs cards.
+                  height: 128,
                   child: GridView.count(
                     physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: 2,
@@ -217,7 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         padding: const EdgeInsets.fromLTRB(20, 28, 20, 96),
         children: [
           Text(
-            'Settings',
+            _getText('settings'),
             style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
@@ -325,9 +327,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icons.feedback,
             label: _getText('contactNav'),
           ),
-          const BottomNavigationItem(
+          BottomNavigationItem(
             icon: Icons.settings_outlined,
-            label: 'Settings',
+            label: _getText('settings'),
           ),
         ],
       ),

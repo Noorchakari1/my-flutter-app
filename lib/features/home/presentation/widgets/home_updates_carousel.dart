@@ -17,7 +17,14 @@ class HomeUpdatesCarousel extends ConsumerStatefulWidget {
 }
 
 class _HomeUpdatesCarouselState extends ConsumerState<HomeUpdatesCarousel> {
-  final PageController _controller = PageController(viewportFraction: .92);
+  static const _updateCount = 3;
+  static const _initialPage = 300;
+
+  // Start away from page zero so the carousel can loop in either direction.
+  final PageController _controller = PageController(
+    initialPage: _initialPage,
+    viewportFraction: 1.0,
+  );
   int _currentPage = 0;
 
   @override
@@ -37,38 +44,52 @@ class _HomeUpdatesCarouselState extends ConsumerState<HomeUpdatesCarousel> {
       child: Column(
         children: [
           Expanded(
-            child: PageView(
+            child: PageView.builder(
               controller: _controller,
-              padEnds: false,
-              onPageChanged: (page) => setState(() => _currentPage = page),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 8),
-                  child: OfficialAnnouncementCard(
-                    description: 'Official live broadcasts from the General Directorate of Administration will appear here.',
-                    sender: 'LIVE STREAMING',
-                    themeVariant: themeState.themeVariant,
-                    onTap: () => _showComingSoon(context, 'Live streaming will be available soon.'),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: announcement.when(
-                    loading: () => _loadingCard(themeState.themeVariant),
-                    error: (_, __) => _errorCard(themeState.themeVariant),
-                    data: (item) => _announcementCard(themeState.themeVariant, item),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, right: 16),
-                  child: OfficialAnnouncementCard(
-                    description: 'New official orders and decrees will be published in this section.',
-                    sender: 'OFFICIAL ORDERS',
-                    themeVariant: themeState.themeVariant,
-                    onTap: () => _showComingSoon(context, 'Official orders will be available soon.'),
-                  ),
-                ),
-              ],
+              clipBehavior: Clip.hardEdge,
+              onPageChanged: (page) =>
+                  setState(() => _currentPage = page % _updateCount),
+              // No itemCount makes the page view continuous. The index maps
+              // back to one of the three update cards, producing a loop.
+              itemBuilder: (context, index) {
+                switch (index % _updateCount) {
+                  case 0:
+                    return _cardPage(
+                      OfficialAnnouncementCard(
+                        description:
+                            'Official live broadcasts from the General Directorate of Administration will appear here.',
+                        sender: 'LIVE STREAMING',
+                        themeVariant: themeState.themeVariant,
+                        onTap: () => _showComingSoon(
+                          context,
+                          'Live streaming will be available soon.',
+                        ),
+                      ),
+                    );
+                  case 1:
+                    return _cardPage(
+                      announcement.when(
+                        loading: () => _loadingCard(themeState.themeVariant),
+                        error: (_, __) => _errorCard(themeState.themeVariant),
+                        data: (item) =>
+                            _announcementCard(themeState.themeVariant, item),
+                      ),
+                    );
+                  default:
+                    return _cardPage(
+                      OfficialAnnouncementCard(
+                        description:
+                            'New official orders and decrees will be published in this section.',
+                        sender: 'OFFICIAL ORDERS',
+                        themeVariant: themeState.themeVariant,
+                        onTap: () => _showComingSoon(
+                          context,
+                          'Official orders will be available soon.',
+                        ),
+                      ),
+                    );
+                }
+              },
             ),
           ),
           const SizedBox(height: 12),
@@ -89,6 +110,12 @@ class _HomeUpdatesCarouselState extends ConsumerState<HomeUpdatesCarousel> {
       ),
     );
   }
+
+  /// The page remains full width; only its active card gets this inset.
+  Widget _cardPage(Widget child) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: child,
+      );
 
   Widget _announcementCard(String themeVariant, Announcement item) {
     return OfficialAnnouncementCard(
