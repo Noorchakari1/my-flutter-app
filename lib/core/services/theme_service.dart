@@ -38,10 +38,13 @@ class ThemeService {
     // Muted antique gold: formal and accessible, not a saturated yellow.
     const gold = Color(0xFFB08D57);
     final themePrimary = isGolden ? gold : primary;
+    // The light palette uses a cool porcelain canvas instead of a flat white
+    // surface. It gives the indigo brand colour room to breathe and keeps cards
+    // visually distinct without relying on heavy shadows.
     final surface = isGolden
         ? const Color(0xFF0B0B0D)
-        : isDarkMode ? const Color(0xFF171526) : const Color(0xFFF8F8FC);
-    final onSurface = isGolden || isDarkMode ? Colors.white : const Color(0xFF1D1B2A);
+        : isDarkMode ? const Color(0xFF171526) : const Color(0xFFF1F6FF);
+    final onSurface = isGolden || isDarkMode ? Colors.white : const Color(0xFF20243A);
 
     return ThemeData(
       useMaterial3: true,
@@ -137,13 +140,22 @@ class ThemeService {
         textColor: isDarkMode ? Colors.white : Colors.black,
       ),
       cardTheme: CardThemeData(
-        color: isGolden ? const Color(0xFF15130F) : isDarkMode ? const Color(0xFF211E34) : Colors.white,
+        color: isGolden
+            ? const Color(0xFF15130F)
+            : isDarkMode
+                ? const Color(0xFF211E34)
+                : const Color(0xFFFFFFFF),
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: isDarkMode
+              ? BorderSide.none
+              : const BorderSide(color: Color(0xFFE5E9F4)),
+        ),
       ),
       dividerTheme: DividerThemeData(
-        color: isGolden ? gold.withAlpha(80) : isDarkMode ? Colors.white12 : const Color(0xFFE5E3EE),
+        color: isGolden ? gold.withAlpha(80) : isDarkMode ? Colors.white12 : const Color(0xFFE1E6F0),
       ),
       tabBarTheme: TabBarThemeData(
         labelColor: isGolden ? gold : Colors.white,

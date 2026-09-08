@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/theme_provider.dart';
 import '../../core/services/language_service.dart';
 import '../constants/app_constants.dart';
+import 'app_bar_placeholder_actions.dart';
 
 /// Shared top bar with accessible theme, saved-items, and language controls.
 class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
@@ -13,8 +14,9 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final bool showThemeToggle;
   final bool showLanguageButton;
   final List<Widget>? actions;
+  final Widget? titleWidget;
 
-  const CustomAppBar({super.key, required this.title, this.showBackButton = false, this.showDrawer = false, this.showThemeToggle = true, this.showLanguageButton = true, this.actions});
+  const CustomAppBar({super.key, required this.title, this.showBackButton = false, this.showDrawer = false, this.showThemeToggle = true, this.showLanguageButton = true, this.actions, this.titleWidget});
 
   String _text(String key, String language) {
     final text = switch (language) {'pashto' => AppConstants.pashtoText, 'persian' => AppConstants.persianText, _ => AppConstants.englishText};
@@ -24,13 +26,23 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(themeNotifierProvider);
+    final foregroundColor = state.isGolden ? const Color(0xFFB08D57) : Colors.white;
+    final useCenteredLogoToolbar = showDrawer && titleWidget != null;
     return AppBar(
       elevation: 0,
+      toolbarHeight: kToolbarHeight * .9,
       backgroundColor: state.isGolden ? const Color(0xFF15120E) : AppConstants.primaryColor,
-      leading: showBackButton ? BackButton(color: state.isGolden ? const Color(0xFFB08D57) : Colors.white) : showDrawer ? null : const SizedBox(),
-      title: Text(title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: state.isGolden ? const Color(0xFFB08D57) : Colors.white)),
+      automaticallyImplyLeading: false,
+      leading: useCenteredLogoToolbar
+          ? null
+          : showBackButton
+              ? BackButton(color: foregroundColor)
+              : showDrawer
+                  ? DrawerMenuButton(color: foregroundColor)
+                  : const SizedBox(),
+      title: useCenteredLogoToolbar ? null : titleWidget ?? Text(title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: foregroundColor)),
       centerTitle: true,
-      actions: [
+      actions: useCenteredLogoToolbar ? null : [
         if (actions != null) ...actions!,
         IconButton(icon: Icon(Icons.bookmark_outline, color: state.isGolden ? const Color(0xFFB08D57) : Colors.white), tooltip: _text('savedNews', state.currentLanguage), onPressed: () => Navigator.pushNamed(context, '/saved_news')),
         if (showLanguageButton)
@@ -82,8 +94,39 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
               ),
             ],
           ),
-        const SizedBox(width: 6),
+        NotificationPlaceholderButton(
+          color: state.isGolden ? const Color(0xFFB08D57) : Colors.white,
+        ),
+        const SizedBox(width: 2),
+        ProfilePlaceholderButton(
+          color: state.isGolden ? const Color(0xFFB08D57) : Colors.white,
+        ),
       ],
+      flexibleSpace: useCenteredLogoToolbar
+          ? _CenteredLogoToolbar(
+              logo: titleWidget!,
+              foregroundColor: foregroundColor,
+              savedNewsTooltip: _text('savedNews', state.currentLanguage),
+              languageTooltip: _text('changeLanguage', state.currentLanguage),
+              showLanguageButton: showLanguageButton,
+              showThemeToggle: showThemeToggle,
+              onOpenSavedNews: () => Navigator.pushNamed(context, '/saved_news'),
+              onSelectLanguage: (language) => _selectLanguage(context, ref, language),
+              onSelectTheme: (variant) => ref.read(themeNotifierProvider.notifier).setThemeVariant(variant),
+              languageItems: [
+                _languageItem('pashto', AppConstants.pashtoFlagPath, '\u067E\u069A\u062A\u0648', state.currentLanguage == 'pashto'),
+                _languageItem('persian', AppConstants.persianFlagPath, '\u062F\u0631\u06CC', state.currentLanguage == 'persian'),
+                _languageItem('english', AppConstants.englishFlagPath, 'English', state.currentLanguage == 'english'),
+                const PopupMenuDivider(),
+                const PopupMenuItem<String>(value: 'more_languages', child: Row(children: [Icon(Icons.translate_outlined), SizedBox(width: 12), Text('More languages')])),
+              ],
+              themeItems: [
+                _themeItem('light', 'Light', Icons.light_mode_outlined, state.themeVariant),
+                _themeItem('dark', 'Dark', Icons.dark_mode_outlined, state.themeVariant),
+                _themeItem('golden', 'Golden', Icons.workspace_premium_outlined, state.themeVariant),
+              ],
+            )
+          : null,
     );
   }
 
@@ -134,4 +177,83 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight * .9);
+}
+
+/// A symmetric toolbar used by the home screen: three controls on either side
+/// of the centered logo.
+class _CenteredLogoToolbar extends StatelessWidget {
+  final Widget logo;
+  final Color foregroundColor;
+  final String savedNewsTooltip;
+  final String languageTooltip;
+  final bool showLanguageButton;
+  final bool showThemeToggle;
+  final VoidCallback onOpenSavedNews;
+  final ValueChanged<String> onSelectLanguage;
+  final ValueChanged<String> onSelectTheme;
+  final List<PopupMenuEntry<String>> languageItems;
+  final List<PopupMenuEntry<String>> themeItems;
+
+  const _CenteredLogoToolbar({required this.logo, required this.foregroundColor, required this.savedNewsTooltip, required this.languageTooltip, required this.showLanguageButton, required this.showThemeToggle, required this.onOpenSavedNews, required this.onSelectLanguage, required this.onSelectTheme, required this.languageItems, required this.themeItems});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: SizedBox(
+            height: kToolbarHeight * .9,
+            child: Row(
+              children: [
+                DrawerMenuButton(color: foregroundColor),
+                IconButton(icon: Icon(Icons.bookmark_outline, color: foregroundColor), tooltip: savedNewsTooltip, onPressed: onOpenSavedNews),
+                if (showLanguageButton)
+                  PopupMenuButton<String>(icon: Icon(Icons.language_outlined, color: foregroundColor), tooltip: languageTooltip, onSelected: onSelectLanguage, itemBuilder: (_) => languageItems)
+                else
+                  const SizedBox(width: 48),
+                Expanded(child: Center(child: logo)),
+                if (showThemeToggle)
+                  PopupMenuButton<String>(icon: Icon(Icons.palette_outlined, color: foregroundColor), tooltip: 'Choose theme', onSelected: onSelectTheme, itemBuilder: (_) => themeItems)
+                else
+                  const SizedBox(width: 48),
+                NotificationPlaceholderButton(color: foregroundColor),
+                ProfilePlaceholderButton(color: foregroundColor),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Opens the drawer on pointer hover (desktop/web) and tap (all platforms).
+class DrawerMenuButton extends StatelessWidget {
+  final Color color;
+
+  const DrawerMenuButton({super.key, required this.color});
+
+  void _openDrawer(BuildContext context) {
+    final scaffold = Scaffold.maybeOf(context);
+    scaffold?.openDrawer();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => _openDrawer(context),
+        child: IconButton(
+          icon: Icon(Icons.menu_rounded, color: color),
+          tooltip: 'Open navigation menu',
+          onPressed: () => _openDrawer(context),
+        ),
+      ),
+    );
+  }
 }
