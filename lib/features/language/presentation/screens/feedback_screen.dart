@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
+import '../../../../shared/widgets/app_drawer.dart';
 import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
 import '../widgets/app_header.dart';
 import '../widgets/custom_button.dart';
@@ -42,7 +43,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(title: widget.appbarTitle, showBackButton: false),
+      appBar: CustomAppBar(title: widget.appbarTitle, showDrawer: true),
+      drawer: const AppDrawer(),
       bottomNavigationBar: widget.showBottomNav ? ModernBottomNavBar(
         currentIndex: 2, // Always show the feedback tab as selected
         onTap: (index) {
@@ -50,7 +52,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             Navigator.pop(context);
           }
         },
-        backgroundColor: AppConstants.primaryColor,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white.withAlpha(179),
         elevation: 8.0,

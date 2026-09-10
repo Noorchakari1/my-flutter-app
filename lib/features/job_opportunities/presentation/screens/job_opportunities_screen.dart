@@ -86,6 +86,8 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
     final jobsAsync = ref.watch(jobNotifierProvider);
     final isConnected = ref.watch(isConnectedProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final appBarColor = Theme.of(context).appBarTheme.backgroundColor;
+    final appBarForeground = Theme.of(context).appBarTheme.titleTextStyle?.color ?? Colors.white;
 
     // Determine text direction based on current language
     final isRTL = ref.watch(themeNotifierProvider).currentLanguage != 'english';
@@ -98,7 +100,7 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
         child: Scaffold(
           appBar: AppBar(
             title: Text(_getText(context, 'jobOpportunities')),
-            backgroundColor: AppConstants.primaryColor,
+            backgroundColor: appBarColor,
             centerTitle: true,
           ),
           body: _buildNoConnectionState(),
@@ -113,8 +115,8 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
         floatingActionButton: ScrollToTopButton(
           onPressed: scrollToTop,
           visible: showScrollToTop,
-          backgroundColor: AppConstants.primaryColor,
-          iconColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          iconColor: Theme.of(context).colorScheme.onPrimary,
           size: ScrollToTopButton.standardSize,
           elevation: 4,
         ),
@@ -126,17 +128,17 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
                   ? buildSearchField()
                   : Text(
                       _getText(context, 'jobOpportunities'), // Localized title
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 22,
-                        color: Colors.white,
+                        color: appBarForeground,
                       ),
                     ),
                 centerTitle: true,
                 floating: true,
                 pinned: true,
                 elevation: 0,
-                backgroundColor: AppConstants.primaryColor,
+                backgroundColor: appBarColor,
                 shadowColor: Colors.transparent,
                 leading: isSearchVisible
                   ? IconButton(
@@ -149,7 +151,7 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
-                      color: AppConstants.primaryColor,
+                      color: appBarColor,
                       border: Border(
                         bottom: BorderSide(
                           color: Colors.white.withAlpha(26), // 0.1 opacity = 26/255
@@ -162,9 +164,9 @@ class _JobOpportunitiesScreenState extends BaseListScreenState<JobItem, JobOppor
                       isScrollable: true,
                       padding: EdgeInsets.zero,
                       labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.white.withAlpha(153), // 0.6 opacity = 153/255
-                      indicatorColor: Colors.white,
+                      labelColor: appBarForeground,
+                      unselectedLabelColor: appBarForeground.withAlpha(153), // 0.6 opacity = 153/255
+                      indicatorColor: appBarForeground,
                       indicatorWeight: 3,
                       indicatorSize: TabBarIndicatorSize.label,
                       // Generate tabs using localized keys

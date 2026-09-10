@@ -29,7 +29,7 @@ class CompassWidget extends ConsumerWidget {
             color: Theme.of(context).cardColor,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -83,7 +83,7 @@ class _CompassBackground extends StatelessWidget {
         shape: BoxShape.circle,
         color: Theme.of(context).scaffoldBackgroundColor,
         border: Border.all(
-          color: AppConstants.primaryColor.withOpacity(0.3),
+          color: AppConstants.primaryColor.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -101,7 +101,7 @@ class _CompassBackgroundPainter extends CustomPainter {
     final radius = size.width / 2;
     
     final paint = Paint()
-      ..color = AppConstants.primaryColor.withOpacity(0.1)
+      ..color = AppConstants.primaryColor.withValues(alpha: 0.1)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
@@ -112,7 +112,7 @@ class _CompassBackgroundPainter extends CustomPainter {
 
     // Draw cardinal direction lines
     final linePaint = Paint()
-      ..color = AppConstants.primaryColor.withOpacity(0.3)
+      ..color = AppConstants.primaryColor.withValues(alpha: 0.3)
       ..strokeWidth = 2;
 
     for (int i = 0; i < 4; i++) {
@@ -131,7 +131,7 @@ class _CompassBackgroundPainter extends CustomPainter {
 
     // Draw minor direction lines
     final minorLinePaint = Paint()
-      ..color = AppConstants.primaryColor.withOpacity(0.2)
+      ..color = AppConstants.primaryColor.withValues(alpha: 0.2)
       ..strokeWidth = 1;
 
     for (int i = 0; i < 8; i++) {
@@ -191,7 +191,7 @@ class _QiblaIndicator extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: (isPointingToQibla ? Colors.green : Colors.orange)
-                    .withOpacity(0.5),
+                    .withValues(alpha: 0.5),
                 blurRadius: 8,
                 spreadRadius: 2,
               ),
@@ -252,7 +252,7 @@ class _CompassError extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Theme.of(context).cardColor,
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,

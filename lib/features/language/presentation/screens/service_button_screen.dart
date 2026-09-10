@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
+import '../../../../shared/widgets/app_drawer.dart';
 import '../widgets/app_header.dart';
 import '../widgets/custom_button.dart';
 import 'web_view_screen.dart';
@@ -44,8 +45,9 @@ class _ServiceButtonScreenState extends ConsumerState<ServiceButtonScreen> {
           isDarkMode ? const Color(0xFF121212) : AppConstants.backgroundColor,
       appBar: CustomAppBar(
         title: languageText['selectService'] ?? languageText['publicServices'] ?? widget.passportTitle,
-        showBackButton: true,
+        showDrawer: true,
       ),
+      drawer: const AppDrawer(),
       body: Column(
         children: [
           AppHeader(

@@ -4,6 +4,8 @@ import '../../core/utils/localization_helper.dart';
 import '../../shared/constants/app_constants.dart';
 import '../../shared/widgets/scroll_to_top_button.dart';
 import '../../shared/widgets/search_bar_widget.dart';
+import '../../shared/widgets/app_drawer.dart';
+import '../../shared/widgets/custom_app_bar.dart';
 
 /// Base class for list screens with common functionality
 abstract class BaseListScreen<T> extends ConsumerStatefulWidget {
@@ -101,11 +103,13 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
     return Directionality(
       textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
       child: Scaffold(
+        drawer: const AppDrawer(),
         appBar: AppBar(
+          leading: const DrawerMenuButton(color: Colors.white),
           title: isSearchVisible
             ? buildSearchField()
             : Text(getScreenTitle()),
-          backgroundColor: AppConstants.primaryColor,
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: true,
           actions: [
             IconButton(
@@ -118,8 +122,8 @@ abstract class BaseListScreenState<T, W extends BaseListScreen<T>> extends Consu
         floatingActionButton: ScrollToTopButton(
           onPressed: scrollToTop,
           visible: showScrollToTop,
-          backgroundColor: AppConstants.primaryColor,
-          iconColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          iconColor: Theme.of(context).colorScheme.onPrimary,
           size: ScrollToTopButton.standardSize,
         ),
       ),

@@ -42,7 +42,7 @@ class SavedNewsScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(_getText(context, ref, 'savedNews')),
-          backgroundColor: AppConstants.primaryColor,
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           centerTitle: true,
           elevation: 0,
           actions: [

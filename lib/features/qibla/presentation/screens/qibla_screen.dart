@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
+import '../../../../shared/widgets/app_drawer.dart';
 import '../../data/providers/qibla_provider.dart';
 import '../widgets/compass_widget.dart';
 import '../widgets/qibla_indicator.dart';
@@ -99,7 +100,7 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
           : AppConstants.backgroundColor,
       appBar: CustomAppBar(
         title: getText('qiblaCompass'),
-        showBackButton: true,
+        showDrawer: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -109,6 +110,7 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
           ),
         ],
       ),
+      drawer: const AppDrawer(),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -136,7 +138,7 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
                   icon: const Icon(Icons.tune),
                   label: Text(getText('calibrateCompass')),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.primaryColor,
+                    backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(

@@ -157,7 +157,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: widget.showAppBar ? AppBar(
-        backgroundColor: AppConstants.primaryColor,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: BackButton(
           color: Colors.white,
           onPressed: () async {
@@ -211,7 +211,7 @@ class _WebViewScreenState extends State<WebViewScreen> with SingleTickerProvider
             Navigator.pop(context);
           }
         },
-        backgroundColor: AppConstants.primaryColor,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white.withAlpha(179),
         elevation: 8.0,

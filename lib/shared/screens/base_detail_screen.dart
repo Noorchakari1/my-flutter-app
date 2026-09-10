@@ -56,7 +56,7 @@ abstract class BaseDetailScreenState<T, W extends BaseDetailScreen<T>> extends C
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
-        backgroundColor: isDarkMode ? Colors.black : Colors.grey.shade100,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Stack(
           children: [
             buildBody(context, ref, isDarkMode),
@@ -68,7 +68,7 @@ abstract class BaseDetailScreenState<T, W extends BaseDetailScreen<T>> extends C
                 visible: showScrollToTop,
                 onPressed: scrollToTop,
                 backgroundColor: Theme.of(context).primaryColor,
-                iconColor: Colors.white,
+                iconColor: Theme.of(context).colorScheme.onPrimary,
                 size: ScrollToTopButton.standardSize,
               ),
             ),

@@ -5,11 +5,13 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/navigation_helper.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
+import '../../../../shared/widgets/draggable_ai_assistant.dart';
+import '../../../../shared/widgets/app_drawer.dart';
 import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
+import '../widgets/home_updates_carousel.dart';
 import '../../../language/presentation/screens/feedback_screen.dart';
 import '../../../language/presentation/screens/service_button_screen.dart';
 import '../../../language/presentation/screens/web_view_screen.dart';
-import '../../../language/presentation/widgets/app_header.dart';
 import '../../../language/presentation/widgets/custom_button.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -41,33 +43,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildHomeContent() {
     final language = ref.watch(themeNotifierProvider).currentLanguage;
+    const gridGap = 12.0;
 
     return Column(
       children: [
-        AppHeader(
-          title: _getText('headerTitle'),
-          logoPath: AppConstants.logoPath,
-          logoHeight: AppConstants.headerImageHeight,
-          logoColor: Colors.white,
-        ),
+        HomeUpdatesCarousel(language: language),
         Expanded(
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.defaultPadding,
-              vertical: AppConstants.defaultPadding * 2,
-            ),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
               children: [
                 // First section: News and Job Opportunities (2 items per row)
                 Container(
-                  margin: const EdgeInsets.only(bottom: AppConstants.defaultPadding * 1.5),
-                  height: 120, // Fixed height for the first row
+                  margin: const EdgeInsets.only(bottom: 14),
+                  height: 112,
                   child: GridView.count(
                     physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: 2,
-                    mainAxisSpacing: AppConstants.defaultPadding * 1.5,
-                    crossAxisSpacing: AppConstants.defaultPadding * 1.5,
-                    childAspectRatio: 1.5,
+                    mainAxisSpacing: gridGap,
+                    crossAxisSpacing: gridGap,
+                    childAspectRatio: 1.55,
                     children: [
                       CustomButton(
                         title: _getText('newsNav'),
@@ -100,9 +95,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Expanded(
                   child: GridView.count(
                     crossAxisCount: 3,
-                    mainAxisSpacing: AppConstants.defaultPadding * 1.5,
-                    crossAxisSpacing: AppConstants.defaultPadding * 1.5,
-                    childAspectRatio: 1.0,
+                    mainAxisSpacing: gridGap,
+                    crossAxisSpacing: gridGap,
+                    childAspectRatio: .96,
                     children: [
                       CustomButton(
                         title: _getText('ministries'),
@@ -213,6 +208,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  Widget _buildSettingsContent() {
+    final theme = Theme.of(context);
+    final themeState = ref.watch(themeNotifierProvider);
+
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 28, 20, 96),
+        children: [
+          Text(
+            'Settings',
+            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Personalize how the app looks and feels.',
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 24),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.palette_outlined, color: theme.colorScheme.primary),
+                      const SizedBox(width: 12),
+                      Text('Appearance', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text('Choose your preferred color theme.', style: theme.textTheme.bodySmall),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _themeChoice('light', 'Light', Icons.light_mode_outlined, themeState.themeVariant),
+                      _themeChoice('dark', 'Dark', Icons.dark_mode_outlined, themeState.themeVariant),
+                      _themeChoice('golden', 'Golden', Icons.workspace_premium_outlined, themeState.themeVariant),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _themeChoice(String variant, String label, IconData icon, String selectedVariant) {
+    return ChoiceChip(
+      label: Text(label),
+      avatar: Icon(icon, size: 18),
+      selected: selectedVariant == variant,
+      onSelected: (_) => ref.read(themeNotifierProvider.notifier).setThemeVariant(variant),
+    );
+  }
+
   void _onNavItemTapped(int index) {
     setState(() {
       _page = index;
@@ -226,23 +283,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _page == 0
           ? CustomAppBar(
-              title: _getText('welcome'),
+              title: '',
+              showDrawer: true,
             )
           : null,
-      body: IndexedStack(
-        index: _page,
+      drawer: const AppDrawer(),
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          _buildHomeContent(),
-          _buildWebContent(),
-          _buildFeedbackContent(),
+          IndexedStack(
+            index: _page,
+            children: [
+              _buildHomeContent(),
+              _buildWebContent(),
+              _buildFeedbackContent(),
+              _buildSettingsContent(),
+            ],
+          ),
+          const DraggableAiAssistant(),
         ],
       ),
       bottomNavigationBar: ModernBottomNavBar(
         currentIndex: _page,
         onTap: _onNavItemTapped,
-        backgroundColor: AppConstants.primaryColor,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white.withAlpha(179),
+        backgroundColor: ref.watch(themeNotifierProvider).isGolden ? const Color(0xFF15120E) : Theme.of(context).colorScheme.primary,
+        selectedItemColor: ref.watch(themeNotifierProvider).isGolden ? const Color(0xFFB08D57) : Colors.white,
+        unselectedItemColor: ref.watch(themeNotifierProvider).isGolden ? const Color(0xFFF7F1E3).withAlpha(170) : Colors.white.withAlpha(179),
         elevation: 8.0,
         iconSize: 24.0,
         height: 60.0,
@@ -258,6 +324,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           BottomNavigationItem(
             icon: Icons.feedback,
             label: _getText('contactNav'),
+          ),
+          const BottomNavigationItem(
+            icon: Icons.settings_outlined,
+            label: 'Settings',
           ),
         ],
       ),

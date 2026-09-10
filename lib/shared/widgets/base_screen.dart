@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/utils/localization_helper.dart';
 import 'custom_app_bar.dart';
+import 'app_drawer.dart';
 import 'scroll_to_top_button.dart';
 
 /// A base screen widget that can be extended by other screens
@@ -31,7 +32,7 @@ class BaseScreen extends ConsumerStatefulWidget {
     this.showAppBar = true,
     this.showBackButton = false,
     this.showScrollToTopButton = true,
-    this.showDrawer = false,
+    this.showDrawer = true,
     this.showThemeToggle = true,
     this.showLanguageButton = true,
     this.floatingActionButton,
@@ -144,6 +145,7 @@ class _BaseScreenState extends ConsumerState<BaseScreen> {
                 actions: widget.actions,
               )
             : null,
+        drawer: widget.showDrawer ? const AppDrawer() : null,
         body: content,
         floatingActionButton: widget.floatingActionButton,
         bottomNavigationBar: widget.bottomNavigationBar,

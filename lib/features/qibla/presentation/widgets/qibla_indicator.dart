@@ -115,7 +115,7 @@ class QiblaIndicator extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppConstants.primaryColor.withOpacity(0.1),
+                    color: AppConstants.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -228,7 +228,7 @@ class QiblaIndicator extends ConsumerWidget {
             Icon(
               Icons.error_outline,
               size: 48,
-              color: Colors.red.withOpacity(0.7),
+              color: Colors.red.withValues(alpha: 0.7),
             ),
             const SizedBox(height: 16),
             Text(

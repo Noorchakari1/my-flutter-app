@@ -276,6 +276,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final appBarColor = Theme.of(context).appBarTheme.backgroundColor;
+    final appBarForeground = Theme.of(context).appBarTheme.titleTextStyle?.color ?? Colors.white;
     final newsState = ref.watch(newsNotifierProvider);
     final isConnected = ref.watch(isConnectedProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -291,7 +293,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
         child: Scaffold(
           appBar: AppBar(
             title: Text(_getText(context, 'newsTitle')),
-            backgroundColor: AppConstants.primaryColor,
+            backgroundColor: appBarColor,
             centerTitle: true,
           ),
           body: ErrorDisplay(
@@ -309,7 +311,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
         child: Scaffold(
           appBar: AppBar(
             title: Text(_getText(context, 'newsTitle')),
-            backgroundColor: AppConstants.primaryColor,
+            backgroundColor: appBarColor,
             centerTitle: true,
           ),
           body: ErrorDisplay(
@@ -330,8 +332,8 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
         floatingActionButton: ScrollToTopButton(
           onPressed: _scrollToTop,
           visible: _showScrollToTop,
-          backgroundColor: AppConstants.primaryColor,
-          iconColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          iconColor: Theme.of(context).colorScheme.onPrimary,
           size: ScrollToTopButton.standardSize,
           elevation: 4,
         ),
@@ -355,17 +357,17 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                     )
                   : Text(
                       _getText(context, 'newsTitle'), // Localized title
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 22,
-                        color: Colors.white,
+                        color: appBarForeground,
                       ),
                     ),
                 centerTitle: true,
                 floating: true,
                 pinned: true,
                 elevation: 0,
-                backgroundColor: AppConstants.primaryColor,
+                backgroundColor: appBarColor,
                 shadowColor: Colors.transparent,
                 leading: _isSearchVisible
                   ? IconButton(
@@ -378,7 +380,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
-                      color: AppConstants.primaryColor,
+                      color: appBarColor,
                       border: Border(
                         bottom: BorderSide(
                           color: Colors.white.withAlpha(26), // 0.1 opacity = 26/255
@@ -391,9 +393,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> with SingleTickerProvid
                       isScrollable: true,
                       padding: EdgeInsets.zero,
                       labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.white.withAlpha(153), // 0.6 opacity = 153/255
-                      indicatorColor: Colors.white,
+                      labelColor: appBarForeground,
+                      unselectedLabelColor: appBarForeground.withAlpha(153), // 0.6 opacity = 153/255
+                      indicatorColor: appBarForeground,
                       indicatorWeight: 3,
                       indicatorSize: TabBarIndicatorSize.label,
                       // Generate tabs using localized keys
