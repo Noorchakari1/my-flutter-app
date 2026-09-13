@@ -17,7 +17,9 @@ class CompassWidget extends ConsumerWidget {
 
     return qiblaState.when(
       data: (qiblaModel) {
-        if (qiblaModel == null) {
+        if (qiblaModel == null ||
+            !qiblaModel.isLocationAvailable ||
+            !qiblaModel.isCompassAvailable) {
           return const _CompassError();
         }
 
@@ -40,19 +42,19 @@ class CompassWidget extends ConsumerWidget {
             children: [
               // Compass background
               _CompassBackground(),
-              
+
               // Compass needle (pointing North)
               Transform.rotate(
                 angle: -qiblaModel.compassAngle * (pi / 180),
                 child: _CompassNeedle(),
               ),
-              
+
               // Qibla indicator
               Transform.rotate(
                 angle: relativeQiblaAngle * (pi / 180),
                 child: _QiblaIndicator(isPointingToQibla: isPointingToQibla),
               ),
-              
+
               // Center dot
               Container(
                 width: 12,
@@ -99,7 +101,7 @@ class _CompassBackgroundPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
-    
+
     final paint = Paint()
       ..color = AppConstants.primaryColor.withValues(alpha: 0.1)
       ..strokeWidth = 1
@@ -121,7 +123,7 @@ class _CompassBackgroundPainter extends CustomPainter {
       final startY = center.dy + sin(angle) * (radius * 0.8);
       final endX = center.dx + cos(angle) * (radius * 0.9);
       final endY = center.dy + sin(angle) * (radius * 0.9);
-      
+
       canvas.drawLine(
         Offset(startX, startY),
         Offset(endX, endY),
@@ -140,7 +142,7 @@ class _CompassBackgroundPainter extends CustomPainter {
       final startY = center.dy + sin(angle) * (radius * 0.85);
       final endX = center.dx + cos(angle) * (radius * 0.9);
       final endY = center.dy + sin(angle) * (radius * 0.9);
-      
+
       canvas.drawLine(
         Offset(startX, startY),
         Offset(endX, endY),

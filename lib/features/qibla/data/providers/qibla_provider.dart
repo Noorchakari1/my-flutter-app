@@ -7,30 +7,34 @@ import '../models/qibla_model.dart';
 import '../services/qibla_service.dart';
 
 /// Provider for QiblaService instance
-final qiblaServiceProvider = Provider<QiblaService>((ref) {
-  return QiblaService();
+final qiblaServiceProvider = Provider.autoDispose<QiblaService>((ref) {
+  final service = QiblaService();
+  ref.onDispose(service.dispose);
+  return service;
 });
 
 /// Provider for Qibla data stream
-final qiblaStreamProvider = StreamProvider<QiblaModel>((ref) {
+final qiblaStreamProvider = StreamProvider.autoDispose<QiblaModel>((ref) {
   final qiblaService = ref.watch(qiblaServiceProvider);
   return qiblaService.qiblaStream;
 });
 
 /// Provider for checking compass availability
-final compassAvailabilityProvider = FutureProvider<bool>((ref) async {
+final compassAvailabilityProvider =
+    FutureProvider.autoDispose<bool>((ref) async {
   final qiblaService = ref.watch(qiblaServiceProvider);
   return await qiblaService.isCompassAvailable();
 });
 
 /// Provider for checking location service status
-final locationServiceProvider = FutureProvider<bool>((ref) async {
+final locationServiceProvider = FutureProvider.autoDispose<bool>((ref) async {
   final qiblaService = ref.watch(qiblaServiceProvider);
   return await qiblaService.isLocationServiceEnabled();
 });
 
 /// Provider for location permission status
-final locationPermissionProvider = FutureProvider<LocationPermission>((ref) async {
+final locationPermissionProvider =
+    FutureProvider.autoDispose<LocationPermission>((ref) async {
   final qiblaService = ref.watch(qiblaServiceProvider);
   return await qiblaService.getLocationPermission();
 });
@@ -43,36 +47,46 @@ class QiblaNotifier extends StateNotifier<AsyncValue<QiblaModel?>> {
 
   final QiblaService _qiblaService;
   StreamSubscription<QiblaModel>? _subscription;
+  bool _initializing = false;
 
   Future<void> _initialize() async {
+    _initializing = true;
     try {
-      await _qiblaService.initialize();
-      
       _subscription = _qiblaService.qiblaStream.listen(
         (qiblaModel) {
-          state = AsyncValue.data(qiblaModel);
+          if (mounted) state = AsyncValue.data(qiblaModel);
         },
         onError: (error, stackTrace) {
-          state = AsyncValue.error(error, stackTrace);
+          if (mounted) state = AsyncValue.error(error, stackTrace);
         },
       );
+      await _qiblaService.initialize();
     } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
+      if (mounted) state = AsyncValue.error(error, stackTrace);
+    } finally {
+      _initializing = false;
     }
   }
 
   /// Refresh location data
   Future<void> refreshLocation() async {
+    if (_initializing || !mounted) return;
+    _initializing = true;
     try {
-      await _qiblaService.refreshLocation();
+      state = const AsyncValue.loading();
+      await _qiblaService.initialize();
     } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
+      if (mounted) state = AsyncValue.error(error, stackTrace);
+    } finally {
+      _initializing = false;
     }
   }
 
   /// Request location permission
   Future<LocationPermission> requestLocationPermission() async {
-    return await _qiblaService.requestLocationPermission();
+    final permission = await _qiblaService.requestLocationPermission();
+    if (mounted) await refreshLocation();
+    return permission;
   }
 
   /// Get current Qibla data
@@ -83,13 +97,15 @@ class QiblaNotifier extends StateNotifier<AsyncValue<QiblaModel?>> {
   @override
   void dispose() {
     _subscription?.cancel();
-    _qiblaService.dispose();
+
     super.dispose();
   }
 }
 
 /// Provider for QiblaNotifier
-final qiblaNotifierProvider = StateNotifierProvider<QiblaNotifier, AsyncValue<QiblaModel?>>((ref) {
+final qiblaNotifierProvider =
+    StateNotifierProvider.autoDispose<QiblaNotifier, AsyncValue<QiblaModel?>>(
+        (ref) {
   final qiblaService = ref.watch(qiblaServiceProvider);
   return QiblaNotifier(qiblaService);
 });

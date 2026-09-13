@@ -103,7 +103,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 crossAxisCount: 3,
                 mainAxisSpacing: AppConstants.defaultPadding * 1.5,
                 crossAxisSpacing: AppConstants.defaultPadding * 1.5,
-                childAspectRatio: 1,
+                // A square cell is shorter than CustomButton's icon, label,
+                // and vertical padding. Give each of the three contact cards
+                // enough height to prevent the bottom RenderFlex overflow.
+                childAspectRatio: 0.78,
                 children: [
                   CustomButton(
                     title: widget.whatsAppTitle,

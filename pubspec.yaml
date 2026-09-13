@@ -98,6 +98,7 @@ flutter:
     - assets/flags/
     - assets/frames/
     - assets/logo.png
+    - lib/features/announcements/data/kabul_prayer_times_permanent.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

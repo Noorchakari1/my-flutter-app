@@ -1,0 +1,4 @@
+# Kabul prayer timetable (Solar Hijri 1405)
+# Format: solar_date,fajr,sunrise,dhuhr,asr,maghrib,isha
+# Add one row for every photographed-table day, e.g.
+# 1405/01/01,04:54,06:11,12:08,15:36,18:20,19:42

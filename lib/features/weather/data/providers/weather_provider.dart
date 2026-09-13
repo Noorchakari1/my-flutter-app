@@ -11,7 +11,8 @@ final weatherServiceProvider = Provider<WeatherService>((ref) {
 });
 
 /// Provider for current weather data
-final weatherDataProvider = StateNotifierProvider<WeatherNotifier, AsyncValue<WeatherData>>((ref) {
+final weatherDataProvider =
+    StateNotifierProvider<WeatherNotifier, AsyncValue<WeatherData>>((ref) {
   final weatherService = ref.watch(weatherServiceProvider);
   return WeatherNotifier(weatherService, ref);
 });
@@ -26,8 +27,10 @@ final locationPermissionProvider = FutureProvider<bool>((ref) async {
 class WeatherNotifier extends StateNotifier<AsyncValue<WeatherData>> {
   final WeatherService _weatherService;
   final Ref _ref;
+  bool _loading = false;
 
-  WeatherNotifier(this._weatherService, this._ref) : super(const AsyncLoading()) {
+  WeatherNotifier(this._weatherService, this._ref)
+      : super(const AsyncLoading()) {
     loadWeatherData();
   }
 
@@ -36,20 +39,24 @@ class WeatherNotifier extends StateNotifier<AsyncValue<WeatherData>> {
     double? latitude,
     double? longitude,
   }) async {
+    if (_loading || !mounted) return;
+    _loading = true;
     try {
       state = const AsyncLoading();
-      
+
       final currentLanguage = _ref.read(themeNotifierProvider).currentLanguage;
-      
+
       final weatherData = await _weatherService.getCurrentWeather(
         latitude: latitude,
         longitude: longitude,
         language: currentLanguage,
       );
-      
-      state = AsyncData(weatherData);
+
+      if (mounted) state = AsyncData(weatherData);
     } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
+      if (mounted) state = AsyncError(error, stackTrace);
+    } finally {
+      _loading = false;
     }
   }
 
@@ -67,12 +74,14 @@ class WeatherNotifier extends StateNotifier<AsyncValue<WeatherData>> {
   Future<void> requestLocationAndReload() async {
     try {
       final permission = await _weatherService.requestLocationPermission();
+      if (!mounted) return;
+      _ref.invalidate(locationPermissionProvider);
       if (permission == LocationPermission.always ||
           permission == LocationPermission.whileInUse) {
         await loadWeatherData();
       }
     } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
+      if (mounted) state = AsyncError(error, stackTrace);
     }
   }
 
@@ -97,7 +106,8 @@ class WeatherFormattingService {
 
   /// Format temperature with unit
   String formatTemperature(double temperature, {bool useFahrenheit = false}) {
-    return _weatherService.formatTemperature(temperature, useFahrenheit: useFahrenheit);
+    return _weatherService.formatTemperature(temperature,
+        useFahrenheit: useFahrenheit);
   }
 
   /// Format wind speed with unit

@@ -4,8 +4,6 @@ import 'package:geolocator/geolocator.dart';
 
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/constants/app_constants.dart';
-import '../../../../shared/widgets/custom_app_bar.dart';
-import '../../../../shared/widgets/app_drawer.dart';
 import '../../data/providers/qibla_provider.dart';
 import '../widgets/compass_widget.dart';
 import '../widgets/qibla_indicator.dart';
@@ -17,65 +15,31 @@ class QiblaScreen extends ConsumerStatefulWidget {
   ConsumerState<QiblaScreen> createState() => _QiblaScreenState();
 }
 
-class _QiblaScreenState extends ConsumerState<QiblaScreen> {
+class _QiblaScreenState extends ConsumerState<QiblaScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _checkPermissions();
+    WidgetsBinding.instance.addObserver(this);
   }
 
-  Future<void> _checkPermissions() async {
-    final permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      _showPermissionDialog();
-    }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
-  void _showPermissionDialog() {
-    final language = ref.read(themeNotifierProvider).currentLanguage;
-    
-    String getText(String key) {
-      Map<String, String> textMap;
-      switch (language) {
-        case 'pashto':
-          textMap = AppConstants.pashtoText;
-          break;
-        case 'persian':
-          textMap = AppConstants.persianText;
-          break;
-        default:
-          textMap = AppConstants.englishText;
-      }
-      return textMap[key] ?? key;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(qiblaNotifierProvider.notifier).refreshLocation();
     }
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(getText('locationPermissionRequired')),
-        content: Text(getText('enableLocationServices')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(getText('cancel')),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              final notifier = ref.read(qiblaNotifierProvider.notifier);
-              await notifier.requestLocationPermission();
-            },
-            child: Text(getText('enableLocationServices')),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final language = ref.watch(themeNotifierProvider).currentLanguage;
+    final qibla = ref.watch(qiblaNotifierProvider);
     final isDarkMode = ref.watch(themeNotifierProvider).isDarkMode;
 
     // Helper function to get localized text
@@ -95,12 +59,10 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
     }
 
     return Scaffold(
-      backgroundColor: isDarkMode 
-          ? const Color(0xFF121212) 
-          : AppConstants.backgroundColor,
-      appBar: CustomAppBar(
-        title: getText('qiblaCompass'),
-        showDrawer: true,
+      backgroundColor:
+          isDarkMode ? const Color(0xFF121212) : AppConstants.backgroundColor,
+      appBar: AppBar(
+        title: Text(getText('qiblaCompass')),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -110,24 +72,50 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
           ),
         ],
       ),
-      drawer: const AppDrawer(),
       body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 20),
-            
+
             // Compass Widget
             const Center(
               child: CompassWidget(),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Qibla Information
             const QiblaIndicator(),
-            
+            if (!qibla.isLoading &&
+                (qibla.hasError ||
+                    qibla.valueOrNull?.isLocationAvailable != true))
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Wrap(spacing: 12, children: [
+                  FilledButton.icon(
+                    icon: const Icon(Icons.my_location),
+                    label: Text(getText('retry')),
+                    onPressed: () => ref
+                        .read(qiblaNotifierProvider.notifier)
+                        .refreshLocation(),
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.settings_outlined),
+                    label: Text(getText('enableLocationServices')),
+                    onPressed: () async {
+                      final permission = await Geolocator.checkPermission();
+                      if (permission == LocationPermission.deniedForever) {
+                        await Geolocator.openAppSettings();
+                      } else {
+                        await Geolocator.openLocationSettings();
+                      }
+                    },
+                  ),
+                ]),
+              ),
+
             const SizedBox(height: 20),
-            
+
             // Calibration Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -138,7 +126,8 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
                   icon: const Icon(Icons.tune),
                   label: Text(getText('calibrateCompass')),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                    backgroundColor:
+                        Theme.of(context).appBarTheme.backgroundColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -148,7 +137,7 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 20),
           ],
         ),
@@ -158,7 +147,7 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
 
   void _showCalibrationDialog() {
     final language = ref.read(themeNotifierProvider).currentLanguage;
-    
+
     String getText(String key) {
       Map<String, String> textMap;
       switch (language) {
@@ -197,7 +186,7 @@ class _QiblaScreenState extends ConsumerState<QiblaScreen> {
             Container(
               height: 100,
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
+                color: AppConstants.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Center(

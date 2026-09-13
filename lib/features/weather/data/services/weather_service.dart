@@ -10,7 +10,13 @@ import '../models/weather_model.dart';
 class WeatherService {
   final http.Client _client;
 
-  WeatherService({http.Client? client}) : _client = client ?? http.Client();
+  final Duration requestTimeout;
+  final Duration airQualityTimeout;
+  WeatherService({
+    http.Client? client,
+    this.requestTimeout = const Duration(seconds: 12),
+    this.airQualityTimeout = const Duration(seconds: 3),
+  }) : _client = client ?? http.Client();
 
   /// Get current weather data
   Future<WeatherData> getCurrentWeather({
@@ -26,7 +32,8 @@ class WeatherService {
         lat = latitude;
         lon = longitude;
       } else {
-        final position = await _getCurrentPosition();
+        final position = await _getCurrentPosition()
+            .timeout(const Duration(seconds: 12), onTimeout: () => null);
         if (position != null) {
           lat = position.latitude;
           lon = position.longitude;
@@ -39,7 +46,7 @@ class WeatherService {
 
       // Fetch weather data
       final weatherResponse = await _fetchWeatherData(lat, lon, language);
-      
+
       // Fetch air quality data (optional)
       AirQualityData? airQuality;
       try {
@@ -67,7 +74,7 @@ class WeatherService {
       language: language,
     );
 
-    final response = await _client.get(Uri.parse(url));
+    final response = await _client.get(Uri.parse(url)).timeout(requestTimeout);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as Map<String, dynamic>;
@@ -99,7 +106,8 @@ class WeatherService {
       longitude: longitude,
     );
 
-    final response = await _client.get(Uri.parse(url));
+    final response =
+        await _client.get(Uri.parse(url)).timeout(airQualityTimeout);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as Map<String, dynamic>;
@@ -126,22 +134,17 @@ class WeatherService {
       }
 
       // Check location permissions
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          return null;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
+      final permission = await Geolocator.checkPermission();
+      // The permission button requests access explicitly. Kabul can load now.
+      if (permission != LocationPermission.always &&
+          permission != LocationPermission.whileInUse) {
         return null;
       }
 
       // Get current position
       return await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
+          accuracy: LocationAccuracy.medium,
           timeLimit: Duration(seconds: 10),
         ),
       );
@@ -155,7 +158,7 @@ class WeatherService {
   Future<bool> hasLocationPermission() async {
     final permission = await Geolocator.checkPermission();
     return permission == LocationPermission.always ||
-           permission == LocationPermission.whileInUse;
+        permission == LocationPermission.whileInUse;
   }
 
   /// Request location permission

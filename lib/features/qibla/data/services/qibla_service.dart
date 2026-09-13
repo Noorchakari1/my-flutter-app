@@ -2,20 +2,16 @@ import 'dart:async';
 
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 
 import '../models/qibla_model.dart';
 
 /// Service for handling Qibla compass functionality
 class QiblaService {
-  static final QiblaService _instance = QiblaService._internal();
-  factory QiblaService() => _instance;
-  QiblaService._internal();
+  QiblaService();
+  bool _disposed = false;
 
   StreamController<QiblaModel>? _qiblaController;
   StreamSubscription<CompassEvent>? _compassSubscription;
-  StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
 
   Position? _currentPosition;
   double _currentCompassAngle = 0.0;
@@ -30,98 +26,67 @@ class QiblaService {
 
   /// Initialize the Qibla service
   Future<void> initialize() async {
-    await _checkPermissions();
     await _getCurrentLocation();
-    await _startCompassListening();
-    _startAccelerometerListening();
+    if (_disposed) return;
+    await _compassSubscription?.cancel();
+    final stream = FlutterCompass.events;
+    if (stream != null) {
+      _compassSubscription = stream.listen((event) {
+        if (_disposed) return;
+        final heading = event.heading;
+        _isCompassAvailable = heading != null && heading.isFinite;
+        if (_isCompassAvailable) _currentCompassAngle = heading!;
+        _updateQiblaData();
+      }, onError: (Object error, StackTrace stack) {
+        _isCompassAvailable = false;
+        _updateQiblaData();
+      });
+    }
+    // Publish a result even without GPS or a compass event.
+    _updateQiblaData();
   }
 
-  /// Check and request necessary permissions
-  Future<bool> _checkPermissions() async {
-    // Check location permission
-    final locationPermission = await Permission.location.status;
-    if (locationPermission.isDenied) {
-      final result = await Permission.location.request();
-      if (result.isDenied) {
-        return false;
-      }
-    }
-
-    // Check if location services are enabled
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /// Get current user location
   Future<void> _getCurrentLocation() async {
+    _isLocationAvailable = false;
     try {
-      final permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        final requestedPermission = await Geolocator.requestPermission();
-        if (requestedPermission == LocationPermission.denied ||
-            requestedPermission == LocationPermission.deniedForever) {
-          _isLocationAvailable = false;
-          return;
-        }
+      if (!await Geolocator.isLocationServiceEnabled()
+          .timeout(const Duration(seconds: 3))) {
+        return;
       }
-
-      _currentPosition = await Geolocator.getCurrentPosition(
+      var permission = await Geolocator.checkPermission()
+          .timeout(const Duration(seconds: 3));
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission != LocationPermission.always &&
+          permission != LocationPermission.whileInUse) {
+        return;
+      }
+      final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
+          accuracy: LocationAccuracy.medium,
           timeLimit: Duration(seconds: 10),
         ),
-      );
+      ).timeout(const Duration(seconds: 12));
+      if (_disposed) return;
+      _currentPosition = position;
       _isLocationAvailable = true;
-    } catch (e) {
+    } catch (_) {
       _isLocationAvailable = false;
     }
   }
 
-  /// Start listening to compass events
-  Future<void> _startCompassListening() async {
-    try {
-      final compassStream = FlutterCompass.events;
-      if (compassStream != null) {
-        _compassSubscription = compassStream.listen((CompassEvent event) {
-          if (event.heading != null) {
-            _currentCompassAngle = event.heading!;
-            _isCompassAvailable = true;
-            _updateQiblaData();
-          }
-        });
-      } else {
-        _isCompassAvailable = false;
-      }
-    } catch (e) {
-      _isCompassAvailable = false;
-    }
-  }
-
-  /// Start listening to accelerometer for calibration detection
-  void _startAccelerometerListening() {
-    _accelerometerSubscription = accelerometerEventStream().listen((AccelerometerEvent event) {
-      // This can be used for calibration detection if needed
-      // For now, we'll just ensure the stream is active
-    });
-  }
-
   /// Update Qibla data and emit to stream
-  void _updateQiblaData() {
-    if (_currentPosition != null) {
-      final qiblaModel = QiblaModel.fromLocationAndCompass(
-        userLatitude: _currentPosition!.latitude,
-        userLongitude: _currentPosition!.longitude,
+  QiblaModel get _currentData => QiblaModel.fromLocationAndCompass(
+        userLatitude: _currentPosition?.latitude ?? 0,
+        userLongitude: _currentPosition?.longitude ?? 0,
         compassAngle: _currentCompassAngle,
         isLocationAvailable: _isLocationAvailable,
         isCompassAvailable: _isCompassAvailable,
       );
 
-      _qiblaController?.add(qiblaModel);
-    }
+  void _updateQiblaData() {
+    if (!_disposed) _qiblaController?.add(_currentData);
   }
 
   /// Check if compass is available on the device
@@ -168,27 +133,11 @@ class QiblaService {
   /// Dispose of resources
   void dispose() {
     _compassSubscription?.cancel();
-    _accelerometerSubscription?.cancel();
+    _disposed = true;
     _qiblaController?.close();
     _qiblaController = null;
   }
 
   /// Get current Qibla data (one-time)
-  Future<QiblaModel?> getCurrentQiblaData() async {
-    if (_currentPosition == null) {
-      await _getCurrentLocation();
-    }
-
-    if (_currentPosition != null) {
-      return QiblaModel.fromLocationAndCompass(
-        userLatitude: _currentPosition!.latitude,
-        userLongitude: _currentPosition!.longitude,
-        compassAngle: _currentCompassAngle,
-        isLocationAvailable: _isLocationAvailable,
-        isCompassAvailable: _isCompassAvailable,
-      );
-    }
-
-    return null;
-  }
+  Future<QiblaModel?> getCurrentQiblaData() async => _currentData;
 }

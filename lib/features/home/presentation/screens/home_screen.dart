@@ -4,15 +4,16 @@ import '../../../../core/config/routes.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/navigation_helper.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/widgets/app_drawer.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
 import '../../../../shared/widgets/draggable_ai_assistant.dart';
-import '../../../../shared/widgets/app_drawer.dart';
 import '../../../../shared/widgets/modern_bottom_nav_bar.dart';
-import '../widgets/home_updates_carousel.dart';
+import '../../../day_to_day/presentation/screens/day_to_day_screen.dart';
 import '../../../language/presentation/screens/feedback_screen.dart';
 import '../../../language/presentation/screens/service_button_screen.dart';
 import '../../../language/presentation/screens/web_view_screen.dart';
 import '../../../language/presentation/widgets/custom_button.dart';
+import '../widgets/home_updates_carousel.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -149,28 +150,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           );
                         },
                       ),
-                      CustomButton(
-                        title: _getText('qiblaCompass'),
-                        iconData: Icons.explore,
-                        onPressed: () {
-                          NavigationHelper.navigateToRouteWithLoading(
-                            context,
-                            routeName: Routes.qibla,
-                            loadingMessage: _getText('loading'),
-                          );
-                        },
-                      ),
-                      CustomButton(
-                        title: _getText('weather'),
-                        iconData: Icons.cloud,
-                        onPressed: () {
-                          NavigationHelper.navigateToRouteWithLoading(
-                            context,
-                            routeName: Routes.weather,
-                            loadingMessage: _getText('loading'),
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ),
@@ -208,6 +187,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       language: language,
       showBottomNav: false,
     );
+  }
+
+  Widget _buildDayToDayContent() {
+    return const DayToDayScreen();
   }
 
   Widget _buildSettingsContent() {
@@ -299,6 +282,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _buildHomeContent(),
               _buildWebContent(),
               _buildFeedbackContent(),
+              _buildDayToDayContent(),
               _buildSettingsContent(),
             ],
           ),
@@ -326,6 +310,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           BottomNavigationItem(
             icon: Icons.feedback,
             label: _getText('contactNav'),
+          ),
+          BottomNavigationItem(
+            icon: Icons.dashboard_outlined,
+            label: _getText('dayToDay'),
           ),
           BottomNavigationItem(
             icon: Icons.settings_outlined,
